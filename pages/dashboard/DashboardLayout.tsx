@@ -9,6 +9,7 @@ const DashboardLayout: React.FC = () => {
     { name: 'Overview', path: '/dashboard', icon: '📊' },
     { name: 'Players', path: '/dashboard/players', icon: '👥' },
     { name: 'Teams', path: '/dashboard/teams', icon: '🏆' },
+    { name: 'Auction Requests', path: '/dashboard/requests', icon: '📋' },
   ];
 
   return (
