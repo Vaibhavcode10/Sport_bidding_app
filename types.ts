@@ -46,3 +46,54 @@ export interface AuctionSession {
 }
 
 export type EntityType = 'players' | 'teams' | 'auction';
+
+export enum BiddingRequestStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  ADDED_TO_AUCTION = 'ADDED_TO_AUCTION'
+}
+
+export interface BiddingRequest {
+  id: string;
+  playerId: string;
+  playerName: string;
+  sport: string;
+  role: string;
+  basePrice: number;
+  status: BiddingRequestStatus;
+  requestedAt: string;
+  approvedAt?: string;
+  approvedBy?: string;
+  rejectionReason?: string;
+  auctionId?: string;
+}
+
+export interface PlayerProfile {
+  id: string;
+  userId: string;
+  name: string;
+  sport: string;
+  role: string;
+  jersey?: number;
+  height?: string;
+  weight?: string;
+  age?: number;
+  basePrice: number;
+  bio?: string;
+  imageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  biddingRequestStatus?: BiddingRequestStatus;
+}
+
+export interface BidEvent {
+  id: string;
+  sport: string;
+  name: string;
+  date: string;
+  status: AuctionStatus;
+  teams: Team[];
+  currentPlayer?: Player;
+  bidIncrement: number;
+}
