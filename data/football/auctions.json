@@ -1,0 +1,21 @@
+[
+  {
+    "id": "auction_fb_1",
+    "name": "Football Premier League Auction 2026",
+    "sport": "football",
+    "description": "Annual premier league player auction for the 2026 season",
+    "startDate": "2026-02-15T10:00:00Z",
+    "endDate": "2026-02-15T18:00:00Z",
+    "status": "SCHEDULED",
+    "createdBy": "admin",
+    "createdAt": "2026-01-27T00:00:00Z",
+    "invitedAuctioneers": [],
+    "acceptedAuctioneers": [],
+    "registeredPlayers": [],
+    "settings": {
+      "minBidIncrement": 100000,
+      "maxPlayersPerTeam": 15,
+      "bidTimeLimit": 30
+    }
+  }
+]

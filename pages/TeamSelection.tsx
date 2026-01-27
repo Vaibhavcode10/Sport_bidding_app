@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 interface Team {
   id: string;
@@ -16,8 +17,9 @@ interface Team {
 }
 
 const TeamSelection: React.FC = () => {
+  const { user, setSport } = useAuth();
   const [teams, setTeams] = useState<Team[]>([]);
-  const [sport, setSport] = useState<string>('football');
+  const [sport, setSportLocal] = useState<string>(user?.sport || 'football');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -28,6 +30,28 @@ const TeamSelection: React.FC = () => {
   const navigate = useNavigate();
 
   const sports = ['football', 'cricket', 'volleyball', 'baseball', 'basketball'];
+
+  useEffect(() => {
+    fetchTeams();
+    const interval = setInterval(fetchTeams, 3000);
+    return () => clearInterval(interval);
+  }, [sport]);
+
+  const handleSportChange = (newSport: string) => {
+    console.log('Changing sport from', sport, 'to', newSport);
+    setSportLocal(newSport);
+    setSport(newSport); // Save to user context
+    console.log('Sport changed to', newSport);
+    
+    // Redirect to appropriate dashboard based on user role
+    if (user?.role === 'admin') {
+      navigate('/dashboard');
+    } else if (user?.role === 'player') {
+      navigate('/player/dashboard');
+    } else if (user?.role === 'auctioneer') {
+      navigate('/auctioneer/dashboard');
+    }
+  };
 
   useEffect(() => {
     fetchTeams();
@@ -97,32 +121,26 @@ const TeamSelection: React.FC = () => {
         <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10">
-        {/* Header */}
-        <div className="border-b border-slate-800/50 backdrop-blur-xl bg-slate-950/80">
-          <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl">
-                <span className="text-2xl">🏆</span>
-              </div>
-              <div>
-                <h1 className="text-3xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  Sports Auction
-                </h1>
-                <p className="text-xs text-slate-400">Select your sport and manage teams</p>
-              </div>
+      {/* Fixed Header */}
+      <header className="fixed top-0 left-0 right-0 z-30 border-b border-slate-800/50 backdrop-blur-xl bg-slate-950/80">
+        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl">
+              <span className="text-2xl">🏆</span>
             </div>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm font-bold text-slate-300 transition-all"
-            >
-              Dashboard
-            </button>
+            <div>
+              <h1 className="text-3xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Sports Auction
+              </h1>
+              <p className="text-xs text-slate-400">Select your sport and manage teams</p>
+            </div>
           </div>
         </div>
+      </header>
 
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-6 py-12">
+      {/* Main Content - with top padding for fixed header */}
+      <main className="relative z-10 pt-24">
+        <div className="max-w-7xl mx-auto px-6 py-12 min-h-screen overflow-y-auto">
           {/* Sport Selector */}
           <div className="mb-12">
             <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Choose Your Sport</h2>
@@ -130,7 +148,7 @@ const TeamSelection: React.FC = () => {
               {sports.map((s) => (
                 <button
                   key={s}
-                  onClick={() => setSport(s)}
+                  onClick={() => handleSportChange(s)}
                   className={`p-4 rounded-2xl font-bold transition-all transform hover:scale-105 ${
                     sport === s
                       ? `bg-gradient-to-br ${getSportColor(s)} shadow-lg scale-105 text-white`
@@ -282,25 +300,25 @@ const TeamSelection: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
-      </div>
 
-      <style>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
+          <style>{`
+            @keyframes blob {
+              0%, 100% { transform: translate(0, 0) scale(1); }
+              33% { transform: translate(30px, -50px) scale(1.1); }
+              66% { transform: translate(-20px, 20px) scale(0.9); }
+            }
+            .animate-blob {
+              animation: blob 7s infinite;
+            }
+            .animation-delay-2000 {
+              animation-delay: 2s;
+            }
+            .animation-delay-4000 {
+              animation-delay: 4s;
+            }
+          `}</style>
+        </div>
+      </main>
     </div>
   );
 };

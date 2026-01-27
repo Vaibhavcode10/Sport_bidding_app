@@ -42,24 +42,21 @@ const Login: React.FC = () => {
         
         await register(username, email, password, selectedRole, selectedSport, name);
         
-        // Navigate based on role
-        if (selectedRole === 'player') {
-          navigate('/player/dashboard');
-        } else if (selectedRole === 'auctioneer') {
-          navigate('/auctioneer/dashboard');
-        }
+        // Always redirect to teams page for sport selection after registration
+        navigate('/teams');
       } else {
         // Login
-        const sport = (selectedRole === 'auctioneer' || selectedRole === 'player') ? selectedSport : undefined;
+        let sport = (selectedRole === 'auctioneer' || selectedRole === 'player') ? selectedSport : undefined;
+        
+        // For admin, set a default sport (can be changed later via sport selection)
+        if (selectedRole === 'admin') {
+          sport = selectedSport;
+        }
+        
         await login(username, password, selectedRole, sport);
         
-        if (selectedRole === 'admin') {
-          navigate('/teams');
-        } else if (selectedRole === 'player') {
-          navigate('/player/dashboard');
-        } else if (selectedRole === 'auctioneer') {
-          navigate('/auctioneer/dashboard');
-        }
+        // Always redirect to teams page for sport selection
+        navigate('/teams');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Operation failed. Please try again.');

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 interface Team {
   id: string;
@@ -13,11 +14,19 @@ interface Team {
   playerCount: number;
   wins: number;
   losses: number;
+  city?: string;
+  stadium?: string;
+  capacity?: number;
+  founded?: string;
+  auctioneerId?: string;
+  auctioneerName?: string;
+  description?: string;
+  createdAt?: string;
 }
 
 const Teams: React.FC = () => {
+  const { user } = useAuth();
   const [teams, setTeams] = useState<Team[]>([]);
-  const [sport, setSport] = useState<string>('football');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -26,13 +35,15 @@ const Teams: React.FC = () => {
     totalPurse: 10000000,
   });
 
-  const sports = ['football', 'cricket', 'volleyball', 'baseball', 'basketball'];
+  // Use user's selected sport
+  const sport = user?.sport || 'football';
 
   useEffect(() => {
+    console.log('Teams dashboard: sport changed to', user?.sport);
     fetchTeams();
     const interval = setInterval(fetchTeams, 3000);
     return () => clearInterval(interval);
-  }, [sport]);
+  }, [user?.sport, sport]);
 
   const fetchTeams = async () => {
     const data = await api.get<Team>('teams', sport);
@@ -82,40 +93,31 @@ const Teams: React.FC = () => {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-4xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
-            Team Management
+            {sport.charAt(0).toUpperCase() + sport.slice(1)} Teams
           </h2>
           <p className="text-slate-400 text-sm">Create and manage teams bidding for players</p>
         </div>
-        <select
-          value={sport}
-          onChange={(e) => setSport(e.target.value)}
-          className={`px-6 py-3 bg-gradient-to-r ${getSportColor(sport)} text-white rounded-xl text-sm font-bold transition-all transform hover:scale-105 shadow-lg`}
-        >
-          {sports.map((s) => (
-            <option key={s} value={s}>
-              {s.charAt(0).toUpperCase() + s.slice(1)}
-            </option>
-          ))}
-        </select>
       </div>
 
-      {/* Add Team Button */}
-      <div className="flex justify-between items-center">
-        <p className="text-slate-400 font-semibold">{teams.length} Teams Registered</p>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className={`px-6 py-3 rounded-xl text-sm font-bold transition-all transform hover:scale-105 ${
-            showForm
-              ? 'bg-slate-700 text-slate-300'
-              : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg hover:shadow-amber-500/50'
-          }`}
-        >
-          {showForm ? '✕ Cancel' : '+ Create Team'}
-        </button>
-      </div>
+      {/* Add Team Button - Only for admins and auctioneers */}
+      {(user?.role === 'admin' || user?.role === 'auctioneer') && (
+        <div className="flex justify-between items-center">
+          <p className="text-slate-400 font-semibold">{teams.length} Teams Registered</p>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className={`px-6 py-3 rounded-xl text-sm font-bold transition-all transform hover:scale-105 ${
+              showForm
+                ? 'bg-slate-700 text-slate-300'
+                : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg hover:shadow-amber-500/50'
+            }`}
+          >
+            {showForm ? '✕ Cancel' : '+ Create Team'}
+          </button>
+        </div>
+      )}
 
-      {/* Create Team Form */}
-      {showForm && (
+      {/* Create Team Form - Only for admins and auctioneers */}
+      {(user?.role === 'admin' || user?.role === 'auctioneer') && showForm && (
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 backdrop-blur-xl rounded-2xl p-8 animate-in fade-in slide-in-from-top">
           <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
             {editingId ? '✏️ Edit Team' : '🏆 Create New Team'}
@@ -176,14 +178,61 @@ const Teams: React.FC = () => {
                     <h3 className="text-2xl font-black text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-orange-400 group-hover:bg-clip-text transition-all mb-2">
                       {team.name}
                     </h3>
-                    <p className="text-sm text-slate-400">
-                      <span className="text-amber-400 font-semibold">Owner:</span> {team.owner}
-                    </p>
+                    <div className="space-y-1">
+                      <p className="text-sm text-slate-400">
+                        <span className="text-amber-400 font-semibold">Owner:</span> {team.owner}
+                      </p>
+                      {user?.role === 'admin' && team.city && (
+                        <p className="text-xs text-slate-500">
+                          <span className="text-purple-400 font-semibold">City:</span> {team.city}
+                        </p>
+                      )}
+                      {user?.role === 'admin' && team.auctioneerName && (
+                        <p className="text-xs text-slate-500">
+                          <span className="text-blue-400 font-semibold">Auctioneer:</span> {team.auctioneerName}
+                        </p>
+                      )}
+                      {user?.role === 'admin' && team.founded && (
+                        <p className="text-xs text-slate-500">
+                          <span className="text-green-400 font-semibold">Founded:</span> {team.founded}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getSportColor(sport)} flex items-center justify-center text-xl font-bold transform group-hover:scale-110 transition-transform`}>
                     🏆
                   </div>
                 </div>
+
+                {/* Stadium Info (Admin Only) */}
+                {user?.role === 'admin' && (team.stadium || team.capacity || team.description) && (
+                  <div className="space-y-2 mb-4 pb-4 border-b border-slate-700">
+                    <h4 className="text-sm font-bold text-cyan-400 mb-2">🏟️ Facility Details</h4>
+                    {team.stadium && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 text-xs">Stadium:</span>
+                        <span className="text-white text-xs font-semibold">{team.stadium}</span>
+                      </div>
+                    )}
+                    {team.capacity && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 text-xs">Capacity:</span>
+                        <span className="text-white text-xs font-semibold">{team.capacity.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {team.description && (
+                      <div className="mt-2">
+                        <p className="text-xs text-slate-400 leading-relaxed">{team.description}</p>
+                      </div>
+                    )}
+                    {team.createdAt && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 text-xs">Established:</span>
+                        <span className="text-white text-xs font-semibold">{team.createdAt}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Budget Info */}
                 <div className="space-y-3 mb-4 pb-4 border-b border-slate-700">
@@ -223,18 +272,37 @@ const Teams: React.FC = () => {
 
                 {/* Actions */}
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(team)}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-lg text-xs font-bold transition-all transform hover:scale-105"
-                  >
-                    ✏️ Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(team.id)}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white rounded-lg text-xs font-bold transition-all transform hover:scale-105"
-                  >
-                    🗑️ Delete
-                  </button>
+                  {/* Edit button - Only for auctioneers */}
+                  {user?.role === 'auctioneer' && (
+                    <button
+                      onClick={() => handleEdit(team)}
+                      className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-lg text-xs font-bold transition-all transform hover:scale-105"
+                    >
+                      ✏️ Edit
+                    </button>
+                  )}
+                  
+                  {/* Delete button - Only for admins */}
+                  {user?.role === 'admin' && (
+                    <button
+                      onClick={() => handleDelete(team.id)}
+                      className={`px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white rounded-lg text-xs font-bold transition-all transform hover:scale-105 ${
+                        user?.role === 'admin' ? 'flex-1' : 'flex-1'
+                      }`}
+                    >
+                      🗑️ Delete
+                    </button>
+                  )}
+                  
+                  {/* View button for other roles or when no actions available */}
+                  {(user?.role !== 'admin' && user?.role !== 'auctioneer') && (
+                    <button
+                      className="flex-1 px-4 py-2 bg-gradient-to-r from-slate-600 to-slate-500 text-slate-300 rounded-lg text-xs font-bold cursor-not-allowed"
+                      disabled
+                    >
+                      👁️ View Only
+                    </button>
+                  )}
                 </div>
               </div>
             );

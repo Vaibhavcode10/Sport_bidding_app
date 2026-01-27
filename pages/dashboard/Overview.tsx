@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 interface Player {
   id: string;
@@ -29,18 +30,19 @@ interface Team {
 }
 
 const Overview: React.FC = () => {
-  const [sport, setSport] = useState<string>('football');
+  const { user } = useAuth();
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const sports = ['football', 'cricket', 'volleyball', 'baseball', 'basketball'];
+  // Use user's selected sport
+  const sport = user?.sport || 'football';
 
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 3000);
     return () => clearInterval(interval);
-  }, [sport]);
+  }, [user?.sport]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -68,27 +70,6 @@ const Overview: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Sport Selector */}
-      <div>
-        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Select Sport</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-          {sports.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSport(s)}
-              className={`p-3 rounded-lg font-bold transition-all transform hover:scale-105 ${
-                sport === s
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-              }`}
-            >
-              <div className="text-xl mb-1">{getSportIcon(s)}</div>
-              <div className="text-xs">{s.charAt(0).toUpperCase() + s.slice(1)}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Stats Cards */}
       <div>
         <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">

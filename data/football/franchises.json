@@ -36,5 +36,17 @@
     "losses": 0,
     "description": "Barcelona's iconic football franchise",
     "createdAt": "2023-01-20"
+  },
+  {
+    "name": "indian footbal team",
+    "owner": "vaibhav",
+    "totalPurse": 10000000,
+    "purseRemaining": 10000000,
+    "id": "fo_t1769498741117",
+    "sport": "football",
+    "playerIds": [],
+    "playerCount": 0,
+    "wins": 0,
+    "losses": 0
   }
 ]

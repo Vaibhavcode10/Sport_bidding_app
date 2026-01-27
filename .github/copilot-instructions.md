@@ -2,7 +2,8 @@
 
 ## Project Overview
 - This is a sports auction/bidding app with a React frontend and a Node.js/Express backend.
-- Data for players, teams, franchises, and auctioneers is stored in JSON files under `data/` (frontend) and `server/data/` (backend).
+- All data is stored in JSON files under the `data/` folder.
+- User authentication data is stored in `data/users.json`.
 - The backend exposes REST endpoints for auctioneers, players, and teams (see `server/routes/`).
 - Context providers (see `context/`) manage authentication and bidding state in the React app.
 
@@ -19,7 +20,8 @@
 ## Patterns & Conventions
 - **Data access:**
   - Use helper functions to load/save JSON (see `server/fileStore.js`).
-  - Each sport has its own subfolder in `data/` and `server/data/`.
+  - Each sport has its own subfolder in `data/` folder.
+  - User authentication data is in `data/users.json`.
 - **Context:**
   - Use React context for auth and bidding state (`context/AuthContext.tsx`, `context/BiddingRequestContext.tsx`).
 - **Routing:**
@@ -38,7 +40,7 @@
   - Managed in `context/AuthContext.tsx` and backend login endpoints.
 
 ## Examples
-- To add a new sport, create a new folder under `data/` and `server/data/` with the required JSON files.
+- To add a new sport, create a new folder under `data/` with the required JSON files.
 - To add a new API endpoint, add a route in `server/routes/` and update `services/api.ts` if needed.
 
 ## Tips for AI Agents

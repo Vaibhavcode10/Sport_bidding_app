@@ -2,7 +2,7 @@ import express from 'express';
 import { fileStore } from '../fileStore.js';
 
 const router = express.Router();
-const USERS_FILE = 'server/data/users.json';
+const USERS_FILE = 'data/users.json';
 
 // Login route - handles all user types
 router.post('/login', async (req, res) => {
@@ -39,7 +39,8 @@ router.post('/login', async (req, res) => {
           username: admin.username,
           email: admin.email,
           name: admin.name,
-          role: 'admin'
+          role: 'admin',
+          sport: sport || 'football' // Set default sport for admin
         }
       });
     }

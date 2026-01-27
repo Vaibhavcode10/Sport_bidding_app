@@ -1,12 +1,15 @@
-[
+[  
   {
     "id": "bb_p1",
+    "username": "aaron_johnson",
+    "password": "password123",
     "name": "Aaron Johnson",
     "sport": "baseball",
     "role": "Pitcher",
     "basePrice": 1500000,
     "currentBid": 0,
     "status": "AVAILABLE",
+    "verified": true,
     "careerRecords": {
       "games": 200,
       "strikeouts": 1850,
@@ -19,12 +22,15 @@
   },
   {
     "id": "bb_p2",
+    "username": "mike_davis",
+    "password": "password123",
     "name": "Mike Davis",
     "sport": "baseball",
     "role": "Outfielder",
     "basePrice": 1800000,
     "currentBid": 0,
     "status": "AVAILABLE",
+    "verified": false,
     "careerRecords": {
       "games": 189,
       "hits": 425,
@@ -37,12 +43,15 @@
   },
   {
     "id": "bb_p3",
+    "username": "carlos_rodriguez",
+    "password": "password123",
     "name": "Carlos Rodriguez",
     "sport": "baseball",
     "role": "Catcher",
     "basePrice": 1300000,
     "currentBid": 0,
     "status": "AVAILABLE",
+    "verified": false,
     "careerRecords": {
       "games": 156,
       "hits": 312,

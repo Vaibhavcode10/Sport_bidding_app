@@ -1,0 +1,21 @@
+[
+  {
+    "id": "auction_vb_1",
+    "name": "Volleyball Pro League Auction 2026",
+    "sport": "volleyball",
+    "description": "Professional volleyball league auction",
+    "startDate": "2026-06-15T11:00:00Z",
+    "endDate": "2026-06-15T19:00:00Z",
+    "status": "SCHEDULED",
+    "createdBy": "admin",
+    "createdAt": "2026-01-27T00:00:00Z",
+    "invitedAuctioneers": [],
+    "acceptedAuctioneers": [],
+    "registeredPlayers": [],
+    "settings": {
+      "minBidIncrement": 100000,
+      "maxPlayersPerTeam": 14,
+      "bidTimeLimit": 30
+    }
+  }
+]

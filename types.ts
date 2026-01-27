@@ -22,6 +22,10 @@ export interface Player {
   status: PlayerStatus;
   teamId?: string;
   imageUrl?: string;
+  verified?: boolean;
+  verificationRequestedAt?: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
 }
 
 export interface Team {

@@ -1,0 +1,21 @@
+[
+  {
+    "id": "auction_cr_1",
+    "name": "Cricket IPL Mega Auction 2026",
+    "sport": "cricket",
+    "description": "IPL mega auction for the 2026 season",
+    "startDate": "2026-03-01T09:00:00Z",
+    "endDate": "2026-03-02T18:00:00Z",
+    "status": "SCHEDULED",
+    "createdBy": "admin",
+    "createdAt": "2026-01-27T00:00:00Z",
+    "invitedAuctioneers": [],
+    "acceptedAuctioneers": [],
+    "registeredPlayers": [],
+    "settings": {
+      "minBidIncrement": 500000,
+      "maxPlayersPerTeam": 25,
+      "bidTimeLimit": 45
+    }
+  }
+]

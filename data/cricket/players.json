@@ -1,12 +1,15 @@
-[
+[  
   {
     "id": "cr_p1",
+    "username": "virat_kohli",
+    "password": "password123",
     "name": "Virat Kohli",
     "sport": "cricket",
     "role": "Batsman",
     "basePrice": 2000000,
     "currentBid": 0,
     "status": "AVAILABLE",
+    "verified": true,
     "careerRecords": {
       "matches": 183,
       "runs": 12000,
@@ -19,12 +22,15 @@
   },
   {
     "id": "cr_p2",
+    "username": "jasprit_bumrah",
+    "password": "password123",
     "name": "Jasprit Bumrah",
     "sport": "cricket",
     "role": "Bowler",
     "basePrice": 1500000,
     "currentBid": 0,
     "status": "AVAILABLE",
+    "verified": false,
     "careerRecords": {
       "matches": 87,
       "runs": 0,
@@ -37,12 +43,15 @@
   },
   {
     "id": "cr_p3",
+    "username": "rohit_sharma",
+    "password": "password123",
     "name": "Rohit Sharma",
     "sport": "cricket",
     "role": "Batsman",
     "basePrice": 1800000,
     "currentBid": 0,
     "status": "AVAILABLE",
+    "verified": false,
     "careerRecords": {
       "matches": 159,
       "runs": 10500,

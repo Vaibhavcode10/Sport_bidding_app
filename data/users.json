@@ -115,6 +115,41 @@
         "bio": "Norwegian professional footballer known for goal-scoring",
         "imageUrl": "",
         "createdAt": "2023-01-15"
+      },
+      {
+        "id": "fo_p1769074306880",
+        "username": "saurabh_player",
+        "email": "saurabh@football.com",
+        "password": "password123",
+        "name": "saurabh",
+        "sport": "football",
+        "role": "Forward",
+        "jersey": 11,
+        "height": "5.9 ft",
+        "weight": "75 kg",
+        "age": 24,
+        "basePrice": 11,
+        "bio": "Young forward player",
+        "imageUrl": "",
+        "createdAt": "2023-01-15"
+      },
+      {
+        "id": "fo_p1769494976240",
+        "username": "Vaibhv_hoke",
+        "email": "vaibhavhoke274@gmail.com",
+        "password": "123456",
+        "name": "vaibhav hoke",
+        "sport": "football",
+        "role": "Midfielder",
+        "jersey": null,
+        "height": "6.0 ft",
+        "weight": "75 kg",
+        "age": 19,
+        "basePrice": 1000000,
+        "bio": "hi i am vaibhav from india",
+        "imageUrl": "",
+        "createdAt": "2026-01-27",
+        "updatedAt": "2026-01-27T06:23:56.067Z"
       }
     ],
     "basketball": [

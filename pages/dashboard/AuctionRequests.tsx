@@ -316,4 +316,5 @@ const AuctionRequests: React.FC = () => {
   );
 };
 
+export { AuctionRequests };
 export default AuctionRequests;

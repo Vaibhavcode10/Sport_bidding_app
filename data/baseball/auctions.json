@@ -1,0 +1,21 @@
+[
+  {
+    "id": "auction_base_1",
+    "name": "Baseball League Auction 2026",
+    "sport": "baseball",
+    "description": "Annual baseball player auction",
+    "startDate": "2026-05-01T10:00:00Z",
+    "endDate": "2026-05-01T20:00:00Z",
+    "status": "SCHEDULED",
+    "createdBy": "admin",
+    "createdAt": "2026-01-27T00:00:00Z",
+    "invitedAuctioneers": [],
+    "acceptedAuctioneers": [],
+    "registeredPlayers": [],
+    "settings": {
+      "minBidIncrement": 150000,
+      "maxPlayersPerTeam": 20,
+      "bidTimeLimit": 30
+    }
+  }
+]

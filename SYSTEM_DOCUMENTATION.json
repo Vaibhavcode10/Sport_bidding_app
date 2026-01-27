@@ -1,0 +1,319 @@
+{
+  "project": {
+    "name": "Sports Auction/Bidding App",
+    "description": "A React-based web application for conducting sports player auctions across multiple sports with different user roles",
+    "type": "Full-stack web application",
+    "status": "Active Development"
+  },
+
+  "technology_stack": {
+    "frontend": {
+      "framework": "React 18 + TypeScript",
+      "build_tool": "Vite",
+      "styling": "Tailwind CSS",
+      "routing": "React Router DOM",
+      "state_management": "React Context API"
+    },
+    "backend": {
+      "runtime": "Node.js",
+      "framework": "Express.js",
+      "data_storage": "JSON files (no database)",
+      "api_style": "RESTful APIs"
+    },
+    "authentication": "Custom implementation with localStorage persistence"
+  },
+
+  "architecture": {
+    "pattern": "Client-Server with File-based Data Storage",
+    "data_flow": "React Frontend → Express API → JSON File Storage",
+    "folder_structure": {
+      "frontend_pages": "pages/ - All React components/pages",
+      "backend_server": "server/ - Express server and API routes", 
+      "data_storage": "data/ - All JSON data files organized by sport",
+      "shared_types": "types.ts - TypeScript interfaces shared across app",
+      "context_providers": "context/ - React context for state management",
+      "services": "services/ - API communication layer"
+    }
+  },
+
+  "user_roles": {
+    "admin": {
+      "description": "System administrator with full control",
+      "authentication": "Username/email + password",
+      "permissions": {
+        "players": ["create", "read", "update", "delete", "view_all_details", "view_credentials", "manage_auction_status"],
+        "teams": ["create", "read", "update", "delete", "view_all_details", "view_financial_data"],
+        "auction_requests": ["approve", "reject", "add_to_auction", "view_all", "manage_workflow"],
+        "sports": ["switch_between_all", "manage_all_sports_data"],
+        "system": ["view_analytics", "manage_cross_entity_data", "access_admin_dashboard"]
+      },
+      "dashboard_access": "/dashboard",
+      "special_features": [
+        "Can see player usernames/IDs for authentication management",
+        "View complete career statistics and auction history", 
+        "Access stadium details and team facility information",
+        "Monitor financial data across all teams",
+        "Manage auction request approval workflow"
+      ]
+    },
+    "player": {
+      "description": "Individual players who can view their profile and auction status",
+      "authentication": "Username + password (stored in sport-specific player data)",
+      "permissions": {
+        "own_profile": ["read", "limited_update"],
+        "own_data": ["view_personal_stats", "view_auction_status"],
+        "teams": ["read_basic_info"],
+        "sports": ["limited_to_own_sport"]
+      },
+      "dashboard_access": "/player/dashboard", 
+      "restrictions": [
+        "Can only see their own player data",
+        "Cannot modify other players or teams",
+        "Limited to single sport they're registered in"
+      ]
+    },
+    "auctioneer": {
+      "description": "Team representatives who conduct auctions and manage franchises",
+      "authentication": "Username/email + password",
+      "permissions": {
+        "players": ["read", "limited_manage", "add_to_auction"],
+        "own_team": ["full_management", "view_detailed_stats"],
+        "auction": ["conduct_bidding", "manage_franchise"],
+        "sports": ["limited_to_assigned_sport"]
+      },
+      "dashboard_access": "/auctioneer/dashboard",
+      "special_features": [
+        "Can manage their assigned franchise/team",
+        "Participate in player auctions",
+        "View detailed team analytics"
+      ]
+    }
+  },
+
+  "data_structure": {
+    "storage_type": "JSON files",
+    "location": "data/ folder with sport-specific subfolders",
+    "sports_supported": ["football", "cricket", "basketball", "baseball", "volleyball"],
+    "entities": {
+      "users": {
+        "file": "server/data/users.json",
+        "contains": {
+          "admins": "Array of admin accounts",
+          "auctioneers": "Array of auctioneer accounts"  
+        }
+      },
+      "players": {
+        "files": "data/{sport}/players.json",
+        "schema": {
+          "id": "string - unique identifier",
+          "username": "string - for authentication",
+          "password": "string - for authentication", 
+          "name": "string - display name",
+          "sport": "string - sport category",
+          "role": "string - position/role in sport",
+          "basePrice": "number - starting auction price",
+          "currentBid": "number - current auction bid",
+          "status": "AVAILABLE|SOLD|UNSOLD|UP_NEXT",
+          "careerRecords": "object - detailed career statistics",
+          "auctionPrice": "number|null - final sale price",
+          "soldTo": "string|null - team that purchased player"
+        }
+      },
+      "teams": {
+        "files": "data/{sport}/franchises.json", 
+        "schema": {
+          "id": "string - unique identifier",
+          "name": "string - team name",
+          "auctioneerId": "string - assigned auctioneer ID",
+          "auctioneerName": "string - auctioneer display name",
+          "sport": "string - sport category",
+          "city": "string - team location",
+          "stadium": "string - home stadium name",
+          "capacity": "number - stadium capacity",
+          "founded": "string - founding year",
+          "totalPurse": "number - total budget",
+          "purseRemaining": "number - remaining budget", 
+          "playerIds": "array - owned player IDs",
+          "playerCount": "number - current squad size",
+          "wins": "number - match wins",
+          "losses": "number - match losses",
+          "description": "string - team description"
+        }
+      },
+      "auctioneers": {
+        "files": "data/{sport}/auctioneers.json",
+        "schema": {
+          "id": "string - unique identifier",
+          "name": "string - display name", 
+          "sport": "string - sport they manage",
+          "teamIds": "array - teams they represent"
+        }
+      }
+    }
+  },
+
+  "features_implemented": {
+    "authentication": {
+      "login_system": "✅ Multi-role login with sport selection",
+      "persistence": "✅ localStorage session management",
+      "sport_persistence": "✅ Selected sport persists across sessions",
+      "role_based_routing": "✅ Auto-redirect based on user role"
+    },
+    "admin_features": {
+      "player_management": "✅ Full CRUD operations with detailed views",
+      "team_management": "✅ Full CRUD operations with facility details", 
+      "auction_requests": "✅ Approval workflow management",
+      "multi_sport_support": "✅ Switch between all sports",
+      "comprehensive_data_view": "✅ See all user credentials and statistics",
+      "dashboard_analytics": "✅ Real-time stats and overviews"
+    },
+    "player_features": {
+      "profile_view": "✅ Personal player profile management",
+      "auction_status": "✅ View own auction/bidding status",
+      "limited_data_access": "✅ Only see own data"
+    },
+    "auctioneer_features": {
+      "franchise_management": "✅ Manage assigned team/franchise",
+      "player_auctions": "✅ Basic auction interface",
+      "team_analytics": "✅ Detailed team performance views"
+    },
+    "ui_ux": {
+      "responsive_design": "✅ Mobile-friendly Tailwind CSS",
+      "collapsible_navigation": "✅ Expandable/collapsible sidebars",
+      "fixed_headers": "✅ Non-scrolling navigation bars",
+      "animated_backgrounds": "✅ Gradient blob animations",
+      "real_time_updates": "✅ 3-second data refresh intervals",
+      "sport_themed_styling": "✅ Color schemes per sport"
+    }
+  },
+
+  "api_endpoints": {
+    "authentication": {
+      "POST /auth/login": "Multi-role login endpoint",
+      "POST /auth/register": "User registration",
+      "GET /auth/profile": "Get user profile data"
+    },
+    "players": {
+      "GET /api/players/:sport": "Get players for specific sport",
+      "POST /api/players/:sport": "Create new player",
+      "PUT /api/players/:sport/:id": "Update player",
+      "DELETE /api/players/:sport/:id": "Delete player"
+    },
+    "teams": {
+      "GET /api/teams/:sport": "Get teams for specific sport", 
+      "POST /api/teams/:sport": "Create new team",
+      "PUT /api/teams/:sport/:id": "Update team",
+      "DELETE /api/teams/:sport/:id": "Delete team"
+    },
+    "auctioneers": {
+      "GET /api/auctioneers/:sport": "Get auctioneers for specific sport"
+    }
+  },
+
+  "current_workflows": {
+    "user_login": {
+      "steps": [
+        "User accesses /login page",
+        "Selects role (admin/player/auctioneer) and sport",
+        "Enters credentials",
+        "System redirects to /teams for sport selection", 
+        "User clicks sport → auto-redirects to role-specific dashboard",
+        "Sport selection persists in localStorage"
+      ]
+    },
+    "admin_player_management": {
+      "steps": [
+        "Admin accesses /dashboard/players",
+        "Views comprehensive player list with career stats",
+        "Can create/edit/delete players",
+        "Sees authentication details (username/ID)",
+        "Views auction history and financial data"
+      ]
+    },
+    "admin_team_management": {
+      "steps": [
+        "Admin accesses /dashboard/teams", 
+        "Views detailed team information including stadium details",
+        "Can create/edit/delete teams",
+        "Sees financial budgets and facility information",
+        "Manages auctioneer assignments"
+      ]
+    },
+    "auction_request_workflow": {
+      "steps": [
+        "Player requests to join auction",
+        "Admin reviews request in /dashboard/requests",
+        "Admin approves/rejects with reasons", 
+        "Approved players can be added to active auctions",
+        "Status tracking throughout process"
+      ]
+    }
+  },
+
+  "current_limitations": {
+    "missing_features": [
+      "❌ Live auction bidding interface",
+      "❌ Real-time bidding with WebSockets", 
+      "❌ User management (create/delete admin accounts)",
+      "❌ Data export/import functionality",
+      "❌ Advanced analytics and reporting",
+      "❌ Email notifications",
+      "❌ File upload for player images",
+      "❌ Audit logging system",
+      "❌ Bulk operations",
+      "❌ Search and filtering within lists"
+    ],
+    "technical_debt": [
+      "⚠️ No database - using JSON files for data storage",
+      "⚠️ No data validation on backend", 
+      "⚠️ No error handling for file operations",
+      "⚠️ No backup/recovery system",
+      "⚠️ No API authentication/authorization",
+      "⚠️ No rate limiting or security measures"
+    ]
+  },
+
+  "development_setup": {
+    "requirements": ["Node.js", "npm"],
+    "installation": [
+      "npm install",
+      "Set GEMINI_API_KEY in .env.local (if AI features used)",
+      "npm run dev (starts Vite dev server)",
+      "Backend server starts automatically"
+    ],
+    "build": "npm run build (outputs to dist/)",
+    "file_structure_importance": "Single data/ folder is source of truth - server/data is legacy"
+  },
+
+  "key_design_decisions": {
+    "json_storage": "Chose JSON files over database for simplicity and rapid development",
+    "context_api": "Used React Context instead of external state management for authentication and bidding",
+    "role_based_routing": "Implemented automatic role-based redirects for better UX",
+    "sport_persistence": "Sport selection saves to localStorage and user context for session continuity", 
+    "collapsible_navigation": "Added expandable sidebars for better mobile experience",
+    "real_time_updates": "Polling every 3 seconds instead of WebSockets for simplicity"
+  },
+
+  "future_enhancements": {
+    "high_priority": [
+      "Live bidding interface with WebSockets",
+      "Database migration (MongoDB/PostgreSQL)",
+      "User management system", 
+      "Search and filtering capabilities",
+      "File upload for images"
+    ],
+    "medium_priority": [
+      "Advanced analytics dashboard",
+      "Email notification system", 
+      "Data export/import tools",
+      "Audit logging",
+      "API security implementation"
+    ],
+    "low_priority": [
+      "Mobile app development",
+      "Advanced reporting features",
+      "Integration with external sports APIs",
+      "Multi-language support"
+    ]
+  }
+}

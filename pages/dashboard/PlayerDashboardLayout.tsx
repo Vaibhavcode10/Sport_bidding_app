@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const PlayerDashboardLayout: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const navItems = [
     { name: 'My Profile', path: '/player/dashboard', icon: '👤', end: true },
+    { name: 'Auctions', path: '/player/dashboard/auctions', icon: '🏆' },
     { name: 'Bid Events', path: '/player/dashboard/bid-events', icon: '🎯' },
   ];
 
@@ -26,13 +28,25 @@ const PlayerDashboardLayout: React.FC = () => {
       </div>
 
       {/* Sidebar */}
-      <aside className="w-64 bg-gradient-to-b from-slate-950/95 to-slate-900/95 backdrop-blur-xl border-r border-blue-600/20 flex flex-col relative z-20">
+      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-gradient-to-b from-slate-950/95 to-slate-900/95 backdrop-blur-xl border-r border-blue-600/20 flex flex-col fixed left-0 top-0 h-screen z-30 transition-all duration-300`}>
         <div className="p-6 border-b border-blue-600/20 bg-gradient-to-r from-blue-600/10 to-purple-600/10">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-3xl">👤</span>
-            <span className="text-2xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">PLAYER</span>
+          <div className="flex items-center justify-between">
+            <div className={`flex items-center gap-3 mb-2 ${sidebarCollapsed ? 'justify-center' : ''}`}>
+              <span className="text-3xl">👤</span>
+              {!sidebarCollapsed && (
+                <span className="text-2xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">PLAYER</span>
+              )}
+            </div>
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="p-1 hover:bg-slate-700/50 rounded-lg transition-colors"
+            >
+              <span className="text-slate-400 text-sm">
+                {sidebarCollapsed ? '→' : '←'}
+              </span>
+            </button>
           </div>
-          <p className="text-xs text-slate-400">Sports Bidding Platform</p>
+          {!sidebarCollapsed && <p className="text-xs text-slate-400">Sports Bidding Platform</p>}
         </div>
         
         <nav className="flex-1 p-4 space-y-3">
@@ -46,33 +60,41 @@ const PlayerDashboardLayout: React.FC = () => {
                   isActive 
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50 scale-105' 
                     : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
-                }`
+                } ${sidebarCollapsed ? 'text-center' : ''}`
               }
+              title={sidebarCollapsed ? item.name : ''}
             >
               <span className="mr-2">{item.icon}</span>
-              {item.name}
+              {!sidebarCollapsed && item.name}
             </NavLink>
           ))}
         </nav>
 
         <div className="p-4 border-t border-blue-600/20 space-y-3">
-          <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700">
-            <p className="text-xs text-slate-400">Logged in as</p>
-            <p className="text-sm font-bold text-white mt-1">{user?.username}</p>
-            <p className="text-xs text-slate-500 mt-1">Sport: {user?.sport?.toUpperCase()}</p>
-          </div>
+          {!sidebarCollapsed && (
+            <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+              <p className="text-xs text-slate-400">Logged in as</p>
+              <p className="text-sm font-bold text-white mt-1">{user?.username}</p>
+              <p className="text-xs text-slate-500 mt-1">Sport: {user?.sport?.toUpperCase()}</p>
+            </div>
+          )}
           <button 
             onClick={handleLogout}
-            className="w-full px-4 py-2 text-sm text-slate-400 hover:text-red-400 transition-colors font-semibold"
+            className={`w-full px-4 py-2 text-sm text-slate-400 hover:text-red-400 transition-colors font-semibold ${
+              sidebarCollapsed ? 'text-center' : ''
+            }`}
+            title={sidebarCollapsed ? 'Logout' : ''}
           >
-            🚪 Logout
+            🚪 {!sidebarCollapsed && 'Logout'}
           </button>
         </div>
       </aside>
 
       {/* Content Area */}
-      <main className="flex-1 overflow-auto bg-transparent relative z-10">
-        <header className="h-20 bg-gradient-to-r from-slate-900/80 to-blue-900/50 backdrop-blur-xl border-b border-blue-600/20 flex items-center justify-between px-8 sticky top-0 z-10 shadow-lg">
+      <main className={`flex-1 bg-transparent relative z-10 transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+        <header className={`h-20 bg-gradient-to-r from-slate-900/80 to-blue-900/50 backdrop-blur-xl border-b border-blue-600/20 flex items-center justify-between px-8 fixed top-0 z-20 shadow-lg transition-all duration-300 ${
+          sidebarCollapsed ? 'left-16 right-0' : 'left-64 right-0'
+        }`}>
           <div>
             <h2 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Player Dashboard
@@ -93,7 +115,7 @@ const PlayerDashboardLayout: React.FC = () => {
           </div>
         </header>
         
-        <div className="p-8">
+        <div className="pt-20 p-8 h-screen overflow-y-auto">
           <Outlet />
         </div>
       </main>

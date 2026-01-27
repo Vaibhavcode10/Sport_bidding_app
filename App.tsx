@@ -14,10 +14,15 @@ import Players from './pages/dashboard/Players';
 import Teams from './pages/dashboard/Teams';
 import PlayerProfilePage from './pages/dashboard/PlayerProfile';
 import BidEvents from './pages/dashboard/BidEvents';
-import AuctionRequests from './pages/dashboard/AuctionRequests';
+import { AuctionRequests } from './pages/dashboard/AuctionRequests';
+import { PlayerVerification } from './pages/dashboard/PlayerVerification';
+import { History } from './pages/dashboard/History';
+import AuctionManagement from './pages/dashboard/AuctionManagement';
+import AuctioneerInvitations from './pages/dashboard/AuctioneerInvitations';
 import AuctioneerOverview from './pages/dashboard/AuctioneerOverview';
 import AuctioneerTeamDetails from './pages/dashboard/AuctioneerTeamDetails';
 import AuctioneerPlayers from './pages/dashboard/AuctioneerPlayers';
+import PlayerAuctions from './pages/dashboard/PlayerAuctions';
 
 const App: React.FC = () => {
   return (
@@ -33,6 +38,7 @@ const App: React.FC = () => {
             <Route path="/player/select-sport" element={<PlayerSelectSport />} />
             <Route path="/player/dashboard" element={<PlayerDashboardLayout />}>
               <Route index element={<PlayerProfilePage />} />
+              <Route path="auctions" element={<PlayerAuctions />} />
               <Route path="bid-events" element={<BidEvents />} />
             </Route>
 
@@ -41,6 +47,7 @@ const App: React.FC = () => {
               <Route index element={<AuctioneerOverview />} />
               <Route path="team" element={<AuctioneerTeamDetails />} />
               <Route path="players" element={<AuctioneerPlayers />} />
+              <Route path="invitations" element={<AuctioneerInvitations />} />
             </Route>
 
             {/* Admin Routes */}
@@ -48,6 +55,9 @@ const App: React.FC = () => {
               <Route index element={<Overview />} />
               <Route path="players" element={<Players />} />
               <Route path="teams" element={<Teams />} />
+              <Route path="verification" element={<PlayerVerification />} />
+              <Route path="auctions" element={<AuctionManagement />} />
+              <Route path="history" element={<History />} />
               <Route path="requests" element={<AuctionRequests />} />
             </Route>
 

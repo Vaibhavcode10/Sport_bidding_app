@@ -3,6 +3,8 @@ import cors from 'cors';
 import playersRouter from './routes/players.js';
 import teamsRouter from './routes/teams.js';
 import authRouter from './routes/auth.js';
+import verificationRouter from './routes/verification.js';
+import auctionsRouter from './routes/auctions.js';
 import * as auctioneersRouter from './routes/auctioneers.js';
 
 const app = express();
@@ -15,6 +17,8 @@ app.use(express.json());
 app.use('/api/players', playersRouter);
 app.use('/api/teams', teamsRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/verification', verificationRouter);
+app.use('/api/auctions', auctionsRouter);
 
 // Auctioneer routes
 app.post('/api/auctioneers/login', (req, res) => {

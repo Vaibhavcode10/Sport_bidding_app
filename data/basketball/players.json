@@ -1,12 +1,15 @@
-[
+[  
   {
     "id": "bk_p1",
+    "username": "lebron_james",
+    "password": "password123",
     "name": "LeBron James",
     "sport": "basketball",
     "role": "Small Forward",
     "basePrice": 2500000,
     "currentBid": 0,
     "status": "AVAILABLE",
+    "verified": true,
     "careerRecords": {
       "games": 1410,
       "points": 40000,
@@ -19,12 +22,15 @@
   },
   {
     "id": "bk_p2",
+    "username": "kevin_durant",
+    "password": "password123",
     "name": "Kevin Durant",
     "sport": "basketball",
     "role": "Power Forward",
     "basePrice": 2300000,
     "currentBid": 0,
     "status": "AVAILABLE",
+    "verified": false,
     "careerRecords": {
       "games": 1390,
       "points": 38000,
@@ -37,12 +43,15 @@
   },
   {
     "id": "bk_p3",
+    "username": "giannis_antetokounmpo",
+    "password": "password123",
     "name": "Giannis Antetokounmpo",
     "sport": "basketball",
     "role": "Power Forward",
     "basePrice": 2100000,
     "currentBid": 0,
     "status": "AVAILABLE",
+    "verified": false,
     "careerRecords": {
       "games": 850,
       "points": 24000,
