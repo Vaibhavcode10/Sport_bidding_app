@@ -33,31 +33,7 @@ const logHistoryAction = async (action, details) => {
   }
 };
 
-// GET all auctions for a sport (anyone can view)
-router.get('/:sport', async (req, res) => {
-  try {
-    const { sport } = req.params;
-    const auctionsFilePath = getAuctionsFilePath(sport);
-    
-    let auctions = [];
-    try {
-      auctions = await fileStore.readJSON(auctionsFilePath);
-    } catch (err) {
-      // No auctions file exists
-      auctions = [];
-    }
-    
-    res.json({
-      success: true,
-      auctions
-    });
-  } catch (err) {
-    console.error('Get auctions error:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// GET all auctions across all sports (for admin dashboard)
+// GET all auctions across all sports (for admin dashboard) - MUST BE BEFORE /:sport
 router.get('/all/sports', async (req, res) => {
   try {
     const sports = ['football', 'cricket', 'basketball', 'baseball', 'volleyball'];
@@ -81,6 +57,80 @@ router.get('/all/sports', async (req, res) => {
     });
   } catch (err) {
     console.error('Get all auctions error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET all auctioneers for admin (to invite) - MUST BE BEFORE /:sport
+router.get('/auctioneers/all/:sport', async (req, res) => {
+  try {
+    const { sport } = req.params;
+    const { userRole } = req.query;
+    
+    if (userRole !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Only admin can view auctioneers list' });
+    }
+    
+    // Get auctioneers from franchises
+    const franchisesFilePath = `data/${sport}/franchises.json`;
+    let franchises = [];
+    try {
+      franchises = await fileStore.readJSON(franchisesFilePath);
+    } catch (err) {
+      franchises = [];
+    }
+    
+    // Get auctioneers info
+    const auctioneersFilePath = `data/${sport}/auctioneers.json`;
+    let auctioneers = [];
+    try {
+      auctioneers = await fileStore.readJSON(auctioneersFilePath);
+    } catch (err) {
+      auctioneers = [];
+    }
+    
+    // Combine data
+    const auctioneersList = auctioneers.map(auctioneer => {
+      const franchise = franchises.find(f => f.auctioneerId === auctioneer.id);
+      return {
+        id: auctioneer.id,
+        username: auctioneer.username,
+        name: auctioneer.name || auctioneer.username,
+        franchiseName: franchise?.name || 'No Franchise',
+        franchiseId: franchise?.id || null
+      };
+    });
+    
+    res.json({
+      success: true,
+      auctioneers: auctioneersList
+    });
+  } catch (err) {
+    console.error('Get auctioneers error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET all auctions for a sport (anyone can view) - Generic route LAST
+router.get('/:sport', async (req, res) => {
+  try {
+    const { sport } = req.params;
+    const auctionsFilePath = getAuctionsFilePath(sport);
+    
+    let auctions = [];
+    try {
+      auctions = await fileStore.readJSON(auctionsFilePath);
+    } catch (err) {
+      // No auctions file exists
+      auctions = [];
+    }
+    
+    res.json({
+      success: true,
+      auctions
+    });
+  } catch (err) {
+    console.error('Get auctions error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -485,56 +535,6 @@ router.get('/auctioneer/:userId/invitations', async (req, res) => {
     });
   } catch (err) {
     console.error('Get auctioneer invitations error:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// GET all auctioneers for admin (to invite)
-router.get('/auctioneers/all/:sport', async (req, res) => {
-  try {
-    const { sport } = req.params;
-    const { userRole } = req.query;
-    
-    if (userRole !== 'admin') {
-      return res.status(403).json({ success: false, error: 'Only admin can view auctioneers list' });
-    }
-    
-    // Get auctioneers from franchises
-    const franchisesFilePath = `data/${sport}/franchises.json`;
-    let franchises = [];
-    try {
-      franchises = await fileStore.readJSON(franchisesFilePath);
-    } catch (err) {
-      franchises = [];
-    }
-    
-    // Get auctioneers info
-    const auctioneersFilePath = `data/${sport}/auctioneers.json`;
-    let auctioneers = [];
-    try {
-      auctioneers = await fileStore.readJSON(auctioneersFilePath);
-    } catch (err) {
-      auctioneers = [];
-    }
-    
-    // Combine data
-    const auctioneersList = auctioneers.map(auctioneer => {
-      const franchise = franchises.find(f => f.auctioneerId === auctioneer.id);
-      return {
-        id: auctioneer.id,
-        username: auctioneer.username,
-        name: auctioneer.name || auctioneer.username,
-        franchiseName: franchise?.name || 'No Franchise',
-        franchiseId: franchise?.id || null
-      };
-    });
-    
-    res.json({
-      success: true,
-      auctioneers: auctioneersList
-    });
-  } catch (err) {
-    console.error('Get auctioneers error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

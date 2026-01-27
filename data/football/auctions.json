@@ -1,14 +1,57 @@
 [
   {
-    "id": "auction_fb_1",
-    "name": "Football Premier League Auction 2026",
+    "id": "auction_fo_1769511372265",
+    "name": "Test Auction",
     "sport": "football",
-    "description": "Annual premier league player auction for the 2026 season",
-    "startDate": "2026-02-15T10:00:00Z",
-    "endDate": "2026-02-15T18:00:00Z",
+    "description": "Testing creation",
+    "startDate": "2026-02-01T10:00:00Z",
+    "endDate": "2026-02-01T18:00:00Z",
+    "status": "COMPLETED",
+    "createdBy": "admin_1",
+    "createdAt": "2026-01-27T10:56:12.265Z",
+    "invitedAuctioneers": [
+      {
+        "id": "fb_a1",
+        "name": "James Mitchell",
+        "invitedAt": "2026-01-27T11:07:54.642Z",
+        "invitedBy": "admin_1",
+        "status": "PENDING"
+      },
+      {
+        "id": "fb_a2",
+        "name": "Sarah Brown",
+        "invitedAt": "2026-01-27T11:07:58.991Z",
+        "invitedBy": "admin_1",
+        "status": "PENDING"
+      },
+      {
+        "id": "fb_a3",
+        "name": "Michael Torres",
+        "invitedAt": "2026-01-27T11:11:03.593Z",
+        "invitedBy": "admin_1",
+        "status": "PENDING"
+      }
+    ],
+    "acceptedAuctioneers": [],
+    "registeredPlayers": [],
+    "settings": {
+      "minBidIncrement": 100000,
+      "maxPlayersPerTeam": 15,
+      "bidTimeLimit": 30
+    },
+    "updatedAt": "2026-01-27T11:16:30.773Z",
+    "updatedBy": "admin_1"
+  },
+  {
+    "id": "auction_fo_1769512109934",
+    "name": "ipl 2026",
+    "sport": "football",
+    "description": "aa",
+    "startDate": "2026-01-27T17:39",
+    "endDate": "2026-01-27T17:41",
     "status": "SCHEDULED",
-    "createdBy": "admin",
-    "createdAt": "2026-01-27T00:00:00Z",
+    "createdBy": "admin_1",
+    "createdAt": "2026-01-27T11:08:29.934Z",
     "invitedAuctioneers": [],
     "acceptedAuctioneers": [],
     "registeredPlayers": [],

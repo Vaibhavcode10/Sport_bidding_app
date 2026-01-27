@@ -46,8 +46,8 @@ const Overview: React.FC = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const playersData = await api.get<Player>('players', sport);
-    const teamsData = await api.get<Team>('teams', sport);
+    const playersData = await api.getEntity<Player>('players', sport);
+    const teamsData = await api.getEntity<Team>('teams', sport);
     setPlayers(playersData);
     setTeams(teamsData);
     setLoading(false);

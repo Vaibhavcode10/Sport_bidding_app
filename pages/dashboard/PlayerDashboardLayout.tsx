@@ -1,11 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const PlayerDashboardLayout: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Redirect if not authenticated or not player (only after loading completes)
+  useEffect(() => {
+    if (isLoading) return;
+    
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    if (user?.role !== 'player') {
+      navigate('/');
+      return;
+    }
+  }, [isAuthenticated, user, navigate, isLoading]);
 
   const navItems = [
     { name: 'My Profile', path: '/player/dashboard', icon: '👤', end: true },
@@ -17,6 +31,20 @@ const PlayerDashboardLayout: React.FC = () => {
     logout();
     navigate('/login');
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-blue-900">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't render if not player
+  if (!isAuthenticated || user?.role !== 'player') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-slate-100">

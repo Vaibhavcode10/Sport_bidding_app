@@ -5,11 +5,13 @@ import { useAuth } from '../../context/AuthContext';
 
 const DashboardLayout: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Redirect if not authenticated or not admin
+  // Redirect if not authenticated or not admin (only after loading completes)
   useEffect(() => {
+    if (isLoading) return; // Wait for auth to load
+    
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -18,7 +20,16 @@ const DashboardLayout: React.FC = () => {
       navigate('/');
       return;
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, isLoading]);
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-blue-900">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   // Don't render anything if not admin
   if (!isAuthenticated || user?.role !== 'admin') {
@@ -47,15 +58,6 @@ const DashboardLayout: React.FC = () => {
   };
 
   const currentSport = user?.sport || 'football';
-
-  // Show loading state while checking authentication
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-blue-900">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-slate-100">

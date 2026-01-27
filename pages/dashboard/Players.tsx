@@ -47,16 +47,16 @@ const Players: React.FC = () => {
       userRole: user.role
     } : undefined;
     
-    const data = await api.get<Player>('players', sport, userContext);
+    const data = await api.getEntity<Player>('players', sport, userContext);
     setPlayers(data);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId) {
-      await api.update('players', editingId, formData, sport);
+      await api.updateEntity('players', editingId, formData, sport);
     } else {
-      await api.create('players', formData, sport);
+      await api.createEntity('players', formData, sport);
     }
     setFormData({ name: '', role: '', basePrice: 0 });
     setEditingId(null);
@@ -77,7 +77,7 @@ const Players: React.FC = () => {
         userRole: user.role
       } : undefined;
       
-      const success = await api.delete('players', id, sport, userContext);
+      const success = await api.deleteEntity('players', id, sport, userContext);
       if (success) {
         fetchPlayers();
       } else {

@@ -60,16 +60,16 @@ const TeamSelection: React.FC = () => {
   }, [sport]);
 
   const fetchTeams = async () => {
-    const data = await api.get<Team>('teams', sport);
+    const data = await api.getEntity<Team>('teams', sport);
     setTeams(data);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId) {
-      await api.update('teams', editingId, { ...formData, purseRemaining: formData.totalPurse }, sport);
+      await api.updateEntity('teams', editingId, { ...formData, purseRemaining: formData.totalPurse }, sport);
     } else {
-      await api.create('teams', { ...formData, purseRemaining: formData.totalPurse }, sport);
+      await api.createEntity('teams', { ...formData, purseRemaining: formData.totalPurse }, sport);
     }
     setFormData({ name: '', owner: '', totalPurse: 10000000 });
     setEditingId(null);
@@ -85,7 +85,7 @@ const TeamSelection: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (confirm('Delete this team?')) {
-      await api.delete('teams', id, sport);
+      await api.deleteEntity('teams', id, sport);
       fetchTeams();
     }
   };

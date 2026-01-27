@@ -9,8 +9,23 @@
     "status": "SCHEDULED",
     "createdBy": "admin",
     "createdAt": "2026-01-27T00:00:00Z",
-    "invitedAuctioneers": [],
-    "acceptedAuctioneers": [],
+    "invitedAuctioneers": [
+      {
+        "id": "c_a1",
+        "name": "Rajesh Kumar",
+        "invitedAt": "2026-01-27T11:15:01.722Z",
+        "invitedBy": "admin_1",
+        "status": "ACCEPTED",
+        "acceptedAt": "2026-01-27T11:19:35.951Z"
+      }
+    ],
+    "acceptedAuctioneers": [
+      {
+        "id": "c_a1",
+        "name": "Rajesh Kumar",
+        "acceptedAt": "2026-01-27T11:19:35.951Z"
+      }
+    ],
     "registeredPlayers": [],
     "settings": {
       "minBidIncrement": 500000,

@@ -5,12 +5,108 @@ interface UserContext {
   userRole?: string;
 }
 
+interface ApiResponse<T = any> {
+  data: T;
+  status: number;
+}
+
 export const api = {
-  get: async <T>(entity: 'players' | 'teams', sport?: string, userContext?: UserContext): Promise<T[]> => {
+  // Generic HTTP methods for flexible API calls
+  get: async <T = any>(path: string, options?: { params?: Record<string, any> }): Promise<ApiResponse<T>> => {
+    try {
+      const baseUrl = getApiBase();
+      let url = `${baseUrl}${path}`;
+      
+      // Add query parameters if provided
+      if (options?.params) {
+        const searchParams = new URLSearchParams();
+        Object.entries(options.params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            searchParams.append(key, String(value));
+          }
+        });
+        const paramString = searchParams.toString();
+        if (paramString) {
+          url += `?${paramString}`;
+        }
+      }
+      
+      const res = await fetch(url);
+      const data = await res.json();
+      return { data, status: res.status };
+    } catch (err) {
+      console.error(`API Get Error (${path}):`, err);
+      return { data: {} as T, status: 500 };
+    }
+  },
+
+  post: async <T = any>(path: string, body?: any): Promise<ApiResponse<T>> => {
+    try {
+      const baseUrl = getApiBase();
+      const url = `${baseUrl}${path}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      return { data, status: res.status };
+    } catch (err) {
+      console.error(`API Post Error (${path}):`, err);
+      return { data: {} as T, status: 500 };
+    }
+  },
+
+  put: async <T = any>(path: string, body?: any): Promise<ApiResponse<T>> => {
+    try {
+      const baseUrl = getApiBase();
+      const url = `${baseUrl}${path}`;
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      return { data, status: res.status };
+    } catch (err) {
+      console.error(`API Put Error (${path}):`, err);
+      return { data: {} as T, status: 500 };
+    }
+  },
+
+  delete: async <T = any>(path: string, options?: { params?: Record<string, any> }): Promise<ApiResponse<T>> => {
+    try {
+      const baseUrl = getApiBase();
+      let url = `${baseUrl}${path}`;
+      
+      // Add query parameters if provided
+      if (options?.params) {
+        const searchParams = new URLSearchParams();
+        Object.entries(options.params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            searchParams.append(key, String(value));
+          }
+        });
+        const paramString = searchParams.toString();
+        if (paramString) {
+          url += `?${paramString}`;
+        }
+      }
+      
+      const res = await fetch(url, { method: 'DELETE' });
+      const data = await res.json();
+      return { data, status: res.status };
+    } catch (err) {
+      console.error(`API Delete Error (${path}):`, err);
+      return { data: {} as T, status: 500 };
+    }
+  },
+
+  // Legacy typed methods for backward compatibility
+  getEntity: async <T>(entity: 'players' | 'teams', sport?: string, userContext?: UserContext): Promise<T[]> => {
     try {
       let url = getApiUrl(entity, sport);
       
-      // Add user context as query parameters if provided
       if (userContext?.userId && userContext?.userRole) {
         const separator = url.includes('?') ? '&' : '?';
         url += `${separator}userId=${encodeURIComponent(userContext.userId)}&userRole=${encodeURIComponent(userContext.userRole)}`;
@@ -25,7 +121,7 @@ export const api = {
     }
   },
 
-  create: async <T>(entity: 'players' | 'teams', data: Partial<T>, sport?: string): Promise<T | null> => {
+  createEntity: async <T>(entity: 'players' | 'teams', data: Partial<T>, sport?: string): Promise<T | null> => {
     try {
       const url = getApiUrl(entity, sport);
       const res = await fetch(url, {
@@ -41,7 +137,7 @@ export const api = {
     }
   },
 
-  update: async <T>(entity: 'players' | 'teams', id: string, data: Partial<T>, sport?: string): Promise<boolean> => {
+  updateEntity: async <T>(entity: 'players' | 'teams', id: string, data: Partial<T>, sport?: string): Promise<boolean> => {
     try {
       const baseUrl = getApiBase();
       const entityPath = entity === 'teams' ? 'teams' : entity;
@@ -58,21 +154,18 @@ export const api = {
     }
   },
 
-  delete: async (entity: 'players' | 'teams', id: string, sport?: string, userContext?: UserContext): Promise<boolean> => {
+  deleteEntity: async (entity: 'players' | 'teams', id: string, sport?: string, userContext?: UserContext): Promise<boolean> => {
     try {
       const baseUrl = getApiBase();
       const entityPath = entity === 'teams' ? 'teams' : entity;
       let url = sport ? `${baseUrl}/${entityPath}/${sport}/${id}` : `${baseUrl}/${entityPath}/${id}`;
       
-      // Add user context as query parameters if provided
       if (userContext?.userId && userContext?.userRole) {
         const separator = url.includes('?') ? '&' : '?';
         url += `${separator}userId=${encodeURIComponent(userContext.userId)}&userRole=${encodeURIComponent(userContext.userRole)}`;
       }
       
-      const res = await fetch(url, {
-        method: 'DELETE',
-      });
+      const res = await fetch(url, { method: 'DELETE' });
       return res.ok;
     } catch (err) {
       console.error(`API Delete Error (${entity}):`, err);

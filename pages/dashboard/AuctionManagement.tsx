@@ -47,12 +47,14 @@ export const AuctionManagement: React.FC = () => {
   const { user } = useAuth();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [auctioneers, setAuctioneers] = useState<Auctioneer[]>([]);
+  const [blockedAuctioneers, setBlockedAuctioneers] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedSport, setSelectedSport] = useState('football');
   const [activeTab, setActiveTab] = useState<'auctions' | 'create' | 'auctioneers'>('auctions');
   const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [invitingAuctioneer, setInvitingAuctioneer] = useState<string | null>(null);
+  const [invitingAll, setInvitingAll] = useState(false);
 
   // Form state for creating/editing auction
   const [formData, setFormData] = useState({
@@ -217,6 +219,61 @@ export const AuctionManagement: React.FC = () => {
 
   const isAuctioneerInvited = (auction: Auction, auctioneerId: string) => {
     return auction.invitedAuctioneers.some(inv => inv.id === auctioneerId);
+  };
+
+  const toggleBlockAuctioneer = (auctioneerId: string) => {
+    setBlockedAuctioneers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(auctioneerId)) {
+        newSet.delete(auctioneerId);
+      } else {
+        newSet.add(auctioneerId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleInviteAll = async () => {
+    if (!selectedAuction) {
+      alert('Please select an auction first');
+      return;
+    }
+
+    const eligibleAuctioneers = auctioneers.filter(
+      a => !blockedAuctioneers.has(a.id) && !isAuctioneerInvited(selectedAuction, a.id)
+    );
+
+    if (eligibleAuctioneers.length === 0) {
+      alert('No eligible auctioneers to invite (all are either blocked or already invited)');
+      return;
+    }
+
+    setInvitingAll(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const auctioneer of eligibleAuctioneers) {
+      try {
+        const response = await api.post(`/auctions/${selectedSport}/${selectedAuction.id}/invite`, {
+          auctioneerId: auctioneer.id,
+          auctioneerName: auctioneer.name || auctioneer.username,
+          userRole: user?.role,
+          userId: user?.id
+        });
+
+        if (response.data.success) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch (error) {
+        failCount++;
+      }
+    }
+
+    setInvitingAll(false);
+    fetchAuctions();
+    alert(`Invitations sent!\n✅ Success: ${successCount}\n❌ Failed: ${failCount}`);
   };
 
   if (user?.role !== 'admin') {
@@ -405,23 +462,67 @@ export const AuctionManagement: React.FC = () => {
               <p className="text-slate-500 text-sm mt-2">No auctioneers registered for {selectedSport}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <>
+              {/* Invite All Button */}
+              {selectedAuction && (
+                <button
+                  onClick={handleInviteAll}
+                  disabled={invitingAll}
+                  className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:from-slate-600 disabled:to-slate-700 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                >
+                  {invitingAll ? (
+                    <>
+                      <span className="animate-spin">⏳</span> Sending Invitations...
+                    </>
+                  ) : (
+                    <>
+                      📨 Invite All Auctioneers ({auctioneers.filter(a => !blockedAuctioneers.has(a.id) && !isAuctioneerInvited(selectedAuction, a.id)).length} eligible)
+                    </>
+                  )}
+                </button>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {auctioneers.map(auctioneer => (
                 <div
                   key={auctioneer.id}
-                  className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700 rounded-xl p-4 hover:border-orange-500/50 transition-all"
+                  className={`relative bg-gradient-to-br from-slate-800/60 to-slate-900/60 border rounded-xl p-4 transition-all ${
+                    blockedAuctioneers.has(auctioneer.id) 
+                      ? 'border-red-500/50 opacity-60' 
+                      : 'border-slate-700 hover:border-orange-500/50'
+                  }`}
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white font-bold text-lg">
+                  {/* Block Button - Top Right Corner */}
+                  <button
+                    onClick={() => toggleBlockAuctioneer(auctioneer.id)}
+                    className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      blockedAuctioneers.has(auctioneer.id)
+                        ? 'bg-red-600 text-white hover:bg-red-500'
+                        : 'bg-slate-700 text-slate-400 hover:bg-red-600/50 hover:text-red-300'
+                    }`}
+                    title={blockedAuctioneers.has(auctioneer.id) ? 'Unblock Auctioneer' : 'Block Auctioneer'}
+                  >
+                    {blockedAuctioneers.has(auctioneer.id) ? '🚫' : '⛔'}
+                  </button>
+
+                  <div className="flex items-center gap-3 mb-3 pr-8">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${
+                      blockedAuctioneers.has(auctioneer.id)
+                        ? 'bg-gradient-to-br from-gray-500 to-gray-600'
+                        : 'bg-gradient-to-br from-orange-500 to-red-500'
+                    }`}>
                       {(auctioneer.name || auctioneer.username).charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <h4 className="text-white font-semibold">{auctioneer.name || auctioneer.username}</h4>
                       <p className="text-slate-400 text-sm">{auctioneer.franchiseName}</p>
+                      {blockedAuctioneers.has(auctioneer.id) && (
+                        <span className="text-red-400 text-xs font-semibold">🚫 Blocked</span>
+                      )}
                     </div>
                   </div>
                   
-                  {selectedAuction && (
+                  {selectedAuction && !blockedAuctioneers.has(auctioneer.id) && (
                     <button
                       onClick={() => handleInviteAuctioneer(selectedAuction.id, auctioneer)}
                       disabled={invitingAuctioneer === auctioneer.id || isAuctioneerInvited(selectedAuction, auctioneer.id)}
@@ -438,21 +539,33 @@ export const AuctionManagement: React.FC = () => {
                           : '📨 Invite to Auction'}
                     </button>
                   )}
+                  
+                  {selectedAuction && blockedAuctioneers.has(auctioneer.id) && (
+                    <div className="w-full py-2 rounded-lg text-sm font-semibold text-center bg-red-600/10 text-red-400">
+                      🚫 Blocked from invitations
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
+            </>
           )}
 
           {selectedAuction && (
-            <div className="p-4 bg-blue-600/10 border border-blue-600/30 rounded-xl">
-              <p className="text-blue-300 font-semibold">
-                📋 Inviting to: {selectedAuction.name}
-              </p>
+            <div className="p-4 bg-blue-600/10 border border-blue-600/30 rounded-xl flex items-center justify-between">
+              <div>
+                <p className="text-blue-300 font-semibold">
+                  📋 Inviting to: {selectedAuction.name}
+                </p>
+                <p className="text-sm text-slate-400 mt-1">
+                  {blockedAuctioneers.size > 0 && `${blockedAuctioneers.size} auctioneer(s) blocked`}
+                </p>
+              </div>
               <button
                 onClick={() => setSelectedAuction(null)}
-                className="text-sm text-blue-400 hover:underline mt-1"
+                className="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg text-sm hover:bg-slate-600 transition-all"
               >
-                Cancel selection
+                ✕ Cancel
               </button>
             </div>
           )}
