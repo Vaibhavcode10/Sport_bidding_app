@@ -1,4 +1,4 @@
-[  
+[
   {
     "id": "cr_p1",
     "username": "virat_kohli",
@@ -30,7 +30,7 @@
     "basePrice": 1500000,
     "currentBid": 0,
     "status": "AVAILABLE",
-    "verified": false,
+    "verified": true,
     "careerRecords": {
       "matches": 87,
       "runs": 0,
@@ -39,7 +39,9 @@
       "avgEconomyRate": 6.8
     },
     "auctionPrice": null,
-    "soldTo": null
+    "soldTo": null,
+    "verifiedAt": "2026-01-28T05:28:56.404Z",
+    "verifiedBy": "admin_1"
   },
   {
     "id": "cr_p3",
@@ -51,7 +53,7 @@
     "basePrice": 1800000,
     "currentBid": 0,
     "status": "AVAILABLE",
-    "verified": false,
+    "verified": true,
     "careerRecords": {
       "matches": 159,
       "runs": 10500,
@@ -60,6 +62,8 @@
       "avgStrike": 93.2
     },
     "auctionPrice": null,
-    "soldTo": null
+    "soldTo": null,
+    "verifiedAt": "2026-01-28T05:28:59.516Z",
+    "verifiedBy": "admin_1"
   }
 ]

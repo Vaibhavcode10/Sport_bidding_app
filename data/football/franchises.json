@@ -1,52 +1,38 @@
 [
   {
-    "id": "fb_f1",
-    "name": "Madrid Stars",
-    "auctioneerId": "fb_a1",
-    "auctioneerName": "Carlo Ancelotti",
+    "id": "fb_team_madrid",
+    "name": "Madrid Lions",
     "sport": "football",
-    "city": "Madrid",
-    "stadium": "Santiago Bernabéu",
-    "capacity": 81044,
-    "founded": "1902",
-    "totalPurse": 50000000,
-    "purseRemaining": 50000000,
+    "purseRemaining": 120000000,
+    "totalPurse": 120000000,
     "playerIds": [],
-    "playerCount": 0,
-    "wins": 0,
-    "losses": 0,
-    "description": "Madrid's legendary football club",
-    "createdAt": "2023-01-15"
+    "logoUrl": "https://via.placeholder.com/100x100/059669/FFFFFF?text=ML"
   },
   {
-    "id": "fb_f2",
-    "name": "Barcelona Blues",
-    "auctioneerId": "fb_a2",
-    "auctioneerName": "Luis Enrique",
+    "id": "fb_team_barcelona",
+    "name": "Barcelona Eagles",
     "sport": "football",
-    "city": "Barcelona",
-    "stadium": "Camp Nou",
-    "capacity": 99354,
-    "founded": "1899",
-    "totalPurse": 50000000,
-    "purseRemaining": 50000000,
+    "purseRemaining": 120000000,
+    "totalPurse": 120000000,
     "playerIds": [],
-    "playerCount": 0,
-    "wins": 0,
-    "losses": 0,
-    "description": "Barcelona's iconic football franchise",
-    "createdAt": "2023-01-20"
+    "logoUrl": "https://via.placeholder.com/100x100/7C2D12/FFFFFF?text=BE"
   },
   {
-    "name": "indian footbal team",
-    "owner": "vaibhav",
-    "totalPurse": 10000000,
-    "purseRemaining": 10000000,
-    "id": "fo_t1769498741117",
+    "id": "fb_team_milan",
+    "name": "Milan Thunder",
     "sport": "football",
+    "purseRemaining": 120000000,
+    "totalPurse": 120000000,
     "playerIds": [],
-    "playerCount": 0,
-    "wins": 0,
-    "losses": 0
+    "logoUrl": "https://via.placeholder.com/100x100/1F2937/FFFFFF?text=MT"
+  },
+  {
+    "id": "fb_team_liverpool",
+    "name": "Liverpool Reds",
+    "sport": "football",
+    "purseRemaining": 120000000,
+    "totalPurse": 120000000,
+    "playerIds": [],
+    "logoUrl": "https://via.placeholder.com/100x100/DC2626/FFFFFF?text=LR"
   }
 ]

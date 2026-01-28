@@ -24,6 +24,7 @@ const PlayerDashboardLayout: React.FC = () => {
   const navItems = [
     { name: 'My Profile', path: '/player/dashboard', icon: '👤', end: true },
     { name: 'Auctions', path: '/player/dashboard/auctions', icon: '🏆' },
+    { name: 'Live Auction', path: '/player/dashboard/live', icon: '🔴', isLive: true },
     { name: 'Bid Events', path: '/player/dashboard/bid-events', icon: '🎯' },
   ];
 

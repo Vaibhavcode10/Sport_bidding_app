@@ -1,7 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, UserRole } from '../context/AuthContext';
+import { api } from '../services/api';
+
+interface AuctioneerAvailability {
+  sport: string;
+  maxAllowed: number;
+  currentCount: number;
+  availableSlots: number;
+  isFull: boolean;
+}
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -16,14 +25,34 @@ const Login: React.FC = () => {
   const [selectedSport, setSelectedSport] = useState('football');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [auctioneerAvailability, setAuctioneerAvailability] = useState<AuctioneerAvailability | null>(null);
 
   const sports = ['football', 'basketball', 'cricket', 'baseball', 'volleyball'];
 
   const roles: { id: UserRole; label: string; description: string; icon: string; canRegister: boolean }[] = [
-    { id: 'admin', label: 'Admin', description: 'Manage auctions and teams', icon: '⚙️', canRegister: false },
-    { id: 'player', label: 'Player', description: 'Manage your profile & view auctions', icon: '👤', canRegister: true },
-    { id: 'auctioneer', label: 'Auctioneer', description: 'Conduct auctions & manage franchise', icon: '🎙️', canRegister: true },
+    { id: 'admin', label: 'Admin', description: 'Create auctions, assign auctioneers & manage teams', icon: '⚙️', canRegister: false },
+    { id: 'player', label: 'Player', description: 'Manage your profile & participate in auctions', icon: '👤', canRegister: true },
+    { id: 'auctioneer', label: 'Auctioneer', description: 'Conduct live auctions (neutral role)', icon: '🎙️', canRegister: true },
   ];
+
+  // Check auctioneer availability when in register mode and auctioneer role selected
+  useEffect(() => {
+    const checkAuctioneerAvailability = async () => {
+      if (isRegisterMode && selectedRole === 'auctioneer') {
+        try {
+          const response = await api.get(`/auth/auctioneer-availability/${selectedSport}`);
+          if (response.success) {
+            setAuctioneerAvailability(response);
+          }
+        } catch (err) {
+          console.error('Failed to check auctioneer availability:', err);
+        }
+      } else {
+        setAuctioneerAvailability(null);
+      }
+    };
+    checkAuctioneerAvailability();
+  }, [isRegisterMode, selectedRole, selectedSport]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,6 +200,35 @@ const Login: React.FC = () => {
                 </button>
               ))}
             </div>
+            
+            {/* Auctioneer Slot Availability Display */}
+            {isRegisterMode && selectedRole === 'auctioneer' && auctioneerAvailability && (
+              <div className={`mt-4 p-3 rounded-lg border ${auctioneerAvailability.isFull ? 'bg-red-600/20 border-red-600/30' : 'bg-amber-600/20 border-amber-600/30'}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`font-bold ${auctioneerAvailability.isFull ? 'text-red-300' : 'text-amber-300'}`}>
+                      {auctioneerAvailability.isFull 
+                        ? '🚫 No Slots Available' 
+                        : `⚡ ${auctioneerAvailability.availableSlots} of ${auctioneerAvailability.maxAllowed} Slots Available`}
+                    </p>
+                    <p className={`text-xs ${auctioneerAvailability.isFull ? 'text-red-400' : 'text-amber-400'}`}>
+                      {auctioneerAvailability.isFull 
+                        ? `Maximum ${auctioneerAvailability.maxAllowed} auctioneers already registered for ${selectedSport}`
+                        : `Only ${auctioneerAvailability.maxAllowed} auctioneers allowed per sport`}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    {[...Array(auctioneerAvailability.maxAllowed)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={`w-3 h-3 rounded-full ${i < auctioneerAvailability.currentCount ? 'bg-slate-500' : 'bg-green-500'}`}
+                        title={i < auctioneerAvailability.currentCount ? 'Filled' : 'Available'}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -242,10 +300,14 @@ const Login: React.FC = () => {
 
           <button 
             type="submit"
-            disabled={isLoading}
-            className={`w-full ${isRegisterMode ? 'bg-green-600 hover:bg-green-500 shadow-green-900/30 hover:shadow-green-600/20' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/30 hover:shadow-blue-600/20'} disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg active:scale-[0.98]`}
+            disabled={isLoading || (isRegisterMode && selectedRole === 'auctioneer' && auctioneerAvailability?.isFull)}
+            className={`w-full ${isRegisterMode ? 'bg-green-600 hover:bg-green-500 shadow-green-900/30 hover:shadow-green-600/20' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/30 hover:shadow-blue-600/20'} disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all shadow-lg active:scale-[0.98]`}
           >
-            {isLoading ? (isRegisterMode ? 'Creating Account...' : 'Logging in...') : (isRegisterMode ? 'Create Account' : 'Login')}
+            {isLoading 
+              ? (isRegisterMode ? 'Creating Account...' : 'Logging in...') 
+              : (isRegisterMode && selectedRole === 'auctioneer' && auctioneerAvailability?.isFull)
+                ? 'Registration Closed'
+                : (isRegisterMode ? 'Create Account' : 'Login')}
           </button>
         </form>
 

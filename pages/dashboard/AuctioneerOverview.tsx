@@ -1,438 +1,216 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getApiBase } from '../../config/index.js';
+import { api } from '../../services/api';
+import { Link } from 'react-router-dom';
+
+interface AssignedAuction {
+  id: string;
+  name: string;
+  sport: string;
+  status: string;
+  startDate: string;
+  teamIds?: string[];
+  playerPool?: string[];
+  assignedAuctioneer?: {
+    id: string;
+    name: string;
+    assignedAt: string;
+  };
+}
+
+interface AuctionStats {
+  totalAssigned: number;
+  readyToStart: number;
+  completed: number;
+  live: number;
+}
 
 const AuctioneerOverview: React.FC = () => {
-  const { user, franchise } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(franchise || {
-    id: '',
-    name: '',
-    auctioneerId: '',
-    sport: '',
-    city: '',
-    stadium: '',
-    totalPurse: 0,
-    purseRemaining: 0,
-    playerCount: 0,
-    wins: 0,
-    losses: 0,
-  });
+  const { user } = useAuth();
+  const [assignedAuctions, setAssignedAuctions] = useState<AssignedAuction[]>([]);
+  const [stats, setStats] = useState<AuctionStats>({ totalAssigned: 0, readyToStart: 0, completed: 0, live: 0 });
+  const [loading, setLoading] = useState(true);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: ['totalPurse', 'purseRemaining', 'wins', 'losses', 'playerCount'].includes(name) 
-        ? parseInt(value) 
-        : value,
-    });
-  };
-
-  const handleSave = async () => {
-    if (!franchise || !user) return;
-    
-    try {
-      const apiBase = getApiBase();
-      const response = await fetch(`${apiBase}/auctioneers/franchise/update`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          franchiseId: franchise.id,
-          auctioneerId: user.id,
-          sport: user.sport,
-          ...formData,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setIsEditing(false);
+  useEffect(() => {
+    const fetchAssignedAuctions = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const response = await api.get(`/auctions/assigned/${user.id}`);
+        if (response.data.success) {
+          const auctions = response.data.auctions;
+          setAssignedAuctions(auctions);
+          
+          // Calculate stats
+          setStats({
+            totalAssigned: auctions.length,
+            readyToStart: auctions.filter((a: AssignedAuction) => a.status === 'READY').length,
+            completed: auctions.filter((a: AssignedAuction) => a.status === 'COMPLETED').length,
+            live: auctions.filter((a: AssignedAuction) => a.status === 'LIVE').length,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch assigned auctions:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error saving franchise:', error);
-    }
-  };
-
-  const [isCreating, setIsCreating] = useState(false);
-  const [createFormData, setCreateFormData] = useState({
-    name: '',
-    city: '',
-    stadium: '',
-    totalPurse: 50000000,
-  });
-
-  const handleCreateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setCreateFormData({
-      ...createFormData,
-      [name]: name === 'totalPurse' ? parseInt(value) : value,
-    });
-  };
-
-  const handleCreateFranchise = async (e: React.FormEvent) => {
-    e.preventDefault();
+    };
     
-    if (!user) return;
+    fetchAssignedAuctions();
+  }, [user?.id]);
 
-    try {
-      const apiBase = getApiBase();
-      const response = await fetch(`${apiBase}/auctioneers/franchise/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          auctioneerId: user.id,
-          sport: user.sport,
-          name: createFormData.name,
-          city: createFormData.city,
-          stadium: createFormData.stadium,
-          auctioneerName: user.username,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Reload page to show new franchise
-        window.location.reload();
-      } else {
-        alert(data.message || 'Failed to create franchise');
-      }
-    } catch (error) {
-      console.error('Error creating franchise:', error);
-      alert('Error creating franchise');
-    }
+  const getStatusBadge = (status: string) => {
+    const styles: { [key: string]: string } = {
+      'READY': 'bg-green-500/20 text-green-300 border-green-500/50',
+      'LIVE': 'bg-red-500/20 text-red-300 border-red-500/50 animate-pulse',
+      'CREATED': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50',
+      'COMPLETED': 'bg-gray-500/20 text-gray-300 border-gray-500/50',
+    };
+    return styles[status] || 'bg-gray-500/20 text-gray-300 border-gray-500/50';
   };
 
-  const handleCancel = () => {
-    setFormData(franchise || {
-      id: '',
-      name: '',
-      auctioneerId: '',
-      sport: '',
-      city: '',
-      stadium: '',
-      totalPurse: 0,
-      purseRemaining: 0,
-      playerCount: 0,
-      wins: 0,
-      losses: 0,
-    });
-    setIsEditing(false);
-  };
-
-  if (!franchise) {
+  if (loading) {
     return (
-      <div className="space-y-8">
-        <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-600/20 rounded-2xl p-12 backdrop-blur-xl text-center">
-          <h1 className="text-4xl font-black text-white mb-4">🏆 Create Your Franchise</h1>
-          <p className="text-slate-400 mb-8">You don't have a franchise yet. Create one now to get started!</p>
-        </div>
-
-        {/* Create Franchise Form */}
-        <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl max-w-2xl mx-auto">
-          <form onSubmit={handleCreateFranchise} className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-2">Franchise Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={createFormData.name}
-                onChange={handleCreateInputChange}
-                placeholder="Enter your franchise name..."
-                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2">City</label>
-                <input
-                  type="text"
-                  name="city"
-                  value={createFormData.city}
-                  onChange={handleCreateInputChange}
-                  placeholder="e.g., New York..."
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2">Stadium Name</label>
-                <input
-                  type="text"
-                  name="stadium"
-                  value={createFormData.stadium}
-                  onChange={handleCreateInputChange}
-                  placeholder="e.g., Sports Arena..."
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-2">Total Purse (₹) *</label>
-              <input
-                type="number"
-                name="totalPurse"
-                value={createFormData.totalPurse}
-                onChange={handleCreateInputChange}
-                min="1000000"
-                step="1000000"
-                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <p className="text-xs text-slate-400 mt-1">Default: ₹{(50000000).toLocaleString()}</p>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-4 rounded-lg transition-all"
-            >
-              🚀 Create Franchise
-            </button>
-          </form>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-white text-xl">Loading...</div>
       </div>
     );
   }
 
-  const purseUsed = franchise.totalPurse - franchise.purseRemaining;
-  const pursePercentage = (purseUsed / franchise.totalPurse) * 100;
-
   return (
     <div className="space-y-8">
-      {/* Franchise Header */}
-      <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
-        <div className="flex items-start justify-between mb-6">
+      {/* Welcome Header */}
+      <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="text-5xl">🎙️</div>
           <div>
-            <h1 className="text-4xl font-black text-white mb-2">{franchise.name}</h1>
-            <p className="text-slate-400 text-lg mb-4">Owner: {user?.username}</p>
-            <div className="flex gap-8">
-              <div>
-                <p className="text-slate-500 text-sm mb-1">Sport</p>
-                <p className="text-white font-bold text-lg">{user?.sport?.toUpperCase()}</p>
-              </div>
-              <div>
-                <p className="text-slate-500 text-sm mb-1">Win-Loss Record</p>
-                <p className="text-white font-bold text-lg">{franchise.wins}W - {franchise.losses}L</p>
-              </div>
-              <div>
-                <p className="text-slate-500 text-sm mb-1">Location</p>
-                <p className="text-white font-bold text-lg">{franchise.city || 'N/A'}</p>
-              </div>
-            </div>
+            <h1 className="text-3xl font-black text-white">Welcome, {user?.username}!</h1>
+            <p className="text-slate-400 text-lg">Neutral Auctioneer • {user?.sport?.toUpperCase()}</p>
           </div>
-          <button
-            onClick={() => {
-              if (isEditing) handleCancel();
-              else setIsEditing(true);
-            }}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all ${
-              isEditing
-                ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                : 'bg-blue-600 hover:bg-blue-500 text-white'
-            }`}
-          >
-            {isEditing ? 'Cancel' : '✏️ Edit Franchise'}
-          </button>
+        </div>
+        
+        <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+          <h3 className="text-blue-300 font-semibold mb-2">ℹ️ Your Role</h3>
+          <p className="text-gray-400 text-sm">
+            As a <strong className="text-white">neutral auctioneer</strong>, you conduct live auctions fairly and impartially. 
+            You don't own or represent any team - your job is to facilitate the bidding process, 
+            confirm bids, and mark players as SOLD or UNSOLD.
+          </p>
         </div>
       </div>
 
-      {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Details */}
-        <div className="lg:col-span-2 space-y-6">
-          {isEditing ? (
-            <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl space-y-6">
-              <h3 className="text-xl font-bold text-white">Edit Franchise Details</h3>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2">Franchise Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Total Purse</label>
-                  <input
-                    type="number"
-                    name="totalPurse"
-                    value={formData.totalPurse}
-                    onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Remaining Purse</label>
-                  <input
-                    type="number"
-                    name="purseRemaining"
-                    value={formData.purseRemaining}
-                    onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Wins</label>
-                  <input
-                    type="number"
-                    name="wins"
-                    value={formData.wins}
-                    onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Losses</label>
-                  <input
-                    type="number"
-                    name="losses"
-                    value={formData.losses}
-                    onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">City</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Stadium</label>
-                  <input
-                    type="text"
-                    name="stadium"
-                    value={formData.stadium}
-                    onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={handleSave}
-                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all"
-                >
-                  ✓ Save Changes
-                </button>
-                <button
-                  onClick={handleCancel}
-                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
-                <h3 className="text-xl font-bold text-white mb-6">Franchise Information</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center pb-4 border-b border-slate-700">
-                    <p className="text-slate-400">Franchise Name</p>
-                    <p className="text-white font-semibold">{franchise.name}</p>
-                  </div>
-                  <div className="flex justify-between items-center pb-4 border-b border-slate-700">
-                    <p className="text-slate-400">Owner</p>
-                    <p className="text-white font-semibold">{user?.username}</p>
-                  </div>
-                  <div className="flex justify-between items-center pb-4 border-b border-slate-700">
-                    <p className="text-slate-400">Sport</p>
-                    <p className="text-white font-semibold">{user?.sport?.toUpperCase()}</p>
-                  </div>
-                  <div className="flex justify-between items-center pb-4 border-b border-slate-700">
-                    <p className="text-slate-400">City</p>
-                    <p className="text-white font-semibold">{franchise.city || 'N/A'}</p>
-                  </div>
-                  <div className="flex justify-between items-center pb-4 border-b border-slate-700">
-                    <p className="text-slate-400">Stadium</p>
-                    <p className="text-white font-semibold">{franchise.stadium || 'N/A'}</p>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <p className="text-slate-400">Player Count</p>
-                    <p className="text-white font-semibold">{franchise.playerCount}</p>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-r from-blue-600/10 to-blue-600/5 border border-blue-600/20 rounded-xl p-6">
+          <div className="text-3xl mb-2">📋</div>
+          <p className="text-slate-400 text-sm">Assigned Auctions</p>
+          <p className="text-3xl font-bold text-blue-400">{stats.totalAssigned}</p>
         </div>
+        
+        <div className="bg-gradient-to-r from-green-600/10 to-green-600/5 border border-green-600/20 rounded-xl p-6">
+          <div className="text-3xl mb-2">🟢</div>
+          <p className="text-slate-400 text-sm">Ready to Start</p>
+          <p className="text-3xl font-bold text-green-400">{stats.readyToStart}</p>
+        </div>
+        
+        <div className="bg-gradient-to-r from-red-600/10 to-red-600/5 border border-red-600/20 rounded-xl p-6">
+          <div className="text-3xl mb-2">🔴</div>
+          <p className="text-slate-400 text-sm">Currently Live</p>
+          <p className="text-3xl font-bold text-red-400">{stats.live}</p>
+        </div>
+        
+        <div className="bg-gradient-to-r from-gray-600/10 to-gray-600/5 border border-gray-600/20 rounded-xl p-6">
+          <div className="text-3xl mb-2">✅</div>
+          <p className="text-slate-400 text-sm">Completed</p>
+          <p className="text-3xl font-bold text-gray-400">{stats.completed}</p>
+        </div>
+      </div>
 
-        {/* Stats Cards */}
-        <div className="space-y-6">
-          {/* Purse Status */}
-          <div className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 border border-purple-600/20 rounded-2xl p-6 backdrop-blur-xl">
-            <h3 className="text-lg font-bold text-white mb-6">Budget Status</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <p className="text-slate-400 text-sm mb-2">Total Purse</p>
-                <p className="text-3xl font-bold text-blue-400">₹{franchise.totalPurse.toLocaleString()}</p>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <p className="text-slate-400 text-sm">Spent</p>
-                  <p className="text-white font-semibold">₹{purseUsed.toLocaleString()}</p>
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all"
-                    style={{ width: `${Math.min(pursePercentage, 100)}%` }}
-                  ></div>
-                </div>
-                <p className="text-xs text-slate-400">{pursePercentage.toFixed(1)}% used</p>
-              </div>
-
-              <div>
-                <p className="text-slate-400 text-sm mb-2">Remaining</p>
-                <p className="text-2xl font-bold text-green-400">₹{franchise.purseRemaining.toLocaleString()}</p>
-              </div>
+      {/* Quick Actions */}
+      {stats.readyToStart > 0 && (
+        <div className="bg-gradient-to-r from-green-600/10 to-emerald-600/10 border border-green-600/30 rounded-xl p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-1">🚀 Ready to Start</h3>
+              <p className="text-gray-400">You have {stats.readyToStart} auction(s) ready to begin!</p>
             </div>
+            <Link
+              to="/auctioneer/live"
+              className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all"
+            >
+              Go to Live Auction →
+            </Link>
           </div>
+        </div>
+      )}
 
-          {/* Performance */}
-          <div className="bg-gradient-to-r from-green-600/10 to-emerald-600/10 border border-green-600/20 rounded-2xl p-6 backdrop-blur-xl">
-            <h3 className="text-lg font-bold text-white mb-4">Performance</h3>
-            <div className="space-y-4">
-              <div>
-                <p className="text-slate-400 text-sm mb-2">Wins</p>
-                <p className="text-3xl font-bold text-green-400">{franchise.wins}</p>
+      {/* Assigned Auctions List */}
+      <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl">
+        <h2 className="text-xl font-bold text-white mb-6">Your Assigned Auctions</h2>
+        
+        {assignedAuctions.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-5xl mb-4">📭</div>
+            <p className="text-slate-400 text-lg">No auctions assigned yet</p>
+            <p className="text-slate-500 text-sm mt-2">
+              Admin will create auctions and assign them to you
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {assignedAuctions.map(auction => (
+              <div
+                key={auction.id}
+                className="bg-slate-800/50 border border-slate-700 rounded-xl p-5 hover:bg-slate-800/70 transition-all"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">{auction.name}</h3>
+                    <p className="text-gray-400 capitalize">{auction.sport}</p>
+                    <div className="mt-2 flex gap-4 text-sm text-gray-500">
+                      <span>📅 {new Date(auction.startDate).toLocaleDateString()}</span>
+                      <span>👥 {auction.teamIds?.length || 0} Teams</span>
+                      <span>🏃 {auction.playerPool?.length || 0} Players</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusBadge(auction.status)}`}>
+                      {auction.status}
+                    </span>
+                    {auction.status === 'READY' && (
+                      <Link
+                        to="/auctioneer/live"
+                        className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-all"
+                      >
+                        Start →
+                      </Link>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-slate-400 text-sm mb-2">Losses</p>
-                <p className="text-3xl font-bold text-red-400">{franchise.losses}</p>
-              </div>
-              <div>
-                <p className="text-slate-400 text-sm mb-2">Win Rate</p>
-                <p className="text-2xl font-bold text-blue-400">
-                  {((franchise.wins / (franchise.wins + franchise.losses)) * 100).toFixed(1)}%
-                </p>
-              </div>
-            </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* How It Works */}
+      <div className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 border border-purple-600/20 rounded-2xl p-6 backdrop-blur-xl">
+        <h2 className="text-xl font-bold text-white mb-4">How Live Auctions Work</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center">
+            <div className="text-4xl mb-3">1️⃣</div>
+            <h3 className="text-white font-semibold mb-2">Admin Creates Auction</h3>
+            <p className="text-gray-400 text-sm">Admin selects players, teams, and bidding rules, then assigns you as auctioneer</p>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl mb-3">2️⃣</div>
+            <h3 className="text-white font-semibold mb-2">You Start the Auction</h3>
+            <p className="text-gray-400 text-sm">When ready, start the live auction and select players one by one</p>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl mb-3">3️⃣</div>
+            <h3 className="text-white font-semibold mb-2">Conduct Fair Bidding</h3>
+            <p className="text-gray-400 text-sm">Confirm bids from teams, manage jump bids, and mark players SOLD or UNSOLD</p>
           </div>
         </div>
       </div>

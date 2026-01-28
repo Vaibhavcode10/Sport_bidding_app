@@ -39,7 +39,7 @@ router.get('/:sport', async (req, res) => {
     const players = await fileStore.readJSON(filePath);
     
     // Check if this is a player-only request (via query parameter or authorization)
-    const { userId, userRole } = req.query;
+    const { userId, userRole, verified } = req.query;
     
     if (userRole === 'player' && userId) {
       // Return only the logged-in player's data
@@ -49,8 +49,12 @@ router.get('/:sport', async (req, res) => {
       } else {
         res.json([]);
       }
+    } else if (verified === 'true') {
+      // Return only verified players (for auctions)
+      const verifiedPlayers = players.filter(p => p.verified === true);
+      res.json(verifiedPlayers);
     } else {
-      // Return all players (for admin/auctioneer view)
+      // Return all players (for admin view)
       res.json(players);
     }
   } catch (err) {

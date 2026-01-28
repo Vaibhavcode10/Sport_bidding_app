@@ -61,7 +61,8 @@ router.get('/all/sports', async (req, res) => {
   }
 });
 
-// GET all auctioneers for admin (to invite) - MUST BE BEFORE /:sport
+// GET all auctioneers for admin (to assign to auctions) - MUST BE BEFORE /:sport
+// NOTE: Auctioneers are NEUTRAL - they don't own or represent any team/franchise
 router.get('/auctioneers/all/:sport', async (req, res) => {
   try {
     const { sport } = req.params;
@@ -71,16 +72,7 @@ router.get('/auctioneers/all/:sport', async (req, res) => {
       return res.status(403).json({ success: false, error: 'Only admin can view auctioneers list' });
     }
     
-    // Get auctioneers from franchises
-    const franchisesFilePath = `data/${sport}/franchises.json`;
-    let franchises = [];
-    try {
-      franchises = await fileStore.readJSON(franchisesFilePath);
-    } catch (err) {
-      franchises = [];
-    }
-    
-    // Get auctioneers info
+    // Get auctioneers (neutral people who conduct auctions)
     const auctioneersFilePath = `data/${sport}/auctioneers.json`;
     let auctioneers = [];
     try {
@@ -89,17 +81,15 @@ router.get('/auctioneers/all/:sport', async (req, res) => {
       auctioneers = [];
     }
     
-    // Combine data
-    const auctioneersList = auctioneers.map(auctioneer => {
-      const franchise = franchises.find(f => f.auctioneerId === auctioneer.id);
-      return {
-        id: auctioneer.id,
-        username: auctioneer.username,
-        name: auctioneer.name || auctioneer.username,
-        franchiseName: franchise?.name || 'No Franchise',
-        franchiseId: franchise?.id || null
-      };
-    });
+    // Return auctioneers - they are neutral, no franchise association
+    const auctioneersList = auctioneers.map(auctioneer => ({
+      id: auctioneer.id,
+      username: auctioneer.username,
+      name: auctioneer.name || auctioneer.username,
+      sport: sport,
+      // Auctioneers are neutral - they don't have franchises
+      role: 'neutral_auctioneer'
+    }));
     
     res.json({
       success: true,
@@ -158,11 +148,26 @@ router.get('/:sport/:auctionId', async (req, res) => {
   }
 });
 
-// CREATE auction (admin only)
+// CREATE auction (admin only) - Full configuration including auctioneer assignment
 router.post('/:sport', async (req, res) => {
   try {
     const { sport } = req.params;
-    const { name, description, startDate, endDate, settings, userRole, userId } = req.body;
+    const { 
+      name, 
+      description, 
+      startDate, 
+      endDate, 
+      settings, 
+      userRole, 
+      userId,
+      // New fields for full auction configuration
+      assignedAuctioneerId,
+      assignedAuctioneerName,
+      teamIds,
+      playerPool,
+      bidSlabs,
+      timerDuration
+    } = req.body;
     
     // Admin only
     if (userRole !== 'admin') {
@@ -178,6 +183,13 @@ router.post('/:sport', async (req, res) => {
       auctions = [];
     }
     
+    // Default bid slabs if not provided
+    const defaultBidSlabs = [
+      { maxPrice: 10.0, increment: 0.25 },
+      { maxPrice: 20.0, increment: 0.50 },
+      { maxPrice: Infinity, increment: 1.0 }
+    ];
+    
     const newAuction = {
       id: `auction_${sport.substring(0, 2)}_${Date.now()}`,
       name,
@@ -185,18 +197,47 @@ router.post('/:sport', async (req, res) => {
       description: description || '',
       startDate,
       endDate,
-      status: 'SCHEDULED',
+      // New status model: CREATED -> READY (when fully configured) -> LIVE -> COMPLETED
+      status: 'CREATED',
       createdBy: userId,
       createdAt: new Date().toISOString(),
+      
+      // Legacy fields for invitations (backward compatibility)
       invitedAuctioneers: [],
       acceptedAuctioneers: [],
       registeredPlayers: [],
+      
+      // NEW: Direct auctioneer assignment (Admin assigns ONE auctioneer)
+      assignedAuctioneer: assignedAuctioneerId ? {
+        id: assignedAuctioneerId,
+        name: assignedAuctioneerName || 'Unknown',
+        assignedAt: new Date().toISOString(),
+        assignedBy: userId
+      } : null,
+      
+      // NEW: Participating teams (replaces teamIds for better structure)
+      participatingTeams: req.body.participatingTeams || [],
+      
+      // NEW: Full auction configuration by admin
+      teamIds: (req.body.participatingTeams || []).map(team => team.id),
+      playerPool: playerPool || [],
+      completedPlayerIds: [],
+      bidSlabs: bidSlabs || defaultBidSlabs,
+      timerDuration: timerDuration || 20,
+      
       settings: settings || {
         minBidIncrement: 100000,
         maxPlayersPerTeam: 15,
         bidTimeLimit: 30
       }
     };
+    
+    // If fully configured (has auctioneer, teams, players), mark as READY
+    if (newAuction.assignedAuctioneer && 
+        newAuction.teamIds.length > 0 && 
+        newAuction.playerPool.length > 0) {
+      newAuction.status = 'READY';
+    }
     
     auctions.push(newAuction);
     await fileStore.writeJSON(auctionsFilePath, auctions);
@@ -206,7 +247,9 @@ router.post('/:sport', async (req, res) => {
       sport,
       auctionId: newAuction.id,
       auctionName: newAuction.name,
-      createdBy: userId
+      createdBy: userId,
+      status: newAuction.status,
+      assignedAuctioneerId: newAuction.assignedAuctioneer?.id
     });
     
     res.json({
@@ -307,6 +350,176 @@ router.delete('/:sport/:auctionId', async (req, res) => {
     });
   } catch (err) {
     console.error('Delete auction error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ============================================
+// NEW ENDPOINTS: Admin assigns auctioneer, configures auction
+// ============================================
+
+// ASSIGN auctioneer to auction (Admin only) - Direct assignment, no invitation flow
+router.post('/:sport/:auctionId/assign-auctioneer', async (req, res) => {
+  try {
+    const { sport, auctionId } = req.params;
+    const { auctioneerId, auctioneerName, userRole, userId } = req.body;
+    
+    // Admin only
+    if (userRole !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Only admin can assign auctioneers' });
+    }
+    
+    if (!auctioneerId || !auctioneerName) {
+      return res.status(400).json({ success: false, error: 'Auctioneer ID and name are required' });
+    }
+    
+    const auctionsFilePath = getAuctionsFilePath(sport);
+    let auctions = await fileStore.readJSON(auctionsFilePath);
+    
+    const auctionIndex = auctions.findIndex(a => a.id === auctionId);
+    if (auctionIndex === -1) {
+      return res.status(404).json({ success: false, error: 'Auction not found' });
+    }
+    
+    // Cannot reassign if auction is already LIVE or COMPLETED
+    if (['LIVE', 'COMPLETED'].includes(auctions[auctionIndex].status)) {
+      return res.status(400).json({ success: false, error: 'Cannot reassign auctioneer for live or completed auction' });
+    }
+    
+    // Assign auctioneer
+    auctions[auctionIndex].assignedAuctioneer = {
+      id: auctioneerId,
+      name: auctioneerName,
+      assignedAt: new Date().toISOString(),
+      assignedBy: userId
+    };
+    
+    // Check if auction is now fully configured (has teams and players too)
+    const auction = auctions[auctionIndex];
+    if (auction.teamIds?.length > 0 && auction.playerPool?.length > 0) {
+      auction.status = 'READY';
+    }
+    
+    auctions[auctionIndex].updatedAt = new Date().toISOString();
+    await fileStore.writeJSON(auctionsFilePath, auctions);
+    
+    // Log history
+    await logHistoryAction('AUCTIONEER_ASSIGNED', {
+      sport,
+      auctionId,
+      auctionName: auctions[auctionIndex].name,
+      auctioneerId,
+      auctioneerName,
+      assignedBy: userId
+    });
+    
+    res.json({
+      success: true,
+      message: `${auctioneerName} assigned to auction successfully`,
+      auction: auctions[auctionIndex]
+    });
+  } catch (err) {
+    console.error('Assign auctioneer error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// CONFIGURE auction (Admin only) - Set teams, players, bid slabs, timer
+router.post('/:sport/:auctionId/configure', async (req, res) => {
+  try {
+    const { sport, auctionId } = req.params;
+    const { teamIds, playerPool, bidSlabs, timerDuration, userRole, userId } = req.body;
+    
+    // Admin only
+    if (userRole !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Only admin can configure auctions' });
+    }
+    
+    const auctionsFilePath = getAuctionsFilePath(sport);
+    let auctions = await fileStore.readJSON(auctionsFilePath);
+    
+    const auctionIndex = auctions.findIndex(a => a.id === auctionId);
+    if (auctionIndex === -1) {
+      return res.status(404).json({ success: false, error: 'Auction not found' });
+    }
+    
+    // Cannot configure if auction is already LIVE or COMPLETED
+    if (['LIVE', 'COMPLETED'].includes(auctions[auctionIndex].status)) {
+      return res.status(400).json({ success: false, error: 'Cannot configure live or completed auction' });
+    }
+    
+    // Update configuration
+    if (teamIds) auctions[auctionIndex].teamIds = teamIds;
+    if (playerPool) auctions[auctionIndex].playerPool = playerPool;
+    if (bidSlabs) auctions[auctionIndex].bidSlabs = bidSlabs;
+    if (timerDuration !== undefined) auctions[auctionIndex].timerDuration = timerDuration;
+    
+    // Check if auction is now fully configured
+    const auction = auctions[auctionIndex];
+    if (auction.assignedAuctioneer && 
+        auction.teamIds?.length > 0 && 
+        auction.playerPool?.length > 0) {
+      auction.status = 'READY';
+    }
+    
+    auctions[auctionIndex].updatedAt = new Date().toISOString();
+    await fileStore.writeJSON(auctionsFilePath, auctions);
+    
+    // Log history
+    await logHistoryAction('AUCTION_CONFIGURED', {
+      sport,
+      auctionId,
+      auctionName: auctions[auctionIndex].name,
+      configuredBy: userId,
+      teamCount: auction.teamIds?.length,
+      playerCount: auction.playerPool?.length
+    });
+    
+    res.json({
+      success: true,
+      message: 'Auction configured successfully',
+      auction: auctions[auctionIndex]
+    });
+  } catch (err) {
+    console.error('Configure auction error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET auctions assigned to auctioneer (Auctioneer only)
+router.get('/assigned/:auctioneerId', async (req, res) => {
+  try {
+    const { auctioneerId } = req.params;
+    const sports = ['football', 'cricket', 'basketball', 'baseball', 'volleyball'];
+    let assignedAuctions = [];
+    
+    for (const sport of sports) {
+      try {
+        const auctions = await fileStore.readJSON(getAuctionsFilePath(sport));
+        for (const auction of auctions) {
+          // Check direct assignment
+          if (auction.assignedAuctioneer?.id === auctioneerId) {
+            assignedAuctions.push({
+              ...auction,
+              assignmentType: 'DIRECT'
+            });
+          }
+        }
+      } catch (err) {
+        // Skip if no auctions file
+      }
+    }
+    
+    // Sort: READY first (can start), then CREATED, then others
+    const statusOrder = { 'READY': 0, 'CREATED': 1, 'LIVE': 2, 'PAUSED': 3, 'COMPLETED': 4 };
+    assignedAuctions.sort((a, b) => (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99));
+    
+    res.json({
+      success: true,
+      auctions: assignedAuctions
+    });
+  } catch (err) {
+    console.error('Get assigned auctions error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

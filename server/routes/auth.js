@@ -189,13 +189,37 @@ router.post('/register', async (req, res) => {
         basePrice: 0,
         bio: 'Unavailable',
         imageUrl: '',
-        createdAt: new Date().toISOString().split('T')[0]
+        verified: false,
+        createdAt: new Date().toISOString().split('T')[0],
+        currentBid: 0,
+        status: 'AVAILABLE',
+        auctionPrice: null,
+        soldTo: null
       };
 
       if (!users.players[sport]) {
         users.players[sport] = [];
       }
       users.players[sport].push(newPlayer);
+      
+      // Also add to the sport's players.json file
+      try {
+        const sportPlayersFilePath = `data/${sport}/players.json`;
+        let sportPlayers = [];
+        try {
+          sportPlayers = await fileStore.readJSON(sportPlayersFilePath);
+        } catch (err) {
+          sportPlayers = [];
+        }
+        
+        // Remove password before adding to sport players file
+        const { password: _, ...playerForSportFile } = newPlayer;
+        sportPlayers.push(playerForSportFile);
+        await fileStore.writeJSON(sportPlayersFilePath, sportPlayers);
+      } catch (err) {
+        console.error('Error adding player to sport file:', err);
+      }
+      
       await fileStore.writeJSON(USERS_FILE, users);
 
       const { password: _, ...playerData } = newPlayer;
@@ -211,6 +235,16 @@ router.post('/register', async (req, res) => {
 
     if (role === 'auctioneer') {
       const sportAuctioneers = users.auctioneers[sport] || [];
+      
+      // LIMIT: Only 4 auctioneers allowed per sport
+      const MAX_AUCTIONEERS_PER_SPORT = 4;
+      if (sportAuctioneers.length >= MAX_AUCTIONEERS_PER_SPORT) {
+        return res.status(403).json({
+          success: false,
+          message: `Maximum ${MAX_AUCTIONEERS_PER_SPORT} auctioneers allowed per sport. Registration closed for ${sport}.`
+        });
+      }
+      
       const existingAuctioneer = sportAuctioneers.find(
         a => a.username === username || a.email === email
       );
@@ -398,6 +432,54 @@ router.put('/profile/:role/:sport/:userId', async (req, res) => {
 
   } catch (err) {
     console.error('Update profile error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Get auctioneer availability for a sport (for registration check)
+router.get('/auctioneer-availability/:sport', async (req, res) => {
+  try {
+    const { sport } = req.params;
+    const users = await fileStore.readJSON(USERS_FILE);
+    
+    const MAX_AUCTIONEERS_PER_SPORT = 4;
+    const sportAuctioneers = users.auctioneers?.[sport] || [];
+    const currentCount = sportAuctioneers.length;
+    const availableSlots = Math.max(0, MAX_AUCTIONEERS_PER_SPORT - currentCount);
+    
+    return res.json({
+      success: true,
+      sport,
+      maxAllowed: MAX_AUCTIONEERS_PER_SPORT,
+      currentCount,
+      availableSlots,
+      isFull: availableSlots === 0
+    });
+  } catch (err) {
+    console.error('Auctioneer availability check error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Get all auctioneers for a sport (for admin to assign)
+router.get('/auctioneers/:sport', async (req, res) => {
+  try {
+    const { sport } = req.params;
+    const users = await fileStore.readJSON(USERS_FILE);
+    
+    const sportAuctioneers = (users.auctioneers?.[sport] || []).map(a => {
+      const { password, ...safeAuctioneer } = a;
+      return safeAuctioneer;
+    });
+    
+    return res.json({
+      success: true,
+      sport,
+      auctioneers: sportAuctioneers,
+      maxAllowed: 4
+    });
+  } catch (err) {
+    console.error('Get auctioneers error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

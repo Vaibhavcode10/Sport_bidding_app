@@ -5,7 +5,9 @@ import teamsRouter from './routes/teams.js';
 import authRouter from './routes/auth.js';
 import verificationRouter from './routes/verification.js';
 import auctionsRouter from './routes/auctions.js';
+import liveAuctionRouter from './routes/liveAuction.js';
 import * as auctioneersRouter from './routes/auctioneers.js';
+import { liveAuctionEngine } from './liveAuctionEngine.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -13,12 +15,18 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+// Initialize live auction engine
+liveAuctionEngine.initialize().then(() => {
+  console.log('🎯 Live Auction Engine ready');
+});
+
 // Routes
 app.use('/api/players', playersRouter);
 app.use('/api/teams', teamsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/verification', verificationRouter);
 app.use('/api/auctions', auctionsRouter);
+app.use('/api/live-auction', liveAuctionRouter);
 
 // Auctioneer routes
 app.post('/api/auctioneers/login', (req, res) => {

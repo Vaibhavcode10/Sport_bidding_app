@@ -22,10 +22,10 @@ const AuctioneerDashboardLayout: React.FC = () => {
   }, [isAuthenticated, user, navigate, isLoading]);
 
   const navItems = [
-    { name: 'My Franchise', path: '/auctioneer/dashboard', icon: '🏢', end: true },
-    { name: 'Team Details', path: '/auctioneer/dashboard/team', icon: '👥' },
-    { name: 'Players', path: '/auctioneer/dashboard/players', icon: '⚾' },
+    { name: 'Overview', path: '/auctioneer/dashboard', icon: '📊', end: true },
+    { name: 'Assigned Auctions', path: '/auctioneer/dashboard/auctions', icon: '📋' },
     { name: 'Auction Invitations', path: '/auctioneer/dashboard/invitations', icon: '📨' },
+    { name: 'Live Auction', path: '/auctioneer/live', icon: '🔴', isLive: true },
   ];
 
   const handleLogout = () => {
@@ -75,7 +75,7 @@ const AuctioneerDashboardLayout: React.FC = () => {
               </span>
             </button>
           </div>
-          {!sidebarCollapsed && <p className="text-xs text-slate-400">Franchise Management</p>}
+          {!sidebarCollapsed && <p className="text-xs text-slate-400">Auction Control</p>}
         </div>
         
         <nav className="flex-1 p-4 space-y-3">
@@ -104,7 +104,7 @@ const AuctioneerDashboardLayout: React.FC = () => {
             <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700">
               <p className="text-xs text-slate-400">Logged in as</p>
               <p className="text-sm font-bold text-white mt-1">{user?.username}</p>
-              <p className="text-xs text-slate-500 mt-1">Auctioneer</p>
+              <p className="text-xs text-slate-500 mt-1">Auctioneer (Neutral)</p>
             </div>
           )}
           <button 
@@ -128,7 +128,7 @@ const AuctioneerDashboardLayout: React.FC = () => {
             <h2 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Auctioneer Dashboard
             </h2>
-            <p className="text-xs text-slate-400 mt-1">Manage your team and franchise</p>
+            <p className="text-xs text-slate-400 mt-1">Conduct live auctions as a neutral host</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -139,7 +139,7 @@ const AuctioneerDashboardLayout: React.FC = () => {
             </div>
             <div>
               <p className="text-sm font-bold text-white">{user?.username}</p>
-              <p className="text-xs text-slate-400">Auctioneer</p>
+              <p className="text-xs text-slate-400">Auctioneer (Neutral)</p>
             </div>
           </div>
         </header>

@@ -1,40 +1,38 @@
 [
   {
-    "id": "bk_f1",
-    "name": "Golden State Warriors",
-    "auctioneerId": "bk_a1",
-    "auctioneerName": "Joe Lacob",
+    "id": "bb_team_lakers",
+    "name": "Lakers Elite",
     "sport": "basketball",
-    "city": "San Francisco",
-    "stadium": "Chase Center",
-    "capacity": 18064,
-    "founded": "1946",
-    "totalPurse": 15000000,
-    "purseRemaining": 15000000,
+    "purseRemaining": 80000000,
+    "totalPurse": 80000000,
     "playerIds": [],
-    "playerCount": 0,
-    "wins": 0,
-    "losses": 0,
-    "description": "Golden State's championship franchise",
-    "createdAt": "2023-01-15"
+    "logoUrl": "https://via.placeholder.com/100x100/7C2D12/FFD700?text=LE"
   },
   {
-    "id": "bk_f2",
-    "name": "Boston Celtics",
-    "auctioneerId": "bk_a2",
-    "auctioneerName": "Wyc Grousbeck",
+    "id": "bb_team_warriors",
+    "name": "Warriors Gold",
     "sport": "basketball",
-    "city": "Boston",
-    "stadium": "TD Garden",
-    "capacity": 19156,
-    "founded": "1946",
-    "totalPurse": 15000000,
-    "purseRemaining": 15000000,
+    "purseRemaining": 80000000,
+    "totalPurse": 80000000,
     "playerIds": [],
-    "playerCount": 0,
-    "wins": 0,
-    "losses": 0,
-    "description": "Boston's historic basketball franchise",
-    "createdAt": "2023-01-20"
+    "logoUrl": "https://via.placeholder.com/100x100/1E40AF/FFD700?text=WG"
+  },
+  {
+    "id": "bb_team_bulls",
+    "name": "Bulls Fire",
+    "sport": "basketball",
+    "purseRemaining": 80000000,
+    "totalPurse": 80000000,
+    "playerIds": [],
+    "logoUrl": "https://via.placeholder.com/100x100/DC2626/FFFFFF?text=BF"
+  },
+  {
+    "id": "bb_team_celtics",
+    "name": "Celtics Pride",
+    "sport": "basketball",
+    "purseRemaining": 80000000,
+    "totalPurse": 80000000,
+    "playerIds": [],
+    "logoUrl": "https://via.placeholder.com/100x100/059669/FFFFFF?text=CP"
   }
 ]

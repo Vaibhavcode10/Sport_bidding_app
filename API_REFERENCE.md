@@ -343,3 +343,339 @@ const response = await fetch('http://localhost:4000/api/auctioneers/franchise/up
 - Auctioneer can only access their own franchise
 - Passwords are not returned in responses
 - Profile pictures are placeholder URLs (can be replaced with real URLs)
+---
+
+# Live Auction API Reference
+
+## Base URL
+```
+http://localhost:4000/api/live-auction
+```
+
+## Overview
+
+The Live Auction API provides real-time auction management capabilities with strict role-based access control:
+
+- **Auctioneer (MUTATION)**: Can start/pause/resume auction, confirm bids, mark sold/unsold
+- **Admin/Player/Public (READ)**: Can only view current auction state and history
+
+### Authorization Rules
+- All mutation endpoints require `userRole: 'auctioneer'` and valid `auctioneerId`
+- Only ONE live auction can exist at any time (global lock)
+- Auctioneer is a neutral controller (NOT tied to any team)
+
+---
+
+## Auction States
+
+| State | Description |
+|-------|-------------|
+| `IDLE` | No player being auctioned |
+| `READY` | Player selected, waiting to start |
+| `LIVE` | Bidding in progress |
+| `PAUSED` | Bidding temporarily paused |
+| `SOLD` | Player sold, finalizing |
+| `COMPLETED` | Auction session completed |
+
+---
+
+## Bidding Rules
+
+### Slab-based Increments
+| Price Range | Increment |
+|-------------|-----------|
+| ≤ 10.0 Cr | 0.25 Cr |
+| 10.0 - 20.0 Cr | 0.50 Cr |
+| > 20.0 Cr | 1.0 Cr |
+
+### Valid Bid Values
+- ✅ 20.00, 20.50, 21.00
+- ❌ 20.25, 20.75 (invalid at >10 Cr slab)
+
+### Consecutive Bidding Rule
+- Same team may bid **twice** consecutively
+- Same team may **NOT** bid three times in a row
+- System enforces this automatically
+
+---
+
+## READ Endpoints (All Users)
+
+### GET /state
+Get current live auction state.
+
+**Response:**
+```json
+{
+  "success": true,
+  "session": {
+    "id": "live_1706000000000",
+    "sport": "cricket",
+    "name": "IPL 2026 Auction",
+    "auctioneerId": "c_a1",
+    "auctioneerName": "Rajesh Kumar",
+    "teamIds": ["cr_f1", "cr_f2"],
+    "playerPool": ["cr_p1", "cr_p2"],
+    "completedPlayerIds": [],
+    "status": "ACTIVE"
+  },
+  "ledger": {
+    "auctionId": "live_1706000000000",
+    "playerId": "cr_p1",
+    "playerName": "Virat Kohli",
+    "basePrice": 2.0,
+    "currentBid": 5.25,
+    "highestBidder": {
+      "teamId": "cr_f1",
+      "teamName": "Mumbai Mystics"
+    },
+    "bidHistory": [...],
+    "state": "LIVE",
+    "timerStartedAt": "2026-01-28T10:00:00Z",
+    "timerDuration": 20
+  },
+  "teams": [...],
+  "currentPlayer": {...},
+  "hasActiveAuction": true
+}
+```
+
+### GET /history/:playerId
+Get bid history for a specific player.
+
+**Response:**
+```json
+{
+  "success": true,
+  "history": [
+    {
+      "playerId": "cr_p1",
+      "playerName": "Virat Kohli",
+      "status": "SOLD",
+      "finalPrice": 10.5,
+      "winningTeam": {
+        "teamId": "cr_f1",
+        "teamName": "Mumbai Mystics"
+      },
+      "bidHistory": [...]
+    }
+  ]
+}
+```
+
+### GET /bid-info
+Get next valid bid information.
+
+**Response:**
+```json
+{
+  "success": true,
+  "hasActiveBidding": true,
+  "info": {
+    "currentBid": 5.25,
+    "nextBid": 5.50,
+    "increment": 0.25
+  }
+}
+```
+
+---
+
+## MUTATION Endpoints (Auctioneer Only)
+
+### POST /start
+Start a new live auction session.
+
+**Request:**
+```json
+{
+  "userRole": "auctioneer",
+  "auctioneerId": "c_a1",
+  "auctionId": "live_1706000000000",
+  "sport": "cricket",
+  "name": "IPL 2026 Auction",
+  "auctioneerName": "Rajesh Kumar",
+  "teamIds": ["cr_f1", "cr_f2", "cr_f3"],
+  "playerPool": ["cr_p1", "cr_p2", "cr_p3"],
+  "timerDuration": 20
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "session": {...}
+}
+```
+
+### POST /select-player
+Select a player to auction.
+
+**Request:**
+```json
+{
+  "userRole": "auctioneer",
+  "auctioneerId": "c_a1",
+  "playerId": "cr_p1",
+  "playerName": "Virat Kohli",
+  "basePrice": 2.0
+}
+```
+
+### POST /start-bidding
+Start bidding for selected player.
+
+**Request:**
+```json
+{
+  "userRole": "auctioneer",
+  "auctioneerId": "c_a1"
+}
+```
+
+### POST /bid
+Confirm a team's bid (system calculates next valid price).
+
+**Request:**
+```json
+{
+  "userRole": "auctioneer",
+  "auctioneerId": "c_a1",
+  "teamId": "cr_f1",
+  "teamName": "Mumbai Mystics"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "ledger": {...},
+  "bidEntry": {
+    "id": "bid_1706000001",
+    "teamId": "cr_f1",
+    "teamName": "Mumbai Mystics",
+    "bidAmount": 2.25,
+    "timestamp": "2026-01-28T10:00:01Z",
+    "isJumpBid": false
+  },
+  "nextValidBid": 2.50
+}
+```
+
+### POST /jump-bid
+Submit a jump bid (custom amount).
+
+**Request:**
+```json
+{
+  "userRole": "auctioneer",
+  "auctioneerId": "c_a1",
+  "teamId": "cr_f2",
+  "teamName": "Delhi Dragons",
+  "jumpAmount": 5.0
+}
+```
+
+### POST /pause
+Pause bidding.
+
+### POST /resume
+Resume bidding.
+
+### POST /sold
+Mark current player as SOLD.
+
+**Response:**
+```json
+{
+  "success": true,
+  "result": {
+    "playerId": "cr_p1",
+    "playerName": "Virat Kohli",
+    "status": "SOLD",
+    "finalPrice": 10.5,
+    "winningTeam": {
+      "teamId": "cr_f1",
+      "teamName": "Mumbai Mystics"
+    },
+    "bidHistory": [...],
+    "totalBids": 15
+  }
+}
+```
+
+### POST /unsold
+Mark current player as UNSOLD.
+
+### POST /end
+End the entire auction session.
+
+---
+
+## Error Responses
+
+```json
+{
+  "success": false,
+  "error": "Only auctioneers can perform this action."
+}
+```
+
+```json
+{
+  "success": false,
+  "error": "Team cannot bid more than 2 times consecutively."
+}
+```
+
+```json
+{
+  "success": false,
+  "error": "Another live auction is already in progress."
+}
+```
+
+---
+
+## Temp Auction Ledger Structure
+
+The ledger is the **SINGLE SOURCE OF TRUTH** during live auction:
+
+```json
+{
+  "auctionId": "string",
+  "sport": "string",
+  "playerId": "string",
+  "playerName": "string",
+  "basePrice": "number (in Cr)",
+  "currentBid": "number (in Cr)",
+  "highestBidder": {
+    "teamId": "string",
+    "teamName": "string"
+  } | null,
+  "bidHistory": [
+    {
+      "id": "string",
+      "teamId": "string",
+      "teamName": "string",
+      "bidAmount": "number",
+      "timestamp": "ISO 8601",
+      "isJumpBid": "boolean"
+    }
+  ],
+  "lastBidTimestamp": "ISO 8601 | null",
+  "consecutiveBidCount": {
+    "teamId": "number (0-2)"
+  },
+  "state": "IDLE|READY|LIVE|PAUSED|SOLD|COMPLETED",
+  "timerStartedAt": "ISO 8601 | null",
+  "timerDuration": "number (seconds)",
+  "bidSlabs": [
+    { "maxPrice": 10.0, "increment": 0.25 },
+    { "maxPrice": 20.0, "increment": 0.50 },
+    { "maxPrice": Infinity, "increment": 1.0 }
+  ]
+}
+```

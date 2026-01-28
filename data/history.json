@@ -1,5 +1,41 @@
 [
   {
+    "id": "1769587706078_8rel30v5j",
+    "timestamp": "2026-01-28T08:08:26.078Z",
+    "action": "AUCTIONEER_ACCEPTED",
+    "sport": "football",
+    "auctionId": "auction_fo_1769511372265",
+    "auctionName": "Test Auction",
+    "auctioneerId": "fb_a1",
+    "auctioneerName": "James Mitchell"
+  },
+  {
+    "id": "1769578139516_8zzzjq88p",
+    "timestamp": "2026-01-28T05:28:59.516Z",
+    "action": "PLAYER_VERIFICATION",
+    "sport": "cricket",
+    "playerId": "cr_p3",
+    "playerName": "Rohit Sharma",
+    "adminUserId": "admin_1",
+    "previousStatus": "UNVERIFIED",
+    "newStatus": "VERIFIED",
+    "role": "Batsman",
+    "basePrice": 1800000
+  },
+  {
+    "id": "1769578136406_wz6ytcu15",
+    "timestamp": "2026-01-28T05:28:56.406Z",
+    "action": "PLAYER_VERIFICATION",
+    "sport": "cricket",
+    "playerId": "cr_p2",
+    "playerName": "Jasprit Bumrah",
+    "adminUserId": "admin_1",
+    "previousStatus": "UNVERIFIED",
+    "newStatus": "VERIFIED",
+    "role": "Bowler",
+    "basePrice": 1500000
+  },
+  {
     "id": "1769512775953_6tpoykepz",
     "timestamp": "2026-01-27T11:19:35.953Z",
     "action": "AUCTIONEER_ACCEPTED",

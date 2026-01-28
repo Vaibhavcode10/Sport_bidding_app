@@ -28,6 +28,18 @@ interface Auction {
     name: string;
     registeredAt: string;
   }>;
+  assignedAuctioneer?: {
+    id: string;
+    name: string;
+    assignedAt: string;
+  };
+  participatingTeams: Array<{
+    id: string;
+    name: string;
+    logoUrl?: string;
+    purseRemaining: number;
+    totalPurse: number;
+  }>;
   settings: {
     minBidIncrement: number;
     maxPlayersPerTeam: number;
@@ -35,18 +47,29 @@ interface Auction {
   };
 }
 
+interface Team {
+  id: string;
+  name: string;
+  sport: string;
+  purseRemaining: number;
+  totalPurse: number;
+  playerIds: string[];
+  logoUrl?: string;
+}
+
 interface Auctioneer {
   id: string;
   username: string;
   name: string;
-  franchiseName: string;
-  franchiseId: string | null;
+  // Auctioneers are neutral - they don't have franchises
+  sport?: string;
 }
 
 export const AuctionManagement: React.FC = () => {
   const { user } = useAuth();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [auctioneers, setAuctioneers] = useState<Auctioneer[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [blockedAuctioneers, setBlockedAuctioneers] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedSport, setSelectedSport] = useState('football');
@@ -64,7 +87,9 @@ export const AuctionManagement: React.FC = () => {
     endDate: '',
     minBidIncrement: 100000,
     maxPlayersPerTeam: 15,
-    bidTimeLimit: 30
+    bidTimeLimit: 30,
+    selectedTeams: [] as string[], // Team IDs
+    assignedAuctioneerId: '' // Auctioneer ID
   });
 
   const sports = ['football', 'cricket', 'basketball', 'baseball', 'volleyball'];
@@ -72,6 +97,7 @@ export const AuctionManagement: React.FC = () => {
   useEffect(() => {
     fetchAuctions();
     fetchAuctioneers();
+    fetchTeams();
   }, [selectedSport]);
 
   const fetchAuctions = async () => {
@@ -85,6 +111,15 @@ export const AuctionManagement: React.FC = () => {
       console.error('Error fetching auctions:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTeams = async () => {
+    try {
+      const response = await api.get(`/teams/${selectedSport}`);
+      setTeams(response.data || []);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
     }
   };
 
@@ -103,9 +138,34 @@ export const AuctionManagement: React.FC = () => {
 
   const handleCreateAuction = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate team selection
+    if (formData.selectedTeams.length !== 4) {
+      alert('Please select exactly 4 teams for the auction.');
+      return;
+    }
+    
+    // Validate auctioneer assignment
+    if (!formData.assignedAuctioneerId) {
+      alert('Please assign an auctioneer to the auction.');
+      return;
+    }
+
     try {
+      const selectedTeamsData = teams.filter(team => formData.selectedTeams.includes(team.id));
+      const assignedAuctioneer = auctioneers.find(a => a.id === formData.assignedAuctioneerId);
+      
       const response = await api.post(`/auctions/${selectedSport}`, {
         ...formData,
+        participatingTeams: selectedTeamsData.map(team => ({
+          id: team.id,
+          name: team.name,
+          logoUrl: team.logoUrl,
+          purseRemaining: team.purseRemaining,
+          totalPurse: team.totalPurse
+        })),
+        assignedAuctioneerId: formData.assignedAuctioneerId,
+        assignedAuctioneerName: assignedAuctioneer?.name,
         settings: {
           minBidIncrement: formData.minBidIncrement,
           maxPlayersPerTeam: formData.maxPlayersPerTeam,
@@ -125,7 +185,9 @@ export const AuctionManagement: React.FC = () => {
           endDate: '',
           minBidIncrement: 100000,
           maxPlayersPerTeam: 15,
-          bidTimeLimit: 30
+          bidTimeLimit: 30,
+          selectedTeams: [],
+          assignedAuctioneerId: ''
         });
         fetchAuctions();
       }
@@ -372,6 +434,36 @@ export const AuctionManagement: React.FC = () => {
                     <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(auction.status)}`}>
                       {auction.status}
                     </span>
+                  </div>
+
+                  {/* Assigned Auctioneer & Teams */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    {/* Assigned Auctioneer */}
+                    {auction.assignedAuctioneer && (
+                      <div className="p-3 bg-blue-600/20 border border-blue-500/30 rounded-lg">
+                        <p className="text-slate-400 text-xs mb-1">Assigned Auctioneer</p>
+                        <p className="text-blue-300 font-semibold">{auction.assignedAuctioneer.name}</p>
+                        <p className="text-slate-500 text-xs">Assigned {formatDate(auction.assignedAuctioneer.assignedAt)}</p>
+                      </div>
+                    )}
+                    
+                    {/* Participating Teams */}
+                    {auction.participatingTeams && auction.participatingTeams.length > 0 && (
+                      <div className="p-3 bg-green-600/20 border border-green-500/30 rounded-lg">
+                        <p className="text-slate-400 text-xs mb-2">Participating Teams ({auction.participatingTeams.length})</p>
+                        <div className="flex flex-wrap gap-1">
+                          {auction.participatingTeams.slice(0, 3).map(team => (
+                            <div key={team.id} className="flex items-center space-x-1 bg-slate-700/50 px-2 py-1 rounded text-xs">
+                              {team.logoUrl && <img src={team.logoUrl} alt={team.name} className="w-4 h-4 rounded" />}
+                              <span className="text-green-300">{team.name}</span>
+                            </div>
+                          ))}
+                          {auction.participatingTeams.length > 3 && (
+                            <span className="text-slate-500 text-xs">+{auction.participatingTeams.length - 3} more</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -651,6 +743,56 @@ export const AuctionManagement: React.FC = () => {
                     className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
                   />
                 </div>
+              </div>
+
+              {/* Team Selection */}
+              <div>
+                <label className="block text-slate-400 text-sm mb-2">Select Teams (4 teams required)</label>
+                <div className="grid grid-cols-2 gap-3 max-h-60 overflow-y-auto border border-slate-600 rounded-lg p-3">
+                  {teams.map(team => (
+                    <div key={team.id} className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id={`team-${team.id}`}
+                        checked={formData.selectedTeams.includes(team.id)}
+                        onChange={e => {
+                          const updatedTeams = e.target.checked 
+                            ? [...formData.selectedTeams, team.id]
+                            : formData.selectedTeams.filter(id => id !== team.id);
+                          setFormData({...formData, selectedTeams: updatedTeams});
+                        }}
+                        className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor={`team-${team.id}`} className="flex items-center space-x-2 cursor-pointer">
+                        {team.logoUrl && (
+                          <img src={team.logoUrl} alt={team.name} className="w-8 h-8 rounded" />
+                        )}
+                        <span className="text-white">{team.name}</span>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Selected: {formData.selectedTeams.length}/4 teams
+                </p>
+              </div>
+
+              {/* Auctioneer Assignment */}
+              <div>
+                <label className="block text-slate-400 text-sm mb-1">Assign Auctioneer</label>
+                <select
+                  value={formData.assignedAuctioneerId}
+                  onChange={e => setFormData({...formData, assignedAuctioneerId: e.target.value})}
+                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                  required
+                >
+                  <option value="">Select an auctioneer...</option>
+                  {auctioneers.map(auctioneer => (
+                    <option key={auctioneer.id} value={auctioneer.id}>
+                      {auctioneer.name} (@{auctioneer.username})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="flex gap-3 pt-4">
