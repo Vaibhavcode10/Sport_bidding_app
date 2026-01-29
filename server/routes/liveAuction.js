@@ -333,6 +333,25 @@ router.post('/jump-bid', requireAuctioneer, async (req, res) => {
 });
 
 /**
+ * POST /api/live-auction/undo-bid
+ * Undo the last bid (strict conditions)
+ */
+router.post('/undo-bid', requireAuctioneer, async (req, res) => {
+  try {
+    const result = await liveAuctionEngine.undoLastBid(req.auctioneerId);
+    
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    
+    res.json(result);
+  } catch (err) {
+    console.error('Undo bid error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
  * POST /api/live-auction/pause
  * Pause bidding
  */

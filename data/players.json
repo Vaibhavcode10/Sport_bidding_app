@@ -4,6 +4,7 @@
     "name": "Lionel Messi",
     "role": "Forward",
     "basePrice": 10000000,
-    "status": "UNSOLD"
+    "status": "UNSOLD",
+    "verified": true
   }
 ]

@@ -144,7 +144,20 @@ const createFranchise = (req, res) => {
     });
   }
 
-  // Create new franchise
+  // Create new franchise with sport-specific default purse
+  const getDefaultPurse = (sport) => {
+    const sportPurses = {
+      'cricket': 1000000000,    // 100 CR (25 players max)
+      'football': 1000000000,   // 100 CR (25 players max) 
+      'baseball': 1000000000,   // 100 CR (26 players max)
+      'basketball': 600000000,  // 60 CR (15 players max)
+      'volleyball': 600000000   // 60 CR (14 players max)
+    };
+    return sportPurses[sport] || 500000000; // Default 50 CR
+  };
+
+  const defaultPurse = getDefaultPurse(sport);
+  
   const newFranchise = {
     id: `${sport.substring(0, 2)}_f_${Date.now()}`,
     name,
@@ -155,8 +168,8 @@ const createFranchise = (req, res) => {
     stadium: stadium || '',
     capacity: capacity || 0,
     founded: new Date().getFullYear().toString(),
-    totalPurse: 50000000,
-    purseRemaining: 50000000,
+    totalPurse: defaultPurse,
+    purseRemaining: defaultPurse,
     playerIds: [],
     playerCount: 0,
     wins: 0,

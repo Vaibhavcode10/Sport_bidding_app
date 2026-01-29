@@ -312,11 +312,5 @@
       }
     ]
   },
-  "auctioneers": {
-    "cricket": [],
-    "football": [],
-    "basketball": [],
-    "baseball": [],
-    "volleyball": []
-  }
+  "auctioneers": {}
 }

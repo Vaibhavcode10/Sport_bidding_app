@@ -311,15 +311,6 @@ const Login: React.FC = () => {
           </button>
         </form>
 
-        {/* Demo Credentials */}
-        {!isRegisterMode && (
-          <div className="mt-4 p-3 bg-blue-600/10 border border-blue-600/20 rounded-lg">
-            <p className="text-blue-300 text-xs">
-              <span className="font-bold">Demo Credentials:</span> {selectedRole === 'admin' ? "username: 'admin', password: 'admin123'" : selectedRole === 'player' ? `Try 'virat_kohli' (cricket), 'lionel_messi' (football) with password 'password123'` : `Try 'james_mitchell' (football), 'rajesh_kumar' (cricket) with password 'password123'`}
-            </p>
-          </div>
-        )}
-
         {/* Toggle Login/Register */}
         {canShowRegister && (
           <div className="mt-6 text-center">

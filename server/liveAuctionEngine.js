@@ -37,6 +37,13 @@ let currentLedger = null;
 // File paths for persistence
 const LIVE_SESSION_FILE = 'data/live-auction-session.json';
 const AUCTION_HISTORY_FILE = 'data/auction-history.json';
+const AUCTION_LEDGERS_FILE = 'data/auction-ledgers.json';
+
+// Undo configuration
+const UNDO_TIME_WINDOW = 15000; // 15 seconds to undo
+
+// Auction ledger tracking
+let currentAuctionLedger = null;
 
 /**
  * Get increment for a given price based on slab configuration
@@ -136,6 +143,146 @@ async function clearPersistedSession() {
 }
 
 // ============================================
+// AUCTION LEDGER MANAGEMENT
+// ============================================
+
+/**
+ * Initialize auction ledger when session starts
+ */
+async function initializeAuctionLedger(auctionId, sport, auctionName, auctioneerId, auctioneerName) {
+  currentAuctionLedger = {
+    auctionId,
+    sport,
+    auctionName,
+    auctioneerId,
+    auctioneerName,
+    status: 'IN_PROGRESS',
+    startedAt: new Date().toISOString(),
+    completedAt: null,
+    totalDuration: null,
+    playerResults: [],
+    currentStats: {
+      playersAuctioned: 0,
+      totalPlayers: 0,
+      totalSpent: 0,
+      averagePrice: 0,
+      highestSale: 0,
+      teamSpending: {}
+    }
+  };
+  
+  await saveAuctionLedger();
+}
+
+/**
+ * Add player result to ledger
+ */
+async function addPlayerResult(playerId, playerName, status, basePrice, finalPrice = null, winningTeam = null, bidHistory = [], auctionDuration = null) {
+  if (!currentAuctionLedger) return;
+
+  const result = {
+    playerId,
+    playerName,
+    auctionOrder: currentAuctionLedger.playerResults.length + 1,
+    status, // 'SOLD' or 'UNSOLD'
+    basePrice,
+    finalPrice,
+    winningTeam,
+    bidHistory,
+    totalBids: bidHistory.length,
+    auctionDuration
+  };
+
+  currentAuctionLedger.playerResults.push(result);
+
+  // Update stats
+  currentAuctionLedger.currentStats.playersAuctioned++;
+  if (status === 'SOLD' && finalPrice) {
+    currentAuctionLedger.currentStats.totalSpent += finalPrice;
+    currentAuctionLedger.currentStats.averagePrice = currentAuctionLedger.currentStats.totalSpent / currentAuctionLedger.currentStats.playersAuctioned;
+    
+    if (finalPrice > currentAuctionLedger.currentStats.highestSale) {
+      currentAuctionLedger.currentStats.highestSale = finalPrice;
+    }
+
+    // Update team spending
+    if (winningTeam?.teamId) {
+      currentAuctionLedger.currentStats.teamSpending[winningTeam.teamId] = 
+        (currentAuctionLedger.currentStats.teamSpending[winningTeam.teamId] || 0) + finalPrice;
+    }
+  }
+
+  await saveAuctionLedger();
+}
+
+/**
+ * Complete auction ledger and save to history
+ */
+async function completeAuctionLedger() {
+  if (!currentAuctionLedger) return;
+
+  currentAuctionLedger.status = 'COMPLETED';
+  currentAuctionLedger.completedAt = new Date().toISOString();
+  
+  const startTime = new Date(currentAuctionLedger.startedAt);
+  const endTime = new Date(currentAuctionLedger.completedAt);
+  currentAuctionLedger.totalDuration = Math.round((endTime - startTime) / 1000); // seconds
+
+  await saveAuctionLedger();
+  
+  // Archive to history
+  await archiveCompletedLedger();
+}
+
+/**
+ * Save current ledger to file
+ */
+async function saveAuctionLedger() {
+  try {
+    let ledgers = [];
+    try {
+      ledgers = await fileStore.readJSON(AUCTION_LEDGERS_FILE);
+    } catch (err) {
+      // File doesn't exist yet
+    }
+
+    // Update or add current ledger
+    const existingIndex = ledgers.findIndex(l => l.auctionId === currentAuctionLedger.auctionId);
+    if (existingIndex >= 0) {
+      ledgers[existingIndex] = currentAuctionLedger;
+    } else {
+      ledgers.push(currentAuctionLedger);
+    }
+
+    await fileStore.writeJSON(AUCTION_LEDGERS_FILE, ledgers);
+  } catch (err) {
+    console.error('Failed to save auction ledger:', err);
+  }
+}
+
+/**
+ * Archive completed ledger and clean up
+ */
+async function archiveCompletedLedger() {
+  try {
+    let history = [];
+    try {
+      history = await fileStore.readJSON(AUCTION_HISTORY_FILE);
+    } catch (err) {
+      // File doesn't exist yet
+    }
+
+    history.push({ ...currentAuctionLedger });
+    await fileStore.writeJSON(AUCTION_HISTORY_FILE, history);
+    
+    // Clear current ledger
+    currentAuctionLedger = null;
+  } catch (err) {
+    console.error('Failed to archive auction ledger:', err);
+  }
+}
+
+// ============================================
 // PUBLIC API
 // ============================================
 
@@ -146,6 +293,129 @@ const liveAuctionEngine = {
   async initialize() {
     await loadPersistedSession();
     console.log('🎯 Live Auction Engine initialized');
+  },
+
+  /**
+   * Undo the last bid (strict conditions)
+   */
+  async undoLastBid(auctioneerId) {
+    // Must have active session and bidding in progress
+    if (!currentSession || !currentLedger) {
+      return { success: false, error: 'No active auction session.' };
+    }
+    
+    // Only auctioneer can undo
+    if (currentSession.auctioneerId !== auctioneerId) {
+      return { success: false, error: 'Only the auctioneer can undo bids.' };
+    }
+    
+    // Must be in LIVE or PAUSED state
+    if (![LiveAuctionState.LIVE, LiveAuctionState.PAUSED].includes(currentLedger.state)) {
+      return { success: false, error: 'Can only undo during active bidding.' };
+    }
+    
+    // Must have an undoable bid
+    if (!currentLedger.lastBidUndoable) {
+      return { success: false, error: 'No bid available to undo.' };
+    }
+    
+    // Check time window (15 seconds)
+    const timeSinceLastBid = Date.now() - currentLedger.lastBidUndoable.timestamp;
+    if (timeSinceLastBid > UNDO_TIME_WINDOW) {
+      // Clear expired undo
+      currentLedger.lastBidUndoable = null;
+      return { success: false, error: 'Undo time window expired.' };
+    }
+    
+    // Must have at least one bid to undo
+    if (currentLedger.bidHistory.length === 0) {
+      return { success: false, error: 'No bids to undo.' };
+    }
+    
+    // Get the last bid
+    const lastBid = currentLedger.bidHistory[currentLedger.bidHistory.length - 1];
+    
+    // Must be the exact bid we're tracking
+    if (lastBid.id !== currentLedger.lastBidUndoable.bidId) {
+      return { success: false, error: 'Bid mismatch - cannot undo.' };
+    }
+    
+    // Perform the undo
+    try {
+      // Remove the last bid from history
+      currentLedger.bidHistory.pop();
+      
+      // Restore previous state
+      currentLedger.currentBid = currentLedger.lastBidUndoable.originalBid;
+      currentLedger.highestBidder = currentLedger.lastBidUndoable.previousHighestBidder;
+      
+      // Update consecutive bid count (decrease for undone team)
+      if (currentLedger.consecutiveBidCount[lastBid.teamId] > 0) {
+        currentLedger.consecutiveBidCount[lastBid.teamId]--;
+      }
+      
+      // Update timestamp
+      currentLedger.lastBidTimestamp = currentLedger.bidHistory.length > 0 
+        ? currentLedger.bidHistory[currentLedger.bidHistory.length - 1].timestamp 
+        : null;
+      
+      // Clear undo tracking (no chains allowed)
+      currentLedger.lastBidUndoable = null;
+      
+      currentLedger.updatedAt = new Date().toISOString();
+      currentSession.updatedAt = new Date().toISOString();
+      
+      // Save state
+      await persistSession();
+      
+      return {
+        success: true,
+        message: `Undid bid from ${lastBid.teamName}`,
+        newCurrentBid: currentLedger.currentBid,
+        newHighestBidder: currentLedger.highestBidder,
+        undoneAmount: lastBid.bidAmount
+      };
+      
+    } catch (err) {
+      console.error('Undo bid error:', err);
+      return { success: false, error: 'Failed to undo bid.' };
+    }
+  },
+
+  /**
+   * Check if undo is available
+   */
+  canUndoLastBid() {
+    if (!currentLedger?.lastBidUndoable) {
+      return { canUndo: false, reason: 'No undoable bid' };
+    }
+    
+    // Check if another team has bid since the undoable bid
+    if (currentLedger.highestBidder?.teamId !== currentLedger.lastBidUndoable.teamId) {
+      // Clear the expired undo
+      currentLedger.lastBidUndoable = null;
+      return { canUndo: false, reason: 'Another team has bid over' };
+    }
+    
+    const timeSinceLastBid = Date.now() - currentLedger.lastBidUndoable.timestamp;
+    if (timeSinceLastBid > UNDO_TIME_WINDOW) {
+      // Clear expired undo
+      currentLedger.lastBidUndoable = null;
+      return { canUndo: false, reason: 'Time expired' };
+    }
+    
+    if (![LiveAuctionState.LIVE, LiveAuctionState.PAUSED].includes(currentLedger.state)) {
+      return { canUndo: false, reason: 'Wrong state' };
+    }
+    
+    const remainingTime = Math.max(0, UNDO_TIME_WINDOW - timeSinceLastBid);
+    return { 
+      canUndo: true, 
+      remainingTime,
+      lastBidTeam: currentLedger.bidHistory.length > 0 
+        ? currentLedger.bidHistory[currentLedger.bidHistory.length - 1].teamName 
+        : null
+    };
   },
 
   /**
@@ -209,6 +479,14 @@ const liveAuctionEngine = {
 
       // Validate auction is in READY status
       if (auctionData.status !== 'READY') {
+        // Check if auction is already completed
+        if (auctionData.status === 'COMPLETED' || auctionData.status === 'TERMINATED') {
+          return {
+            success: false,
+            error: `This auction has already been completed and is now view-only. Status: ${auctionData.status}. Completed auctions cannot be restarted.`
+          };
+        }
+        
         return {
           success: false,
           error: `Auction is not ready to start. Current status: ${auctionData.status}. Admin must configure teams and players first.`
@@ -256,6 +534,23 @@ const liveAuctionEngine = {
     }
 
     currentLedger = null;
+    
+    // Initialize auction ledger for tracking
+    const finalAuctioneerName = auctionData?.assignedAuctioneer?.name || config.auctioneerName || 'Unknown';
+    await initializeAuctionLedger(
+      currentSession.id,
+      currentSession.sport,
+      currentSession.name,
+      currentSession.auctioneerId,
+      finalAuctioneerName
+    );
+
+    // Set total players count
+    if (currentAuctionLedger) {
+      currentAuctionLedger.currentStats.totalPlayers = currentSession.playerPool.length;
+      await saveAuctionLedger();
+    }
+
     await persistSession();
 
     return { 
@@ -314,6 +609,8 @@ const liveAuctionEngine = {
       lastBidTimestamp: null,
       consecutiveBidCount: {},
       state: LiveAuctionState.READY,
+      // Undo tracking - only last bid can be undone
+      lastBidUndoable: null, // { bidId, teamId, timestamp, originalBid }
       timerStartedAt: null,
       timerDuration: currentSession.timerDuration,
       bidSlabs: currentSession.bidSlabs,
@@ -421,6 +718,22 @@ const liveAuctionEngine = {
     currentLedger.highestBidder = { teamId, teamName };
     currentLedger.lastBidTimestamp = bidEntry.timestamp;
     currentLedger.timerStartedAt = bidEntry.timestamp; // Reset timer
+    
+    // Track as undoable (only the latest bid)
+    currentLedger.lastBidUndoable = {
+      bidId: bidEntry.id,
+      teamId: teamId,
+      timestamp: Date.now(),
+      originalBid: currentLedger.bidHistory.length > 1 
+        ? currentLedger.bidHistory[currentLedger.bidHistory.length - 2].bidAmount 
+        : currentLedger.basePrice,
+      previousHighestBidder: currentLedger.bidHistory.length > 1 
+        ? {
+            teamId: currentLedger.bidHistory[currentLedger.bidHistory.length - 2].teamId,
+            teamName: currentLedger.bidHistory[currentLedger.bidHistory.length - 2].teamName
+          }
+        : null
+    };
 
     // Update consecutive bid counts
     // Reset all to 0, then set this team's count
@@ -520,6 +833,27 @@ const liveAuctionEngine = {
     currentLedger.highestBidder = { teamId, teamName };
     currentLedger.lastBidTimestamp = bidEntry.timestamp;
     currentLedger.timerStartedAt = bidEntry.timestamp; // Reset timer
+    
+    // Track as undoable (only the latest bid)
+    // But first, clear any existing undo if this is a different team
+    if (currentLedger.lastBidUndoable && currentLedger.lastBidUndoable.teamId !== teamId) {
+      currentLedger.lastBidUndoable = null;
+    }
+    
+    currentLedger.lastBidUndoable = {
+      bidId: bidEntry.id,
+      teamId: teamId,
+      timestamp: Date.now(),
+      originalBid: currentLedger.bidHistory.length > 1 
+        ? currentLedger.bidHistory[currentLedger.bidHistory.length - 2].bidAmount 
+        : currentLedger.basePrice,
+      previousHighestBidder: currentLedger.bidHistory.length > 1 
+        ? {
+            teamId: currentLedger.bidHistory[currentLedger.bidHistory.length - 2].teamId,
+            teamName: currentLedger.bidHistory[currentLedger.bidHistory.length - 2].teamName
+          }
+        : null
+    };
 
     // Update consecutive bid counts
     const lastBidderId = currentLedger.bidHistory.length > 1 
@@ -631,6 +965,21 @@ const liveAuctionEngine = {
     // Persist to history
     await this._saveAuctionResult(result);
 
+    // Add to auction ledger
+    await addPlayerResult(
+      currentLedger.playerId,
+      currentLedger.playerName,
+      'SOLD',
+      currentLedger.basePrice,
+      currentLedger.currentBid,
+      currentLedger.highestBidder,
+      currentLedger.bidHistory,
+      null // TODO: calculate actual auction duration
+    );
+    
+    // Clear undo (player resolved)
+    currentLedger.lastBidUndoable = null;
+
     // Update player status in players.json
     await this._updatePlayerStatus(
       currentLedger.playerId, 
@@ -651,6 +1000,9 @@ const liveAuctionEngine = {
     // Move player to completed
     currentSession.completedPlayerIds.push(currentLedger.playerId);
     currentSession.playerPool = currentSession.playerPool.filter(id => id !== currentLedger.playerId);
+
+    // Clear undo (player resolved)
+    currentLedger.lastBidUndoable = null;
 
     // Clear ledger, keep session
     const finalLedger = { ...currentLedger, state: LiveAuctionState.SOLD };
@@ -700,6 +1052,21 @@ const liveAuctionEngine = {
     // Persist to history
     await this._saveAuctionResult(result);
 
+    // Add to auction ledger
+    await addPlayerResult(
+      currentLedger.playerId,
+      currentLedger.playerName,
+      'UNSOLD',
+      currentLedger.basePrice,
+      null,
+      null,
+      currentLedger.bidHistory,
+      null // TODO: calculate actual auction duration
+    );
+    
+    // Clear undo (player resolved)
+    currentLedger.lastBidUndoable = null;
+
     // Update player status
     await this._updatePlayerStatus(
       currentLedger.playerId, 
@@ -742,6 +1109,28 @@ const liveAuctionEngine = {
     }
 
     const finalSession = { ...currentSession, status: 'COMPLETED' };
+    
+    // Complete the auction ledger (saves to history)
+    await completeAuctionLedger();
+    
+    // Mark original auction as COMPLETED and view-only
+    try {
+      const auctionsFile = `data/${currentSession.sport}/auctions.json`;
+      let auctions = await fileStore.readJSON(auctionsFile);
+      
+      const auctionIndex = auctions.findIndex(a => a.id === currentSession.id);
+      if (auctionIndex !== -1) {
+        auctions[auctionIndex].status = 'COMPLETED';
+        auctions[auctionIndex].completedAt = new Date().toISOString();
+        auctions[auctionIndex].auctioneerId = currentSession.auctioneerId;
+        auctions[auctionIndex].auctioneerName = currentSession.auctioneerName;
+        auctions[auctionIndex].isViewOnly = true;
+        await fileStore.writeJSON(auctionsFile, auctions);
+        console.log(`✅ Marked auction ${currentSession.id} as COMPLETED and view-only`);
+      }
+    } catch (err) {
+      console.error('Failed to mark auction as completed:', err);
+    }
     
     // Clear state
     currentSession = null;

@@ -1,0 +1,606 @@
+import React, { useState, useEffect } from 'react';
+import { api } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+
+interface Team {
+  id: string;
+  name: string;
+  sport: string;
+  owner: string;
+  purseRemaining: number;
+  totalPurse: number;
+  playerIds: string[];
+  playerCount: number;
+  logoUrl?: string;
+}
+
+interface Player {
+  id: string;
+  name: string;
+  sport: string;
+  role: string;
+  basePrice: number;
+  currentBid: number;
+  status: string;
+  verified?: boolean;
+  imageUrl?: string;
+}
+
+const TeamsAndPlayers: React.FC = () => {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'teams' | 'players' | 'verification'>('teams');
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [unverifiedPlayers, setUnverifiedPlayers] = useState<Player[]>([]);
+  const [selectedSport, setSelectedSport] = useState(user?.sport || 'football');
+  
+  // Form states
+  const [showTeamForm, setShowTeamForm] = useState(false);
+  const [showPlayerForm, setShowPlayerForm] = useState(false);
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
+  
+  const [teamFormData, setTeamFormData] = useState({
+    name: '',
+    owner: '',
+    totalPurse: 10000000,
+    logoUrl: ''
+  });
+  
+  const [playerFormData, setPlayerFormData] = useState({
+    name: '',
+    role: '',
+    basePrice: 0,
+    imageUrl: ''
+  });
+
+  const sports = ['football', 'cricket', 'basketball', 'baseball', 'volleyball'];
+
+  useEffect(() => {
+    fetchTeams();
+    fetchPlayers();
+    fetchUnverifiedPlayers();
+  }, [selectedSport]);
+
+  const fetchTeams = async () => {
+    const data = await api.getEntity<Team>('teams', selectedSport);
+    setTeams(data);
+  };
+
+  const fetchPlayers = async () => {
+    const data = await api.getEntity<Player>('players', selectedSport);
+    setPlayers(data);
+  };
+
+  const fetchUnverifiedPlayers = async () => {
+    try {
+      const response = await api.get(`/verification/${selectedSport}/pending`);
+      if (response.data.success) {
+        setUnverifiedPlayers(response.data.requests || []);
+      }
+    } catch (error) {
+      console.error('Error fetching unverified players:', error);
+    }
+  };
+
+  // Team handlers
+  const handleTeamSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingTeamId) {
+      await api.updateEntity('teams', editingTeamId, { ...teamFormData, purseRemaining: teamFormData.totalPurse }, selectedSport);
+    } else {
+      await api.createEntity('teams', { ...teamFormData, purseRemaining: teamFormData.totalPurse }, selectedSport);
+    }
+    resetTeamForm();
+    fetchTeams();
+  };
+
+  const handleEditTeam = (team: Team) => {
+    setTeamFormData({ 
+      name: team.name, 
+      owner: team.owner, 
+      totalPurse: team.totalPurse,
+      logoUrl: team.logoUrl || ''
+    });
+    setEditingTeamId(team.id);
+    setShowTeamForm(true);
+  };
+
+  const handleDeleteTeam = async (id: string) => {
+    if (confirm('Delete this team?')) {
+      await api.deleteEntity('teams', id, selectedSport);
+      fetchTeams();
+    }
+  };
+
+  const resetTeamForm = () => {
+    setTeamFormData({ name: '', owner: '', totalPurse: 10000000, logoUrl: '' });
+    setEditingTeamId(null);
+    setShowTeamForm(false);
+  };
+
+  // Player handlers
+  const handlePlayerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingPlayerId) {
+      await api.updateEntity('players', editingPlayerId, playerFormData, selectedSport);
+    } else {
+      await api.createEntity('players', playerFormData, selectedSport);
+    }
+    resetPlayerForm();
+    fetchPlayers();
+  };
+
+  const handleEditPlayer = (player: Player) => {
+    setPlayerFormData({ 
+      name: player.name, 
+      role: player.role, 
+      basePrice: player.basePrice,
+      imageUrl: player.imageUrl || ''
+    });
+    setEditingPlayerId(player.id);
+    setShowPlayerForm(true);
+  };
+
+  const handleDeletePlayer = async (id: string) => {
+    if (confirm('Delete this player?')) {
+      await api.deleteEntity('players', id, selectedSport);
+      fetchPlayers();
+    }
+  };
+
+  const resetPlayerForm = () => {
+    setPlayerFormData({ name: '', role: '', basePrice: 0, imageUrl: '' });
+    setEditingPlayerId(null);
+    setShowPlayerForm(false);
+  };
+
+  // Verification handlers
+  const handleVerifyPlayer = async (playerId: string) => {
+    try {
+      const response = await api.post(`/verification/${selectedSport}/${playerId}/verify`, {
+        userId: user?.id,
+        userRole: user?.role
+      });
+      if (response.data.success) {
+        alert('Player verified successfully!');
+        fetchUnverifiedPlayers();
+        fetchPlayers();
+      }
+    } catch (error) {
+      console.error('Error verifying player:', error);
+      alert('Failed to verify player');
+    }
+  };
+
+  const handleRejectPlayer = async (playerId: string, reason: string) => {
+    try {
+      const response = await api.post(`/verification/${selectedSport}/${playerId}/reject`, {
+        userId: user?.id,
+        userRole: user?.role,
+        reason
+      });
+      if (response.data.success) {
+        alert('Player rejected');
+        fetchUnverifiedPlayers();
+      }
+    } catch (error) {
+      console.error('Error rejecting player:', error);
+    }
+  };
+
+  const getSportEmoji = (sport: string) => {
+    const emojis: { [key: string]: string } = {
+      football: '⚽', cricket: '🏏', basketball: '🏀', baseball: '⚾', volleyball: '🏐'
+    };
+    return emojis[sport] || '🏆';
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl">
+        <h1 className="text-3xl font-black text-white mb-2">👥 Teams & Players</h1>
+        <p className="text-slate-400">Manage teams and players for your auctions</p>
+      </div>
+
+      {/* Sport Selector */}
+      <div className="flex flex-wrap gap-2">
+        {sports.map(sport => (
+          <button
+            key={sport}
+            onClick={() => setSelectedSport(sport)}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+              selectedSport === sport
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+            }`}
+          >
+            {getSportEmoji(sport)} {sport.charAt(0).toUpperCase() + sport.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div className="flex space-x-1 bg-slate-800/50 p-1 rounded-xl border border-slate-700">
+        <button
+          onClick={() => setActiveTab('teams')}
+          className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+            activeTab === 'teams'
+              ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white'
+              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+          }`}
+        >
+          🏆 Teams ({teams.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('players')}
+          className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+            activeTab === 'players'
+              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+          }`}
+        >
+          ⭐ Players ({players.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('verification')}
+          className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+            activeTab === 'verification'
+              ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
+              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+          }`}
+        >
+          ✅ Verification ({unverifiedPlayers.length})
+        </button>
+      </div>
+
+      {/* Teams Tab */}
+      {activeTab === 'teams' && (
+        <div className="space-y-6">
+          {/* Add Team Button */}
+          <button
+            onClick={() => setShowTeamForm(!showTeamForm)}
+            className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-[1.02] ${
+              showTeamForm
+                ? 'bg-slate-700 text-slate-300'
+                : 'bg-gradient-to-r from-amber-600 to-orange-600 text-white'
+            }`}
+          >
+            {showTeamForm ? '✕ Cancel' : '+ Create New Team'}
+          </button>
+
+          {/* Team Form */}
+          {showTeamForm && (
+            <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6">
+              <h3 className="text-xl font-bold text-white mb-4">
+                {editingTeamId ? '✏️ Edit Team' : '🏆 Create New Team'}
+              </h3>
+              <form onSubmit={handleTeamSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Team Name"
+                    value={teamFormData.name}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, name: e.target.value })}
+                    className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Owner Name"
+                    value={teamFormData.owner}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, owner: e.target.value })}
+                    className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                    required
+                  />
+                  <input
+                    type="number"
+                    placeholder="Total Purse"
+                    value={teamFormData.totalPurse}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, totalPurse: Number(e.target.value) })}
+                    className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                    required
+                  />
+                  <input
+                    type="url"
+                    placeholder="Logo URL (optional)"
+                    value={teamFormData.logoUrl}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, logoUrl: e.target.value })}
+                    className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg font-bold hover:from-amber-500 hover:to-orange-500 transition-all"
+                  >
+                    ✓ {editingTeamId ? 'Update' : 'Create'} Team
+                  </button>
+                  {editingTeamId && (
+                    <button
+                      type="button"
+                      onClick={resetTeamForm}
+                      className="px-6 py-3 bg-slate-700 text-slate-300 rounded-lg font-bold hover:bg-slate-600 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Teams Grid */}
+          {teams.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {teams.map(team => {
+                const spentBudget = team.totalPurse - team.purseRemaining;
+                const spentPercentage = (spentBudget / team.totalPurse) * 100;
+                return (
+                  <div key={team.id} className="bg-slate-800/60 border border-slate-700 hover:border-amber-500/50 rounded-2xl p-6 transition-all">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        {team.logoUrl ? (
+                          <img src={team.logoUrl} alt={team.name} className="w-12 h-12 rounded-lg object-cover" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-2xl">🏆</div>
+                        )}
+                        <div>
+                          <h3 className="text-xl font-bold text-white">{team.name}</h3>
+                          <p className="text-slate-400 text-sm">Owner: {team.owner}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400 text-sm">Total Purse</span>
+                        <span className="text-emerald-400 font-bold">₹{(team.totalPurse / 10000000).toFixed(2)} Cr</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400 text-sm">Remaining</span>
+                        <span className="text-amber-400 font-bold">₹{(team.purseRemaining / 10000000).toFixed(2)} Cr</span>
+                      </div>
+                      <div className="w-full bg-slate-700 rounded-full h-2">
+                        <div className="bg-gradient-to-r from-amber-500 to-orange-500 h-2 rounded-full" style={{ width: `${spentPercentage}%` }}></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-slate-500">
+                        <span>Players: {team.playerCount || 0}</span>
+                        <span>{spentPercentage.toFixed(0)}% spent</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditTeam(team)}
+                        className="flex-1 py-2 bg-blue-600/20 text-blue-300 rounded-lg text-sm font-semibold hover:bg-blue-600/30 transition-all"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTeam(team.id)}
+                        className="flex-1 py-2 bg-red-600/20 text-red-300 rounded-lg text-sm font-semibold hover:bg-red-600/30 transition-all"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-slate-800/30 border border-slate-700 rounded-2xl">
+              <div className="text-6xl mb-4">🏆</div>
+              <p className="text-slate-400 text-lg font-semibold">No teams yet</p>
+              <p className="text-slate-500 text-sm mt-2">Create teams to start the auction</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Players Tab */}
+      {activeTab === 'players' && (
+        <div className="space-y-6">
+          {/* Add Player Button */}
+          <button
+            onClick={() => setShowPlayerForm(!showPlayerForm)}
+            className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-[1.02] ${
+              showPlayerForm
+                ? 'bg-slate-700 text-slate-300'
+                : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+            }`}
+          >
+            {showPlayerForm ? '✕ Cancel' : '+ Add New Player'}
+          </button>
+
+          {/* Player Form */}
+          {showPlayerForm && (
+            <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6">
+              <h3 className="text-xl font-bold text-white mb-4">
+                {editingPlayerId ? '✏️ Edit Player' : '⭐ Add New Player'}
+              </h3>
+              <form onSubmit={handlePlayerSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Player Name"
+                    value={playerFormData.name}
+                    onChange={(e) => setPlayerFormData({ ...playerFormData, name: e.target.value })}
+                    className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Role (e.g., Batsman, Forward)"
+                    value={playerFormData.role}
+                    onChange={(e) => setPlayerFormData({ ...playerFormData, role: e.target.value })}
+                    className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    required
+                  />
+                  <input
+                    type="number"
+                    placeholder="Base Price"
+                    value={playerFormData.basePrice}
+                    onChange={(e) => setPlayerFormData({ ...playerFormData, basePrice: Number(e.target.value) })}
+                    className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    required
+                  />
+                  <input
+                    type="url"
+                    placeholder="Image URL (optional)"
+                    value={playerFormData.imageUrl}
+                    onChange={(e) => setPlayerFormData({ ...playerFormData, imageUrl: e.target.value })}
+                    className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold hover:from-blue-500 hover:to-purple-500 transition-all"
+                  >
+                    ✓ {editingPlayerId ? 'Update' : 'Add'} Player
+                  </button>
+                  {editingPlayerId && (
+                    <button
+                      type="button"
+                      onClick={resetPlayerForm}
+                      className="px-6 py-3 bg-slate-700 text-slate-300 rounded-lg font-bold hover:bg-slate-600 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Players Grid */}
+          {players.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {players.map(player => (
+                <div key={player.id} className="bg-slate-800/60 border border-slate-700 hover:border-blue-500/50 rounded-2xl p-6 transition-all">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      {player.imageUrl ? (
+                        <img src={player.imageUrl} alt={player.name} className="w-12 h-12 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xl">⭐</div>
+                      )}
+                      <div>
+                        <h3 className="text-xl font-bold text-white">{player.name}</h3>
+                        <span className="px-2 py-1 bg-blue-600/20 text-blue-300 rounded text-xs font-semibold">{player.role}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 text-sm">Base Price</span>
+                      <span className="text-emerald-400 font-bold">₹{(player.basePrice / 10000000).toFixed(2)} Cr</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 text-sm">Status</span>
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${
+                        player.status === 'AVAILABLE' ? 'bg-green-600/20 text-green-300' : 'bg-red-600/20 text-red-300'
+                      }`}>
+                        {player.status || 'AVAILABLE'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 text-sm">Verified</span>
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${
+                        player.verified ? 'bg-blue-600/20 text-blue-300' : 'bg-orange-600/20 text-orange-300'
+                      }`}>
+                        {player.verified ? '✅ Yes' : '⏳ Pending'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditPlayer(player)}
+                      className="flex-1 py-2 bg-blue-600/20 text-blue-300 rounded-lg text-sm font-semibold hover:bg-blue-600/30 transition-all"
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeletePlayer(player.id)}
+                      className="flex-1 py-2 bg-red-600/20 text-red-300 rounded-lg text-sm font-semibold hover:bg-red-600/30 transition-all"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-slate-800/30 border border-slate-700 rounded-2xl">
+              <div className="text-6xl mb-4">⭐</div>
+              <p className="text-slate-400 text-lg font-semibold">No players yet</p>
+              <p className="text-slate-500 text-sm mt-2">Add players to be auctioned</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Verification Tab */}
+      {activeTab === 'verification' && (
+        <div className="space-y-6">
+          <div className="bg-yellow-600/10 border border-yellow-600/30 rounded-xl p-4">
+            <p className="text-yellow-300 text-sm">
+              ⚠️ Players must be verified before they can be added to an auction. Review and approve player registrations below.
+            </p>
+          </div>
+
+          {unverifiedPlayers.length > 0 ? (
+            <div className="space-y-4">
+              {unverifiedPlayers.map((player: any) => (
+                <div key={player.id} className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    {player.imageUrl ? (
+                      <img src={player.imageUrl} alt={player.name} className="w-16 h-16 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center text-2xl">👤</div>
+                    )}
+                    <div>
+                      <h3 className="text-xl font-bold text-white">{player.name || player.playerName}</h3>
+                      <p className="text-slate-400 text-sm">Role: {player.role}</p>
+                      <p className="text-slate-400 text-sm">Base Price: ₹{((player.basePrice || 0) / 10000000).toFixed(2)} Cr</p>
+                      <p className="text-slate-500 text-xs mt-1">Requested: {new Date(player.requestedAt || player.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleVerifyPlayer(player.id || player.playerId)}
+                      className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-bold hover:from-green-500 hover:to-emerald-500 transition-all"
+                    >
+                      ✅ Verify
+                    </button>
+                    <button
+                      onClick={() => {
+                        const reason = prompt('Reason for rejection:');
+                        if (reason) handleRejectPlayer(player.id || player.playerId, reason);
+                      }}
+                      className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-lg font-bold hover:from-red-500 hover:to-pink-500 transition-all"
+                    >
+                      ❌ Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-slate-800/30 border border-slate-700 rounded-2xl">
+              <div className="text-6xl mb-4">✅</div>
+              <p className="text-slate-400 text-lg font-semibold">All players verified!</p>
+              <p className="text-slate-500 text-sm mt-2">No pending verification requests</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TeamsAndPlayers;

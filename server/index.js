@@ -6,6 +6,7 @@ import authRouter from './routes/auth.js';
 import verificationRouter from './routes/verification.js';
 import auctionsRouter from './routes/auctions.js';
 import liveAuctionRouter from './routes/liveAuction.js';
+import auctionHistoryRouter from './routes/auctionHistory.js';
 import * as auctioneersRouter from './routes/auctioneers.js';
 import { liveAuctionEngine } from './liveAuctionEngine.js';
 
@@ -27,6 +28,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/verification', verificationRouter);
 app.use('/api/auctions', auctionsRouter);
 app.use('/api/live-auction', liveAuctionRouter);
+app.use('/api/auction-history', auctionHistoryRouter);
 
 // Auctioneer routes
 app.post('/api/auctioneers/login', (req, res) => {

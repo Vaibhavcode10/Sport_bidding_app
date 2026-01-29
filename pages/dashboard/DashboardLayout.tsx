@@ -37,14 +37,9 @@ const DashboardLayout: React.FC = () => {
   }
 
   const navItems = [
-    { name: 'Overview', path: '/dashboard', icon: '📊' },
-    { name: 'Players', path: '/dashboard/players', icon: '👥' },
-    { name: 'Teams', path: '/dashboard/teams', icon: '🏆' },
-    { name: 'Auctions', path: '/dashboard/auctions', icon: '�' },
-    { name: 'Live Auction', path: '/dashboard/live', icon: '🔴', isLive: true },
-    { name: 'Player Verification', path: '/dashboard/verification', icon: '✅' },
-    { name: 'History', path: '/dashboard/history', icon: '📚' },
-    { name: 'Auction Requests', path: '/dashboard/requests', icon: '📋' },
+    { name: 'Teams & Players', path: '/dashboard', icon: '👥' },
+    { name: 'Auctions', path: '/dashboard/auctions', icon: '🎯' },
+    { name: 'Auction History', path: '/dashboard/auction-history', icon: '📚' },
   ];
 
   const getSportEmoji = (sport: string) => {

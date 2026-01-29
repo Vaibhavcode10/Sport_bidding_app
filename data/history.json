@@ -1,5 +1,109 @@
 [
   {
+    "id": "1769669014826_tk8dh2lmo",
+    "timestamp": "2026-01-29T06:43:34.826Z",
+    "action": "AUCTION_CREATED",
+    "sport": "football",
+    "auctionId": "auction_fo_1769669014798",
+    "auctionName": "football",
+    "createdBy": "admin_1",
+    "status": "READY",
+    "assignedAuctioneerId": "auc-football-001"
+  },
+  {
+    "id": "1769663301051_57hxdlfnp",
+    "timestamp": "2026-01-29T05:08:21.051Z",
+    "action": "AUCTION_CREATED",
+    "sport": "football",
+    "auctionId": "auction_fo_1769663301041",
+    "auctionName": "madrid football",
+    "createdBy": "admin_1",
+    "status": "READY",
+    "assignedAuctioneerId": "auc-football-001"
+  },
+  {
+    "id": "1769663213579_k6yeiqvqr",
+    "timestamp": "2026-01-29T05:06:53.579Z",
+    "action": "AUCTION_DELETED",
+    "sport": "football",
+    "auctionId": "auction_fo_1769661493129",
+    "auctionName": "madrid footbal",
+    "deletedBy": "admin_1"
+  },
+  {
+    "id": "1769661493145_qhqi6fj1b",
+    "timestamp": "2026-01-29T04:38:13.145Z",
+    "action": "AUCTION_CREATED",
+    "sport": "football",
+    "auctionId": "auction_fo_1769661493129",
+    "auctionName": "madrid footbal",
+    "createdBy": "admin_1",
+    "status": "READY",
+    "assignedAuctioneerId": "auc-football-001"
+  },
+  {
+    "id": "1769661419683_37pukd5oh",
+    "timestamp": "2026-01-29T04:36:59.683Z",
+    "action": "AUCTION_DELETED",
+    "sport": "football",
+    "auctionId": "auction_fo_1769661226008",
+    "auctionName": "madrid",
+    "deletedBy": "admin_1"
+  },
+  {
+    "id": "1769661226041_sj25opi94",
+    "timestamp": "2026-01-29T04:33:46.041Z",
+    "action": "AUCTION_CREATED",
+    "sport": "football",
+    "auctionId": "auction_fo_1769661226008",
+    "auctionName": "madrid",
+    "createdBy": "admin_1",
+    "status": "READY",
+    "assignedAuctioneerId": "auc-football-001"
+  },
+  {
+    "id": "1769660670319_seq2yzngr",
+    "timestamp": "2026-01-29T04:24:30.319Z",
+    "action": "AUCTION_CREATED",
+    "sport": "basketball",
+    "auctionId": "auction_ba_1769660670308",
+    "auctionName": "baskeltball action",
+    "createdBy": "admin_1",
+    "status": "READY",
+    "assignedAuctioneerId": "auc-basketball-001"
+  },
+  {
+    "id": "1769660570178_0lwsxojgh",
+    "timestamp": "2026-01-29T04:22:50.178Z",
+    "action": "AUCTION_DELETED",
+    "sport": "basketball",
+    "auctionId": "auction_ba_1769626786243",
+    "auctionName": "ipl action",
+    "deletedBy": "admin_1"
+  },
+  {
+    "id": "1769626797775_7ki46w24z",
+    "timestamp": "2026-01-28T18:59:57.775Z",
+    "action": "AUCTIONEER_INVITED",
+    "sport": "basketball",
+    "auctionId": "auction_ba_1769626786243",
+    "auctionName": "ipl action",
+    "auctioneerId": "auc-basketball-001",
+    "auctioneerName": "James Williams",
+    "invitedBy": "admin_1"
+  },
+  {
+    "id": "1769626786260_arn8z2pco",
+    "timestamp": "2026-01-28T18:59:46.260Z",
+    "action": "AUCTION_CREATED",
+    "sport": "basketball",
+    "auctionId": "auction_ba_1769626786243",
+    "auctionName": "ipl action",
+    "createdBy": "admin_1",
+    "status": "READY",
+    "assignedAuctioneerId": "auc-basketball-001"
+  },
+  {
     "id": "1769587706078_8rel30v5j",
     "timestamp": "2026-01-28T08:08:26.078Z",
     "action": "AUCTIONEER_ACCEPTED",

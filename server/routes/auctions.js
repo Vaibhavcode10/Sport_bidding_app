@@ -101,6 +101,44 @@ router.get('/auctioneers/all/:sport', async (req, res) => {
   }
 });
 
+// GET auctions assigned to auctioneer (Auctioneer only) - MUST BE BEFORE /:sport
+router.get('/assigned/:auctioneerId', async (req, res) => {
+  try {
+    const { auctioneerId } = req.params;
+    const sports = ['football', 'cricket', 'basketball', 'baseball', 'volleyball'];
+    let assignedAuctions = [];
+    
+    for (const sport of sports) {
+      try {
+        const auctions = await fileStore.readJSON(getAuctionsFilePath(sport));
+        for (const auction of auctions) {
+          // Check direct assignment
+          if (auction.assignedAuctioneer?.id === auctioneerId) {
+            assignedAuctions.push({
+              ...auction,
+              assignmentType: 'DIRECT'
+            });
+          }
+        }
+      } catch (err) {
+        // Skip if no auctions file
+      }
+    }
+    
+    // Sort: READY first (can start), then CREATED, then others
+    const statusOrder = { 'READY': 0, 'CREATED': 1, 'LIVE': 2, 'PAUSED': 3, 'COMPLETED': 4 };
+    assignedAuctions.sort((a, b) => (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99));
+    
+    res.json({
+      success: true,
+      auctions: assignedAuctions
+    });
+  } catch (err) {
+    console.error('Get assigned auctions error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // GET all auctions for a sport (anyone can view) - Generic route LAST
 router.get('/:sport', async (req, res) => {
   try {
@@ -154,7 +192,8 @@ router.post('/:sport', async (req, res) => {
     const { sport } = req.params;
     const { 
       name, 
-      description, 
+      description,
+      logoUrl,
       startDate, 
       endDate, 
       settings, 
@@ -195,6 +234,7 @@ router.post('/:sport', async (req, res) => {
       name,
       sport,
       description: description || '',
+      logoUrl: logoUrl || '',
       startDate,
       endDate,
       // New status model: CREATED -> READY (when fully configured) -> LIVE -> COMPLETED
@@ -259,6 +299,44 @@ router.post('/:sport', async (req, res) => {
     });
   } catch (err) {
     console.error('Create auction error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// UPDATE team purses during live auction (Auctioneer)
+router.put('/:sport/:auctionId/teams', async (req, res) => {
+  try {
+    const { sport, auctionId } = req.params;
+    const { participatingTeams, userRole, userId } = req.body;
+    
+    // Auctioneer or admin only
+    if (userRole !== 'auctioneer' && userRole !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Only auctioneer can update team purses during live auction' });
+    }
+    
+    const auctionsFilePath = getAuctionsFilePath(sport);
+    let auctions = await fileStore.readJSON(auctionsFilePath);
+    
+    const auctionIndex = auctions.findIndex(a => a.id === auctionId);
+    if (auctionIndex === -1) {
+      return res.status(404).json({ success: false, error: 'Auction not found' });
+    }
+    
+    // Update participating teams (purse changes)
+    if (participatingTeams) {
+      auctions[auctionIndex].participatingTeams = participatingTeams;
+    }
+    auctions[auctionIndex].updatedAt = new Date().toISOString();
+    
+    await fileStore.writeJSON(auctionsFilePath, auctions);
+    
+    res.json({
+      success: true,
+      message: 'Team purses updated',
+      auction: auctions[auctionIndex]
+    });
+  } catch (err) {
+    console.error('Update team purses error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -486,195 +564,6 @@ router.post('/:sport/:auctionId/configure', async (req, res) => {
   }
 });
 
-// GET auctions assigned to auctioneer (Auctioneer only)
-router.get('/assigned/:auctioneerId', async (req, res) => {
-  try {
-    const { auctioneerId } = req.params;
-    const sports = ['football', 'cricket', 'basketball', 'baseball', 'volleyball'];
-    let assignedAuctions = [];
-    
-    for (const sport of sports) {
-      try {
-        const auctions = await fileStore.readJSON(getAuctionsFilePath(sport));
-        for (const auction of auctions) {
-          // Check direct assignment
-          if (auction.assignedAuctioneer?.id === auctioneerId) {
-            assignedAuctions.push({
-              ...auction,
-              assignmentType: 'DIRECT'
-            });
-          }
-        }
-      } catch (err) {
-        // Skip if no auctions file
-      }
-    }
-    
-    // Sort: READY first (can start), then CREATED, then others
-    const statusOrder = { 'READY': 0, 'CREATED': 1, 'LIVE': 2, 'PAUSED': 3, 'COMPLETED': 4 };
-    assignedAuctions.sort((a, b) => (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99));
-    
-    res.json({
-      success: true,
-      auctions: assignedAuctions
-    });
-  } catch (err) {
-    console.error('Get assigned auctions error:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// INVITE auctioneer to auction (admin only)
-router.post('/:sport/:auctionId/invite', async (req, res) => {
-  try {
-    const { sport, auctionId } = req.params;
-    const { auctioneerId, auctioneerName, userRole, userId } = req.body;
-    
-    // Admin only
-    if (userRole !== 'admin') {
-      return res.status(403).json({ success: false, error: 'Only admin can invite auctioneers' });
-    }
-    
-    const auctionsFilePath = getAuctionsFilePath(sport);
-    let auctions = await fileStore.readJSON(auctionsFilePath);
-    
-    const auctionIndex = auctions.findIndex(a => a.id === auctionId);
-    if (auctionIndex === -1) {
-      return res.status(404).json({ success: false, error: 'Auction not found' });
-    }
-    
-    // Check if already invited
-    if (auctions[auctionIndex].invitedAuctioneers.some(inv => inv.id === auctioneerId)) {
-      return res.status(400).json({ success: false, error: 'Auctioneer already invited' });
-    }
-    
-    // Add invitation
-    auctions[auctionIndex].invitedAuctioneers.push({
-      id: auctioneerId,
-      name: auctioneerName,
-      invitedAt: new Date().toISOString(),
-      invitedBy: userId,
-      status: 'PENDING'
-    });
-    
-    await fileStore.writeJSON(auctionsFilePath, auctions);
-    
-    // Log history
-    await logHistoryAction('AUCTIONEER_INVITED', {
-      sport,
-      auctionId,
-      auctionName: auctions[auctionIndex].name,
-      auctioneerId,
-      auctioneerName,
-      invitedBy: userId
-    });
-    
-    res.json({
-      success: true,
-      message: `${auctioneerName} invited to auction successfully`
-    });
-  } catch (err) {
-    console.error('Invite auctioneer error:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// ACCEPT invitation (auctioneer)
-router.post('/:sport/:auctionId/accept', async (req, res) => {
-  try {
-    const { sport, auctionId } = req.params;
-    const { userId, userName, userRole } = req.body;
-    
-    if (userRole !== 'auctioneer') {
-      return res.status(403).json({ success: false, error: 'Only auctioneers can accept invitations' });
-    }
-    
-    const auctionsFilePath = getAuctionsFilePath(sport);
-    let auctions = await fileStore.readJSON(auctionsFilePath);
-    
-    const auctionIndex = auctions.findIndex(a => a.id === auctionId);
-    if (auctionIndex === -1) {
-      return res.status(404).json({ success: false, error: 'Auction not found' });
-    }
-    
-    // Find and update invitation
-    const invitationIndex = auctions[auctionIndex].invitedAuctioneers.findIndex(inv => inv.id === userId);
-    if (invitationIndex === -1) {
-      return res.status(404).json({ success: false, error: 'Invitation not found' });
-    }
-    
-    auctions[auctionIndex].invitedAuctioneers[invitationIndex].status = 'ACCEPTED';
-    auctions[auctionIndex].invitedAuctioneers[invitationIndex].acceptedAt = new Date().toISOString();
-    
-    // Add to accepted auctioneers
-    if (!auctions[auctionIndex].acceptedAuctioneers.some(a => a.id === userId)) {
-      auctions[auctionIndex].acceptedAuctioneers.push({
-        id: userId,
-        name: userName,
-        acceptedAt: new Date().toISOString()
-      });
-    }
-    
-    await fileStore.writeJSON(auctionsFilePath, auctions);
-    
-    // Log history
-    await logHistoryAction('AUCTIONEER_ACCEPTED', {
-      sport,
-      auctionId,
-      auctionName: auctions[auctionIndex].name,
-      auctioneerId: userId,
-      auctioneerName: userName
-    });
-    
-    res.json({
-      success: true,
-      message: 'Invitation accepted successfully'
-    });
-  } catch (err) {
-    console.error('Accept invitation error:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// DECLINE invitation (auctioneer)
-router.post('/:sport/:auctionId/decline', async (req, res) => {
-  try {
-    const { sport, auctionId } = req.params;
-    const { userId, userRole } = req.body;
-    
-    if (userRole !== 'auctioneer') {
-      return res.status(403).json({ success: false, error: 'Only auctioneers can decline invitations' });
-    }
-    
-    const auctionsFilePath = getAuctionsFilePath(sport);
-    let auctions = await fileStore.readJSON(auctionsFilePath);
-    
-    const auctionIndex = auctions.findIndex(a => a.id === auctionId);
-    if (auctionIndex === -1) {
-      return res.status(404).json({ success: false, error: 'Auction not found' });
-    }
-    
-    // Find and update invitation
-    const invitationIndex = auctions[auctionIndex].invitedAuctioneers.findIndex(inv => inv.id === userId);
-    if (invitationIndex === -1) {
-      return res.status(404).json({ success: false, error: 'Invitation not found' });
-    }
-    
-    auctions[auctionIndex].invitedAuctioneers[invitationIndex].status = 'DECLINED';
-    auctions[auctionIndex].invitedAuctioneers[invitationIndex].declinedAt = new Date().toISOString();
-    
-    await fileStore.writeJSON(auctionsFilePath, auctions);
-    
-    res.json({
-      success: true,
-      message: 'Invitation declined'
-    });
-  } catch (err) {
-    console.error('Decline invitation error:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
 // REGISTER player for auction
 router.post('/:sport/:auctionId/register-player', async (req, res) => {
   try {
@@ -713,41 +602,6 @@ router.post('/:sport/:auctionId/register-player', async (req, res) => {
     });
   } catch (err) {
     console.error('Register player error:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// GET auctions for auctioneer (invitations)
-router.get('/auctioneer/:userId/invitations', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const sports = ['football', 'cricket', 'basketball', 'baseball', 'volleyball'];
-    let invitations = [];
-    
-    for (const sport of sports) {
-      try {
-        const auctions = await fileStore.readJSON(getAuctionsFilePath(sport));
-        for (const auction of auctions) {
-          const invitation = auction.invitedAuctioneers.find(inv => inv.id === userId);
-          if (invitation) {
-            invitations.push({
-              ...auction,
-              invitationStatus: invitation.status,
-              invitedAt: invitation.invitedAt
-            });
-          }
-        }
-      } catch (err) {
-        // Skip if no auctions file
-      }
-    }
-    
-    res.json({
-      success: true,
-      invitations
-    });
-  } catch (err) {
-    console.error('Get auctioneer invitations error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

@@ -78,7 +78,7 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Handle auctioneer login
+    // Handle auctioneer login - Read from sport-specific auctioneers.json
     if (role === 'auctioneer') {
       if (!sport) {
         return res.status(400).json({
@@ -87,7 +87,14 @@ router.post('/login', async (req, res) => {
         });
       }
 
-      const sportAuctioneers = users.auctioneers[sport] || [];
+      // Read from sport-specific auctioneers.json file
+      let sportAuctioneers = [];
+      try {
+        sportAuctioneers = await fileStore.readJSON(`data/${sport}/auctioneers.json`);
+      } catch (e) {
+        sportAuctioneers = [];
+      }
+      
       const auctioneer = sportAuctioneers.find(
         a => (a.username === username || a.email === username) && a.password === password
       );

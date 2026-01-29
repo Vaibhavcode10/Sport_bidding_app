@@ -10,22 +10,18 @@ import PlayerSelectSport from './pages/PlayerSelectSport';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import PlayerDashboardLayout from './pages/dashboard/PlayerDashboardLayout';
 import AuctioneerDashboardLayout from './pages/dashboard/AuctioneerDashboardLayout';
-import Overview from './pages/dashboard/Overview';
-import Players from './pages/dashboard/Players';
-import Teams from './pages/dashboard/Teams';
+import TeamsAndPlayers from './pages/dashboard/TeamsAndPlayers';
 import PlayerProfilePage from './pages/dashboard/PlayerProfile';
 import BidEvents from './pages/dashboard/BidEvents';
-import { AuctionRequests } from './pages/dashboard/AuctionRequests';
-import { PlayerVerification } from './pages/dashboard/PlayerVerification';
 import { History } from './pages/dashboard/History';
 import AuctionManagement from './pages/dashboard/AuctionManagement';
-import AuctioneerInvitations from './pages/dashboard/AuctioneerInvitations';
 import AuctioneerOverview from './pages/dashboard/AuctioneerOverview';
 import AuctioneerTeamDetails from './pages/dashboard/AuctioneerTeamDetails';
 import AuctioneerPlayers from './pages/dashboard/AuctioneerPlayers';
 import PlayerAuctions from './pages/dashboard/PlayerAuctions';
 import AuctioneerLiveDashboard from './pages/dashboard/AuctioneerLiveDashboard';
 import LiveAuctionViewer from './pages/dashboard/LiveAuctionViewer';
+import AuctionHistoryWrapper from './pages/dashboard/AuctionHistoryWrapper';
 
 const App: React.FC = () => {
   return (
@@ -56,19 +52,23 @@ const App: React.FC = () => {
                 <Route index element={<AuctioneerOverview />} />
                 <Route path="team" element={<AuctioneerTeamDetails />} />
                 <Route path="players" element={<AuctioneerPlayers />} />
-                <Route path="invitations" element={<AuctioneerInvitations />} />
               </Route>
+              
+              {/* Auctioneer History Route (separate for access control) */}
+              <Route 
+                path="/auctioneer/history" 
+                element={<AuctionHistoryWrapper userRole="auctioneer" />} 
+              />
 
-              {/* Admin Routes */}
+              {/* Admin Routes - Simplified: Teams & Players, Auctions, History */}
               <Route path="/dashboard" element={<DashboardLayout />}>
-                <Route index element={<Overview />} />
-                <Route path="players" element={<Players />} />
-                <Route path="teams" element={<Teams />} />
-                <Route path="verification" element={<PlayerVerification />} />
+                <Route index element={<TeamsAndPlayers />} />
                 <Route path="auctions" element={<AuctionManagement />} />
                 <Route path="history" element={<History />} />
-                <Route path="requests" element={<AuctionRequests />} />
-                <Route path="live" element={<LiveAuctionViewer />} />
+                <Route 
+                  path="auction-history" 
+                  element={<AuctionHistoryWrapper userRole="admin" />} 
+                />
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface AssignedAuction {
   id: string;
@@ -11,6 +11,11 @@ interface AssignedAuction {
   startDate: string;
   teamIds?: string[];
   playerPool?: string[];
+  participatingTeams?: Array<{
+    id: string;
+    name: string;
+    logoUrl?: string;
+  }>;
   assignedAuctioneer?: {
     id: string;
     name: string;
@@ -27,43 +32,95 @@ interface AuctionStats {
 
 const AuctioneerOverview: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [assignedAuctions, setAssignedAuctions] = useState<AssignedAuction[]>([]);
   const [stats, setStats] = useState<AuctionStats>({ totalAssigned: 0, readyToStart: 0, completed: 0, live: 0 });
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAssignedAuctions = async () => {
-      if (!user?.id) return;
-      
-      try {
-        const response = await api.get(`/auctions/assigned/${user.id}`);
-        if (response.data.success) {
-          const auctions = response.data.auctions;
-          setAssignedAuctions(auctions);
-          
-          // Calculate stats
-          setStats({
-            totalAssigned: auctions.length,
-            readyToStart: auctions.filter((a: AssignedAuction) => a.status === 'READY').length,
-            completed: auctions.filter((a: AssignedAuction) => a.status === 'COMPLETED').length,
-            live: auctions.filter((a: AssignedAuction) => a.status === 'LIVE').length,
-          });
-        }
-      } catch (err) {
-        console.error('Failed to fetch assigned auctions:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchAssignedAuctions();
   }, [user?.id]);
+
+  const fetchAssignedAuctions = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setLoading(true);
+      console.log('Fetching auctions for user:', user.id);
+      const response = await api.get(`/auctions/assigned/${user.id}`);
+      console.log('Response:', response.data);
+      
+      if (response.data?.success) {
+        const auctions = response.data.auctions || [];
+        setAssignedAuctions(auctions);
+        
+        // Calculate stats
+        setStats({
+          totalAssigned: auctions.length,
+          readyToStart: auctions.filter((a: AssignedAuction) => a.status === 'READY').length,
+          completed: auctions.filter((a: AssignedAuction) => a.status === 'COMPLETED').length,
+          live: auctions.filter((a: AssignedAuction) => a.status === 'LIVE').length,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch assigned auctions:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStartAuction = (auction: AssignedAuction) => {
+    // Navigate to live auction page with auction context
+    navigate('/auctioneer/live', { state: { selectedAuction: auction } });
+  };
+
+  const handlePostponeAuction = async (auction: AssignedAuction) => {
+    if (!confirm(`Postpone "${auction.name}"? This will change the status to SCHEDULED.`)) return;
+    
+    setActionLoading(auction.id);
+    try {
+      await api.put(`/auctions/${auction.sport}/${auction.id}`, {
+        status: 'SCHEDULED',
+        userRole: 'auctioneer',
+        userId: user?.id
+      });
+      alert('Auction postponed successfully');
+      fetchAssignedAuctions();
+    } catch (err) {
+      console.error('Failed to postpone auction:', err);
+      alert('Failed to postpone auction');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleTerminateAuction = async (auction: AssignedAuction) => {
+    if (!confirm(`TERMINATE "${auction.name}"? This action will end the auction completely.`)) return;
+    
+    setActionLoading(auction.id);
+    try {
+      await api.put(`/auctions/${auction.sport}/${auction.id}`, {
+        status: 'COMPLETED',
+        userRole: 'auctioneer',
+        userId: user?.id
+      });
+      alert('Auction terminated');
+      fetchAssignedAuctions();
+    } catch (err) {
+      console.error('Failed to terminate auction:', err);
+      alert('Failed to terminate auction');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const styles: { [key: string]: string } = {
       'READY': 'bg-green-500/20 text-green-300 border-green-500/50',
       'LIVE': 'bg-red-500/20 text-red-300 border-red-500/50 animate-pulse',
       'CREATED': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50',
+      'SCHEDULED': 'bg-blue-500/20 text-blue-300 border-blue-500/50',
       'COMPLETED': 'bg-gray-500/20 text-gray-300 border-gray-500/50',
     };
     return styles[status] || 'bg-gray-500/20 text-gray-300 border-gray-500/50';
@@ -163,27 +220,77 @@ const AuctioneerOverview: React.FC = () => {
                 key={auction.id}
                 className="bg-slate-800/50 border border-slate-700 rounded-xl p-5 hover:bg-slate-800/70 transition-all"
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">{auction.name}</h3>
-                    <p className="text-gray-400 capitalize">{auction.sport}</p>
-                    <div className="mt-2 flex gap-4 text-sm text-gray-500">
-                      <span>📅 {new Date(auction.startDate).toLocaleDateString()}</span>
-                      <span>👥 {auction.teamIds?.length || 0} Teams</span>
-                      <span>🏃 {auction.playerPool?.length || 0} Players</span>
+                <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-xl font-bold text-white">{auction.name}</h3>
+                      <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusBadge(auction.status)}`}>
+                        {auction.status}
+                      </span>
                     </div>
+                    <p className="text-gray-400 capitalize mb-3">{auction.sport}</p>
+                    
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+                      <span className="flex items-center gap-1">📅 {new Date(auction.startDate).toLocaleDateString()}</span>
+                      <span className="flex items-center gap-1">👥 {auction.teamIds?.length || 0} Teams</span>
+                      <span className="flex items-center gap-1">🏃 {auction.playerPool?.length || 0} Players</span>
+                    </div>
+
+                    {/* Teams Preview */}
+                    {auction.participatingTeams && auction.participatingTeams.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {auction.participatingTeams.slice(0, 4).map(team => (
+                          <div key={team.id} className="flex items-center gap-2 bg-slate-700/50 px-3 py-1 rounded-full">
+                            {team.logoUrl && <img src={team.logoUrl} alt={team.name} className="w-5 h-5 rounded-full" />}
+                            <span className="text-white text-sm">{team.name}</span>
+                          </div>
+                        ))}
+                        {auction.participatingTeams.length > 4 && (
+                          <span className="text-gray-500 text-sm px-2 py-1">+{auction.participatingTeams.length - 4} more</span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusBadge(auction.status)}`}>
-                      {auction.status}
-                    </span>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap gap-2">
                     {auction.status === 'READY' && (
+                      <button
+                        onClick={() => handleStartAuction(auction)}
+                        disabled={actionLoading === auction.id}
+                        className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all disabled:opacity-50"
+                      >
+                        🚀 Start Auction
+                      </button>
+                    )}
+                    
+                    {auction.status === 'LIVE' && (
                       <Link
                         to="/auctioneer/live"
-                        className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-all"
+                        className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold rounded-lg hover:from-red-600 hover:to-pink-700 transition-all animate-pulse"
                       >
-                        Start →
+                        🔴 Continue Live
                       </Link>
+                    )}
+
+                    {(auction.status === 'READY' || auction.status === 'SCHEDULED') && (
+                      <button
+                        onClick={() => handlePostponeAuction(auction)}
+                        disabled={actionLoading === auction.id}
+                        className="px-4 py-3 bg-yellow-600/20 text-yellow-400 border border-yellow-500/50 rounded-lg hover:bg-yellow-600/30 transition-all disabled:opacity-50"
+                      >
+                        ⏸️ Postpone
+                      </button>
+                    )}
+
+                    {auction.status !== 'COMPLETED' && (
+                      <button
+                        onClick={() => handleTerminateAuction(auction)}
+                        disabled={actionLoading === auction.id}
+                        className="px-4 py-3 bg-red-600/20 text-red-400 border border-red-500/50 rounded-lg hover:bg-red-600/30 transition-all disabled:opacity-50"
+                      >
+                        ⛔ Terminate
+                      </button>
                     )}
                   </div>
                 </div>

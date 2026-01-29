@@ -171,5 +171,109 @@ export const api = {
       console.error(`API Delete Error (${entity}):`, err);
       return false;
     }
+  },
+
+  // ===== AUCTION HISTORY API =====
+  
+  // Get all auction history (admin/auctioneer only)
+  getAuctionHistory: async (userRole: string, userId: string, sport?: string, auctioneerId?: string) => {
+    try {
+      const params = new URLSearchParams({
+        userRole,
+        userId
+      });
+      
+      if (sport) params.append('sport', sport);
+      if (auctioneerId) params.append('auctioneerId', auctioneerId);
+      
+      const response = await api.get(`/auction-history?${params.toString()}`);
+      return response;
+    } catch (err) {
+      console.error('Get auction history error:', err);
+      return { data: { success: false, history: [], total: 0 }, status: 500 };
+    }
+  },
+
+  // Get specific auction history details
+  getAuctionDetails: async (auctionId: string, userRole: string, userId: string) => {
+    try {
+      const params = new URLSearchParams({
+        userRole,
+        userId
+      });
+      
+      const response = await api.get(`/auction-history/${auctionId}?${params.toString()}`);
+      return response;
+    } catch (err) {
+      console.error('Get auction details error:', err);
+      return { data: { success: false, auction: null }, status: 500 };
+    }
+  },
+
+  // Get all active auction ledgers
+  getActiveLedgers: async (userRole: string, userId: string) => {
+    try {
+      const params = new URLSearchParams({
+        userRole,
+        userId
+      });
+      
+      const response = await api.get(`/auction-history/ledgers/active?${params.toString()}`);
+      return response;
+    } catch (err) {
+      console.error('Get active ledgers error:', err);
+      return { data: { success: false, ledgers: [], total: 0 }, status: 500 };
+    }
+  },
+
+  // Get specific auction ledger
+  getAuctionLedger: async (auctionId: string, userRole: string, userId: string) => {
+    try {
+      const params = new URLSearchParams({
+        userRole,
+        userId
+      });
+      
+      const response = await api.get(`/auction-history/ledgers/${auctionId}?${params.toString()}`);
+      return response;
+    } catch (err) {
+      console.error('Get auction ledger error:', err);
+      return { data: { success: false, ledger: null }, status: 500 };
+    }
+  },
+
+  // Get auction statistics
+  getAuctionStats: async (userRole: string, userId: string, sport?: string, auctioneerId?: string) => {
+    try {
+      const params = new URLSearchParams({
+        userRole,
+        userId
+      });
+      
+      if (sport) params.append('sport', sport);
+      if (auctioneerId) params.append('auctioneerId', auctioneerId);
+      
+      const response = await api.get(`/auction-history/stats?${params.toString()}`);
+      return response;
+    } catch (err) {
+      console.error('Get auction stats error:', err);
+      return { data: { success: false, stats: null }, status: 500 };
+    }
+  },
+
+  // ===== LIVE AUCTION API =====
+  
+  // Undo last bid
+  undoLastBid: async (userRole: string, userId: string) => {
+    try {
+      const response = await api.post('/live-auction/undo-bid', {
+        userRole,
+        userId
+      });
+      return response;
+    } catch (err) {
+      console.error('Undo bid error:', err);
+      return { data: { success: false, error: 'Failed to undo bid' }, status: 500 };
+    }
   }
 };
