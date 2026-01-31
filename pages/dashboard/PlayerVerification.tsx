@@ -110,13 +110,13 @@ export const PlayerVerification: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-slate-800/50 p-1 rounded-xl border border-slate-700">
+      <div className="flex space-x-1 bg-gray-100 dark:bg-slate-800/50 p-1 rounded-xl border border-gray-300 dark:border-slate-700">
         <button
           onClick={() => setActiveTab('pending')}
           className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
             activeTab === 'pending'
               ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-700/50'
           }`}
         >
           🕐 Pending Verification ({unverifiedPlayers.length})
@@ -126,7 +126,7 @@ export const PlayerVerification: React.FC = () => {
           className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
             activeTab === 'eligible'
               ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-700/50'
           }`}
         >
           ✅ Eligible for Auction ({eligiblePlayers.length})

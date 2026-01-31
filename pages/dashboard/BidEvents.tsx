@@ -97,8 +97,8 @@ const BidEvents: React.FC = () => {
     <div className="space-y-8">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
-        <h1 className="text-4xl font-black text-white mb-2">Bid Events</h1>
-        <p className="text-slate-400">Watch live auctions for {user?.sport?.toUpperCase()} and follow the bidding action</p>
+        <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-2">Bid Events</h1>
+        <p className="text-gray-600 dark:text-slate-400">Watch live auctions for {user?.sport?.toUpperCase()} and follow the bidding action</p>
       </div>
 
       {/* Auctions Grid */}
@@ -106,14 +106,14 @@ const BidEvents: React.FC = () => {
         {auctions.map((auction) => (
           <div
             key={auction.id}
-            className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl overflow-hidden backdrop-blur-xl"
+            className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl overflow-hidden backdrop-blur-xl shadow-sm"
           >
             {/* Auction Header */}
-            <div className="p-8 border-b border-blue-600/10">
+            <div className="p-8 border-b border-gray-200 dark:border-blue-600/10">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">{auction.name}</h2>
-                  <p className="text-slate-400">Scheduled for {new Date(auction.date).toLocaleDateString()}</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{auction.name}</h2>
+                  <p className="text-gray-600 dark:text-slate-400">Scheduled for {new Date(auction.date).toLocaleDateString()}</p>
                 </div>
                 <div className={`px-4 py-2 rounded-lg border font-semibold ${getStatusColor(auction.status)}`}>
                   {auction.status === 'LIVE' && '🔴 LIVE NOW'}
@@ -127,10 +127,10 @@ const BidEvents: React.FC = () => {
                 {auction.teams.map((team) => (
                   <div
                     key={team.id}
-                    className="px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg flex items-center gap-2"
+                    className="px-4 py-2 bg-gray-100 dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg flex items-center gap-2"
                   >
                     <span className="text-2xl">{team.logo}</span>
-                    <span className="text-white font-semibold">{team.name}</span>
+                    <span className="text-gray-900 dark:text-white font-semibold">{team.name}</span>
                   </div>
                 ))}
               </div>
@@ -138,19 +138,19 @@ const BidEvents: React.FC = () => {
 
             {/* Players Section */}
             <div className="p-8">
-              <h3 className="text-xl font-bold text-white mb-4">Players in Auction</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Players in Auction</h3>
 
               {selectedAuction === auction.id ? (
                 <div className="space-y-4">
                   {auction.players.map((player) => (
                     <div
                       key={player.id}
-                      className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-blue-600/30 transition-all"
+                      className="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl p-6 hover:border-primary-500 dark:hover:border-blue-600/30 transition-all shadow-sm"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            <h4 className="text-lg font-bold text-white">{player.name}</h4>
+                            <h4 className="text-lg font-bold text-gray-900 dark:text-white">{player.name}</h4>
                             <span className="text-2xl">{getPlayerStatusIcon(player.status)}</span>
                             <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
                               player.status === 'LIVE' ? 'bg-red-600/30 text-red-300' :
@@ -161,7 +161,7 @@ const BidEvents: React.FC = () => {
                               {player.status}
                             </span>
                           </div>
-                          <p className="text-slate-400 text-sm mb-4">{player.role}</p>
+                          <p className="text-gray-600 dark:text-slate-400 text-sm mb-4">{player.role}</p>
 
                           <div className="grid grid-cols-3 gap-4">
                             <div>

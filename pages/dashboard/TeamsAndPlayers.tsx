@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from '../../components/ThemeToggle';
 
 interface Team {
   id: string;
@@ -189,19 +190,23 @@ const TeamsAndPlayers: React.FC = () => {
     }
   };
 
-  const getSportEmoji = (sport: string) => {
-    const emojis: { [key: string]: string } = {
-      football: '⚽', cricket: '🏏', basketball: '🏀', baseball: '⚾', volleyball: '🏐'
+  const getSportIcon = (sport: string) => {
+    const sportEmojis: { [key: string]: string } = {
+      football: '⚽',
+      cricket: '🏏', 
+      basketball: '🏀',
+      baseball: '⚾',
+      volleyball: '🏐'
     };
-    return emojis[sport] || '🏆';
+    return sportEmojis[sport] || '⚽';
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl">
-        <h1 className="text-3xl font-black text-white mb-2">👥 Teams & Players</h1>
-        <p className="text-slate-400">Manage teams and players for your auctions</p>
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Teams & Players Management</h1>
+        <p className="text-gray-600 dark:text-gray-400">Manage teams and players for your auctions</p>
       </div>
 
       {/* Sport Selector */}
@@ -210,45 +215,48 @@ const TeamsAndPlayers: React.FC = () => {
           <button
             key={sport}
             onClick={() => setSelectedSport(sport)}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
               selectedSport === sport
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                ? 'bg-primary-600 text-white shadow-sm'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
           >
-            {getSportEmoji(sport)} {sport.charAt(0).toUpperCase() + sport.slice(1)}
+            <span className="inline-flex items-center gap-2">
+              <span className="text-lg">{getSportIcon(sport)}</span>
+              {sport.charAt(0).toUpperCase() + sport.slice(1)}
+            </span>
           </button>
         ))}
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-slate-800/50 p-1 rounded-xl border border-slate-700">
+      <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setActiveTab('teams')}
-          className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+          className={`flex-1 py-3 px-6 rounded-md font-medium transition-all ${
             activeTab === 'teams'
-              ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'
           }`}
         >
-          🏆 Teams ({teams.length})
+          Teams ({teams.length})
         </button>
         <button
           onClick={() => setActiveTab('players')}
-          className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+          className={`flex-1 py-3 px-6 rounded-md font-medium transition-all ${
             activeTab === 'players'
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'
           }`}
         >
-          ⭐ Players ({players.length})
+          Players ({players.length})
         </button>
         <button
           onClick={() => setActiveTab('verification')}
-          className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+          className={`flex-1 py-3 px-6 rounded-md font-medium transition-all ${
             activeTab === 'verification'
-              ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'
           }`}
         >
           ✅ Verification ({unverifiedPlayers.length})
@@ -274,7 +282,7 @@ const TeamsAndPlayers: React.FC = () => {
           {showTeamForm && (
             <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6">
               <h3 className="text-xl font-bold text-white mb-4">
-                {editingTeamId ? '✏️ Edit Team' : '🏆 Create New Team'}
+                {editingTeamId ? 'Edit Team' : 'Create New Team'}
               </h3>
               <form onSubmit={handleTeamSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -344,7 +352,11 @@ const TeamsAndPlayers: React.FC = () => {
                         {team.logoUrl ? (
                           <img src={team.logoUrl} alt={team.name} className="w-12 h-12 rounded-lg object-cover" />
                         ) : (
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-2xl">🏆</div>
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                            </svg>
+                          </div>
                         )}
                         <div>
                           <h3 className="text-xl font-bold text-white">{team.name}</h3>
@@ -391,7 +403,11 @@ const TeamsAndPlayers: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-16 bg-slate-800/30 border border-slate-700 rounded-2xl">
-              <div className="text-6xl mb-4">🏆</div>
+              <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-4 mx-auto">
+                <svg className="w-8 h-8 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
               <p className="text-slate-400 text-lg font-semibold">No teams yet</p>
               <p className="text-slate-500 text-sm mt-2">Create teams to start the auction</p>
             </div>

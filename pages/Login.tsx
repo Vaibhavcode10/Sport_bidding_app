@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, UserRole } from '../context/AuthContext';
 import { api } from '../services/api';
+import ThemeToggle from '../components/ThemeToggle';
 
 interface AuctioneerAvailability {
   sport: string;
@@ -29,10 +30,28 @@ const Login: React.FC = () => {
 
   const sports = ['football', 'basketball', 'cricket', 'baseball', 'volleyball'];
 
-  const roles: { id: UserRole; label: string; description: string; icon: string; canRegister: boolean }[] = [
-    { id: 'admin', label: 'Admin', description: 'Create auctions, assign auctioneers & manage teams', icon: '⚙️', canRegister: false },
-    { id: 'player', label: 'Player', description: 'Manage your profile & participate in auctions', icon: '👤', canRegister: true },
-    { id: 'auctioneer', label: 'Auctioneer', description: 'Conduct live auctions (neutral role)', icon: '🎙️', canRegister: true },
+  const roles: { id: UserRole; label: string; description: string; iconPath: string; canRegister: boolean }[] = [
+    { 
+      id: 'admin', 
+      label: 'Admin', 
+      description: 'Create auctions, assign auctioneers & manage teams', 
+      iconPath: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', 
+      canRegister: false 
+    },
+    { 
+      id: 'player', 
+      label: 'Player', 
+      description: 'Manage your profile & participate in auctions', 
+      iconPath: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', 
+      canRegister: true 
+    },
+    { 
+      id: 'auctioneer', 
+      label: 'Auctioneer', 
+      description: 'Conduct live auctions (neutral role)', 
+      iconPath: 'M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2h4a1 1 0 010 2h-1v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6H3a1 1 0 010-2h4zM9 3v1h2V3H9zm0 5a1 1 0 112 0v6a1 1 0 11-2 0V8z M7 8a1 1 0 012 0v6a1 1 0 11-2 0V8z M13 8a1 1 0 012 0v6a1 1 0 11-2 0V8z', 
+      canRegister: true 
+    },
   ];
 
   // Check auctioneer availability when in register mode and auctioneer role selected
@@ -115,15 +134,16 @@ const Login: React.FC = () => {
   const canShowRegister = selectedRole !== 'admin';
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Subtle Grid Pattern */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none" 
-           style={{backgroundImage: 'radial-gradient(#475569 1px, transparent 1px)', backgroundSize: '24px 24px'}}></div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 flex items-center justify-center p-6">
+      {/* Theme Toggle */}
+      <div className="absolute top-6 right-6">
+        <ThemeToggle />
+      </div>
 
-      <div className="w-full max-w-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-10 rounded-3xl shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] z-10">
+      <div className="w-full max-w-2xl bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 p-10 rounded-lg">
         <div className="flex justify-center mb-8">
-          <div className={`p-4 rounded-2xl border ${isRegisterMode ? 'bg-green-600/10 border-green-600/20' : 'bg-blue-600/10 border-blue-600/20'}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" className={`h-10 w-10 ${isRegisterMode ? 'text-green-500' : 'text-blue-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className={`p-4 rounded-lg border ${isRegisterMode ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-10 w-10 ${isRegisterMode ? 'text-green-600 dark:text-green-400' : 'text-primary-600 dark:text-primary-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {isRegisterMode ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               ) : (
@@ -133,11 +153,11 @@ const Login: React.FC = () => {
           </div>
         </div>
 
-        <h2 className="text-3xl font-black text-center mb-2 tracking-tight">
-          {isRegisterMode ? 'Create Account' : 'Sports Auction'}
+        <h2 className="text-3xl font-bold text-center mb-2 text-gray-900 dark:text-white">
+          {isRegisterMode ? 'Create Account' : 'System Access'}
         </h2>
-        <p className="text-slate-500 text-center mb-8 text-sm">
-          {isRegisterMode ? 'Register as a new player or auctioneer' : 'Select your role and login'}
+        <p className="text-gray-600 dark:text-gray-400 text-center mb-8 text-sm">
+          {isRegisterMode ? 'Register as a new player or auctioneer' : 'Select your role and authenticate'}
         </p>
 
         {error && (
@@ -161,19 +181,41 @@ const Login: React.FC = () => {
                   }
                 }}
                 disabled={isDisabled}
-                className={`p-4 rounded-xl border-2 transition-all ${
+                className={`p-4 rounded-lg border-2 transition-all ${
                   isDisabled 
-                    ? 'border-slate-800 bg-slate-900/50 opacity-50 cursor-not-allowed'
+                    ? 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700/50 opacity-50 cursor-not-allowed'
                     : selectedRole === role.id
-                      ? isRegisterMode ? 'border-green-500 bg-green-600/10' : 'border-blue-500 bg-blue-600/10'
-                      : 'border-slate-700 bg-slate-800/30 hover:border-slate-600'
+                      ? isRegisterMode 
+                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+                        : 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                      : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/30 hover:border-gray-300 dark:hover:border-gray-500'
                 }`}
               >
-                <div className="text-3xl mb-2">{role.icon}</div>
-                <p className="font-bold text-white">{role.label}</p>
-                <p className="text-xs text-slate-400 mt-1">{role.description}</p>
+                <div className="mb-3 flex justify-center">
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className={`h-8 w-8 ${
+                      isDisabled 
+                        ? 'text-gray-400 dark:text-gray-500'
+                        : selectedRole === role.id
+                          ? isRegisterMode ? 'text-green-600 dark:text-green-400' : 'text-primary-600 dark:text-primary-400'
+                          : 'text-gray-500 dark:text-gray-400'
+                    }`} 
+                    fill="none" 
+                    viewBox="0 0 20 20" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={role.iconPath} />
+                  </svg>
+                </div>
+                <p className={`font-semibold ${
+                  isDisabled 
+                    ? 'text-gray-500 dark:text-gray-400' 
+                    : 'text-gray-900 dark:text-white'
+                }`}>{role.label}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{role.description}</p>
                 {isRegisterMode && !role.canRegister && (
-                  <p className="text-xs text-red-400 mt-1">Login only</p>
+                  <p className="text-xs text-red-500 dark:text-red-400 mt-1">Authentication Only</p>
                 )}
               </button>
             );
@@ -182,18 +224,20 @@ const Login: React.FC = () => {
 
         {/* Sport Selection for Player and Auctioneer */}
         {(selectedRole === 'auctioneer' || selectedRole === 'player') && (
-          <div className="mb-6 p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
-            <label className="block text-sm font-bold text-slate-300 uppercase tracking-widest ml-1 mb-3">Select Sport</label>
+          <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Select Sport</label>
             <div className="grid grid-cols-5 gap-2">
               {sports.map((sport) => (
                 <button
                   key={sport}
                   type="button"
                   onClick={() => setSelectedSport(sport)}
-                  className={`py-2 px-3 rounded-lg font-semibold text-sm transition-all ${
+                  className={`py-2 px-3 rounded-lg font-medium text-sm transition-all ${
                     selectedSport === sport
-                      ? isRegisterMode ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? isRegisterMode 
+                        ? 'bg-green-600 text-white' 
+                        : 'bg-primary-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
                   }`}
                 >
                   {sport.charAt(0).toUpperCase() + sport.slice(1)}
@@ -203,25 +247,41 @@ const Login: React.FC = () => {
             
             {/* Auctioneer Slot Availability Display */}
             {isRegisterMode && selectedRole === 'auctioneer' && auctioneerAvailability && (
-              <div className={`mt-4 p-3 rounded-lg border ${auctioneerAvailability.isFull ? 'bg-red-600/20 border-red-600/30' : 'bg-amber-600/20 border-amber-600/30'}`}>
+              <div className={`mt-4 p-3 rounded-lg border ${
+                auctioneerAvailability.isFull 
+                  ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' 
+                  : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+              }`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className={`font-bold ${auctioneerAvailability.isFull ? 'text-red-300' : 'text-amber-300'}`}>
+                    <p className={`font-semibold ${
+                      auctioneerAvailability.isFull 
+                        ? 'text-red-700 dark:text-red-300' 
+                        : 'text-amber-700 dark:text-amber-300'
+                    }`}>
                       {auctioneerAvailability.isFull 
-                        ? '🚫 No Slots Available' 
-                        : `⚡ ${auctioneerAvailability.availableSlots} of ${auctioneerAvailability.maxAllowed} Slots Available`}
+                        ? 'No Positions Available' 
+                        : `${auctioneerAvailability.availableSlots} of ${auctioneerAvailability.maxAllowed} Positions Available`}
                     </p>
-                    <p className={`text-xs ${auctioneerAvailability.isFull ? 'text-red-400' : 'text-amber-400'}`}>
+                    <p className={`text-xs ${
+                      auctioneerAvailability.isFull 
+                        ? 'text-red-600 dark:text-red-400' 
+                        : 'text-amber-600 dark:text-amber-400'
+                    }`}>
                       {auctioneerAvailability.isFull 
                         ? `Maximum ${auctioneerAvailability.maxAllowed} auctioneers already registered for ${selectedSport}`
-                        : `Only ${auctioneerAvailability.maxAllowed} auctioneers allowed per sport`}
+                        : `Maximum ${auctioneerAvailability.maxAllowed} auctioneers allowed per sport`}
                     </p>
                   </div>
                   <div className="flex gap-1">
                     {[...Array(auctioneerAvailability.maxAllowed)].map((_, i) => (
                       <div 
                         key={i} 
-                        className={`w-3 h-3 rounded-full ${i < auctioneerAvailability.currentCount ? 'bg-slate-500' : 'bg-green-500'}`}
+                        className={`w-3 h-3 rounded-full ${
+                          i < auctioneerAvailability.currentCount 
+                            ? 'bg-gray-400 dark:bg-gray-500' 
+                            : 'bg-green-500'
+                        }`}
                         title={i < auctioneerAvailability.currentCount ? 'Filled' : 'Available'}
                       />
                     ))}
@@ -235,10 +295,10 @@ const Login: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {isRegisterMode && (
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Full Name (Optional)</label>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Full Name (Optional)</label>
               <input 
                 type="text" 
-                className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all text-white placeholder:text-slate-600"
+                className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 placeholder="Enter your full name..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -247,10 +307,10 @@ const Login: React.FC = () => {
           )}
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Username</label>
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Username</label>
             <input 
               type="text" 
-              className={`w-full bg-slate-800/50 border border-slate-700 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 ${isRegisterMode ? 'focus:ring-green-500' : 'focus:ring-blue-500'} transition-all text-white placeholder:text-slate-600`}
+              className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder={isRegisterMode ? 'Choose a username...' : 'Enter username or email...'}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -260,10 +320,10 @@ const Login: React.FC = () => {
 
           {isRegisterMode && (
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Email</label>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Email</label>
               <input 
                 type="email" 
-                className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all text-white placeholder:text-slate-600"
+                className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 placeholder="Enter your email..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -273,10 +333,10 @@ const Login: React.FC = () => {
           )}
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Password</label>
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Password</label>
             <input 
               type="password" 
-              className={`w-full bg-slate-800/50 border border-slate-700 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 ${isRegisterMode ? 'focus:ring-green-500' : 'focus:ring-blue-500'} transition-all text-white placeholder:text-slate-600`}
+              className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -286,10 +346,10 @@ const Login: React.FC = () => {
 
           {isRegisterMode && (
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Confirm Password</label>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Confirm Password</label>
               <input 
                 type="password" 
-                className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all text-white placeholder:text-slate-600"
+                className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -301,26 +361,36 @@ const Login: React.FC = () => {
           <button 
             type="submit"
             disabled={isLoading || (isRegisterMode && selectedRole === 'auctioneer' && auctioneerAvailability?.isFull)}
-            className={`w-full ${isRegisterMode ? 'bg-green-600 hover:bg-green-500 shadow-green-900/30 hover:shadow-green-600/20' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/30 hover:shadow-blue-600/20'} disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all shadow-lg active:scale-[0.98]`}
+            className={`w-full font-semibold py-4 rounded-lg text-white transition-all focus:outline-none focus:ring-4 shadow-lg ${
+              isLoading || (isRegisterMode && selectedRole === 'auctioneer' && auctioneerAvailability?.isFull)
+                ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                : isRegisterMode
+                  ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500/50 hover:shadow-xl'
+                  : 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500/50 hover:shadow-xl'
+            }`}
           >
             {isLoading 
-              ? (isRegisterMode ? 'Creating Account...' : 'Logging in...') 
+              ? (isRegisterMode ? 'Creating Account...' : 'Authenticating...') 
               : (isRegisterMode && selectedRole === 'auctioneer' && auctioneerAvailability?.isFull)
                 ? 'Registration Closed'
-                : (isRegisterMode ? 'Create Account' : 'Login')}
+                : (isRegisterMode ? 'Create Account' : 'Sign In')}
           </button>
         </form>
 
         {/* Toggle Login/Register */}
         {canShowRegister && (
           <div className="mt-6 text-center">
-            <p className="text-slate-500 text-sm">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
               {isRegisterMode ? 'Already have an account?' : "Don't have an account?"}
               <button 
                 onClick={toggleMode}
-                className={`ml-2 font-bold ${isRegisterMode ? 'text-blue-400 hover:text-blue-300' : 'text-green-400 hover:text-green-300'} transition-colors`}
+                className={`ml-2 font-semibold ${
+                  isRegisterMode 
+                    ? 'text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300' 
+                    : 'text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300'
+                } transition-colors`}
               >
-                {isRegisterMode ? 'Login' : 'Register'}
+                {isRegisterMode ? 'Sign In' : 'Register'}
               </button>
             </p>
           </div>
@@ -328,9 +398,9 @@ const Login: React.FC = () => {
         
         <button 
           onClick={() => navigate('/')}
-          className="w-full mt-6 text-slate-500 hover:text-slate-300 text-sm transition-colors"
+          className="w-full mt-6 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm transition-colors"
         >
-          Cancel and return home
+          Return to Home
         </button>
       </div>
     </div>

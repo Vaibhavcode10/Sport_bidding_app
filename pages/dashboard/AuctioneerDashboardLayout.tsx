@@ -47,7 +47,7 @@ const AuctioneerDashboardLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-slate-100">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-blue-950 dark:to-slate-950 text-gray-900 dark:text-slate-100">
       {/* Animated Background Blobs */}
       <div className="fixed inset-0 opacity-20 pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
@@ -56,7 +56,7 @@ const AuctioneerDashboardLayout: React.FC = () => {
       </div>
 
       {/* Sidebar */}
-      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-gradient-to-b from-slate-950/95 to-slate-900/95 backdrop-blur-xl border-r border-blue-600/20 flex flex-col fixed left-0 top-0 h-screen z-30 transition-all duration-300`}>
+      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-white dark:bg-gradient-to-b dark:from-slate-950/95 dark:to-slate-900/95 backdrop-blur-xl border-r border-gray-200 dark:border-blue-600/20 flex flex-col fixed left-0 top-0 h-screen z-30 transition-all duration-300 shadow-sm dark:shadow-none`}>
         <div className="p-6 border-b border-blue-600/20 bg-gradient-to-r from-blue-600/10 to-purple-600/10">
           <div className="flex items-center justify-between">
             <div className={`flex items-center gap-3 mb-2 ${sidebarCollapsed ? 'justify-center' : ''}`}>
@@ -69,12 +69,12 @@ const AuctioneerDashboardLayout: React.FC = () => {
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className="p-1 hover:bg-slate-700/50 rounded-lg transition-colors"
             >
-              <span className="text-slate-400 text-sm">
+              <span className="text-gray-500 dark:text-slate-400 text-sm">
                 {sidebarCollapsed ? '→' : '←'}
               </span>
             </button>
           </div>
-          {!sidebarCollapsed && <p className="text-xs text-slate-400">Auction Control</p>}
+          {!sidebarCollapsed && <p className="text-xs text-gray-500 dark:text-slate-400">Auction Control</p>}
         </div>
         
         <nav className="flex-1 p-4 space-y-3">
@@ -87,7 +87,7 @@ const AuctioneerDashboardLayout: React.FC = () => {
                 `block px-4 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${
                   isActive 
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50 scale-105' 
-                    : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
+                    : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white'
                 } ${sidebarCollapsed ? 'text-center' : ''}`
               }
               title={sidebarCollapsed ? item.name : ''}
@@ -100,15 +100,15 @@ const AuctioneerDashboardLayout: React.FC = () => {
 
         <div className="p-4 border-t border-blue-600/20 space-y-3">
           {!sidebarCollapsed && (
-            <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700">
-              <p className="text-xs text-slate-400">Logged in as</p>
-              <p className="text-sm font-bold text-white mt-1">{user?.username}</p>
-              <p className="text-xs text-slate-500 mt-1">Auctioneer (Neutral)</p>
+            <div className="p-3 bg-white dark:bg-slate-800/30 rounded-lg border border-gray-200 dark:border-slate-700">
+              <p className="text-xs text-gray-600 dark:text-slate-400">Logged in as</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{user?.username}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">Auctioneer (Neutral)</p>
             </div>
           )}
           <button 
             onClick={handleLogout}
-            className={`w-full px-4 py-2 text-sm text-slate-400 hover:text-red-400 transition-colors font-semibold ${
+            className={`w-full px-4 py-2 text-sm text-gray-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors font-semibold ${
               sidebarCollapsed ? 'text-center' : ''
             }`}
             title={sidebarCollapsed ? 'Logout' : ''}
@@ -120,14 +120,14 @@ const AuctioneerDashboardLayout: React.FC = () => {
 
       {/* Content Area */}
       <main className="flex-1 bg-transparent relative z-10">
-        <header className={`h-20 bg-gradient-to-r from-slate-900/80 to-blue-900/50 backdrop-blur-xl border-b border-blue-600/20 flex items-center justify-between px-8 fixed top-0 right-0 z-20 shadow-lg transition-all duration-300 ${
+        <header className={`h-20 bg-white/95 dark:bg-gradient-to-r dark:from-slate-900/80 dark:to-blue-900/50 backdrop-blur-xl border-b border-gray-200 dark:border-blue-600/20 flex items-center justify-between px-8 fixed top-0 right-0 z-20 shadow-sm dark:shadow-lg transition-all duration-300 ${
           sidebarCollapsed ? 'left-16' : 'left-64'
         }`}>
           <div>
             <h2 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Auctioneer Dashboard
             </h2>
-            <p className="text-xs text-slate-400 mt-1">Conduct live auctions as a neutral host</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Conduct live auctions as a neutral host</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -137,8 +137,8 @@ const AuctioneerDashboardLayout: React.FC = () => {
               </div>
             </div>
             <div>
-              <p className="text-sm font-bold text-white">{user?.username}</p>
-              <p className="text-xs text-slate-400">Auctioneer (Neutral)</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">{user?.username}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Auctioneer (Neutral)</p>
             </div>
           </div>
         </header>

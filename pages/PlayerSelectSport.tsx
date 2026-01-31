@@ -20,9 +20,9 @@ const PlayerSelectSport: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-slate-100 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-blue-950 dark:to-slate-950 text-gray-900 dark:text-slate-100 p-8">
       {/* Background Blobs */}
-      <div className="fixed inset-0 opacity-20 pointer-events-none">
+      <div className="fixed inset-0 opacity-10 dark:opacity-20 pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
       </div>
@@ -32,7 +32,7 @@ const PlayerSelectSport: React.FC = () => {
           <h1 className="text-5xl font-black mb-3 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             Select Your Sport
           </h1>
-          <p className="text-slate-400 text-lg">Choose the sport you want to participate in</p>
+          <p className="text-gray-600 dark:text-slate-400 text-lg">Choose the sport you want to participate in</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -58,7 +58,7 @@ const PlayerSelectSport: React.FC = () => {
         <div className="mt-12 text-center">
           <button
             onClick={() => navigate('/login')}
-            className="text-slate-400 hover:text-slate-300 transition-colors"
+            className="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 transition-colors"
           >
             ← Back to Login
           </button>

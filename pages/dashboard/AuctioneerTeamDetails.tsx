@@ -54,106 +54,106 @@ const AuctioneerTeamDetails: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
-        <h1 className="text-4xl font-black text-white mb-2">Team Management</h1>
-        <p className="text-slate-400">Edit team information and manage squad details</p>
+      <div className="bg-white dark:bg-gradient-to-r dark:from-blue-600/10 dark:to-purple-600/10 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl shadow-sm">
+        <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-2">Team Management</h1>
+        <p className="text-gray-600 dark:text-slate-400">Edit team information and manage squad details</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {isEditing ? (
-            <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl space-y-6">
-              <h3 className="text-xl font-bold text-white">Edit Team Details</h3>
+            <div className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl space-y-6 shadow-sm">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Edit Team Details</h3>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2">Team Name</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Team Name</label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">City</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">City</label>
                   <input
                     type="text"
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Founded Year</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Founded Year</label>
                   <input
                     type="text"
                     name="founded"
                     value={formData.founded}
                     onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Coach Name</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Coach Name</label>
                   <input
                     type="text"
                     name="coach"
                     value={formData.coach}
                     onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Coach Email</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Coach Email</label>
                   <input
                     type="email"
                     name="coachEmail"
                     value={formData.coachEmail}
                     onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Stadium Name</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Stadium Name</label>
                   <input
                     type="text"
                     name="stadium"
                     value={formData.stadium}
                     onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Capacity</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Capacity</label>
                   <input
                     type="number"
                     name="capacity"
                     value={formData.capacity}
                     onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2">Description</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Description</label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   placeholder="Team description..."
                 />
               </div>
@@ -161,13 +161,13 @@ const AuctioneerTeamDetails: React.FC = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={handleSave}
-                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all"
+                  className="flex-1 bg-primary-600 hover:bg-primary-500 text-white font-bold py-3 rounded-lg transition-all"
                 >
                   ✓ Save Changes
                 </button>
                 <button
                   onClick={handleCancel}
-                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-all"
+                  className="flex-1 bg-gray-500 dark:bg-slate-700 hover:bg-gray-400 dark:hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-all"
                 >
                   Cancel
                 </button>
@@ -175,9 +175,9 @@ const AuctioneerTeamDetails: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
+              <div className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
                 <div className="flex justify-between items-start mb-6">
-                  <h3 className="text-xl font-bold text-white">Team Details</h3>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">Team Details</h3>
                   <button
                     onClick={() => setIsEditing(true)}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-all"
@@ -241,15 +241,15 @@ const AuctioneerTeamDetails: React.FC = () => {
             <h3 className="text-lg font-bold text-white mb-4">Squad Stats</h3>
             <div className="space-y-4">
               <div>
-                <p className="text-slate-400 text-sm mb-2">Total Players</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-2">Total Players</p>
                 <p className="text-4xl font-black text-blue-400">{teamMembers.length}</p>
               </div>
               <div>
-                <p className="text-slate-400 text-sm mb-2">Active Players</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-2">Active Players</p>
                 <p className="text-3xl font-bold text-green-400">{activeMembers}</p>
               </div>
               <div>
-                <p className="text-slate-400 text-sm mb-2">Inactive Players</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-2">Inactive Players</p>
                 <p className="text-3xl font-bold text-orange-400">{teamMembers.length - activeMembers}</p>
               </div>
             </div>
@@ -259,16 +259,16 @@ const AuctioneerTeamDetails: React.FC = () => {
             <h3 className="text-lg font-bold text-white mb-4">Quick Info</h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-slate-400">Stadium:</span>
+                <span className="text-gray-500 dark:text-slate-400">Stadium:</span>
                 <span className="text-white font-semibold">{teamData.stadium}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Capacity:</span>
+                <span className="text-gray-500 dark:text-slate-400">Capacity:</span>
                 <span className="text-white font-semibold">{teamData.capacity.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Coach:</span>
-                <span className="text-white font-semibold">{teamData.coach}</span>
+                <span className="text-gray-500 dark:text-slate-400">Coach:</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{teamData.coach}</span>
               </div>
             </div>
           </div>
@@ -276,27 +276,27 @@ const AuctioneerTeamDetails: React.FC = () => {
       </div>
 
       {/* Squad Members */}
-      <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
-        <h3 className="text-xl font-bold text-white mb-6">Current Squad</h3>
+      <div className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl shadow-sm">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Current Squad</h3>
         <div className="space-y-3">
           {teamMembers.map((member) => (
             <div
               key={member.id}
-              className="flex items-center justify-between p-4 bg-slate-800/50 border border-slate-700 rounded-lg hover:border-blue-600/30 transition-all"
+              className="flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-primary-500 dark:hover:border-blue-600/30 transition-all shadow-sm"
             >
               <div>
-                <p className="text-white font-semibold">{member.name}</p>
-                <p className="text-slate-400 text-sm">{member.role}</p>
+                <p className="text-gray-900 dark:text-white font-semibold">{member.name}</p>
+                <p className="text-gray-600 dark:text-slate-400 text-sm">{member.role}</p>
               </div>
               <div className="flex items-center gap-4">
                 <span className={`text-xs px-3 py-1 rounded-full font-bold ${
                   member.status === 'ACTIVE'
-                    ? 'bg-green-600/30 text-green-300'
-                    : 'bg-orange-600/30 text-orange-300'
+                    ? 'bg-green-100 dark:bg-green-600/30 text-green-600 dark:text-green-300'
+                    : 'bg-orange-100 dark:bg-orange-600/30 text-orange-600 dark:text-orange-300'
                 }`}>
                   {member.status}
                 </span>
-                <p className="text-slate-400 text-sm">Joined: {new Date(member.joinDate).toLocaleDateString()}</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm">Joined: {new Date(member.joinDate).toLocaleDateString()}</p>
               </div>
             </div>
           ))}

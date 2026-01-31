@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { BiddingRequestProvider } from './context/BiddingRequestContext';
 import { LiveAuctionProvider } from './context/LiveAuctionContext';
@@ -25,10 +26,11 @@ import AuctionHistoryWrapper from './pages/dashboard/AuctionHistoryWrapper';
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <BiddingRequestProvider>
-        <LiveAuctionProvider>
-          <BrowserRouter>
+    <ThemeProvider>
+      <AuthProvider>
+        <BiddingRequestProvider>
+          <LiveAuctionProvider>
+            <BrowserRouter>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
@@ -74,10 +76,10 @@ const App: React.FC = () => {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
-        </LiveAuctionProvider>
-      </BiddingRequestProvider>
-    </AuthProvider>
+          </LiveAuctionProvider>
+        </BiddingRequestProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
-
 export default App;

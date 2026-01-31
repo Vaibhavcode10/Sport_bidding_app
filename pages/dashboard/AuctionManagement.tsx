@@ -298,9 +298,9 @@ export const AuctionManagement: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 border border-purple-600/20 rounded-2xl p-8 backdrop-blur-xl">
-        <h1 className="text-4xl font-black text-white mb-2">🏆 Auction Management</h1>
-        <p className="text-slate-400">Create and manage auctions</p>
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Auction Management</h1>
+        <p className="text-gray-600 dark:text-gray-400">Create and manage auctions</p>
       </div>
 
       {/* Sport Selector */}
@@ -309,10 +309,10 @@ export const AuctionManagement: React.FC = () => {
           <button
             key={sport}
             onClick={() => setSelectedSport(sport)}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
               selectedSport === sport
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                ? 'bg-primary-600 text-white shadow-sm'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
           >
             {getSportEmoji(sport)} {sport.charAt(0).toUpperCase() + sport.slice(1)}
@@ -325,7 +325,7 @@ export const AuctionManagement: React.FC = () => {
       {/* Create Auction Button */}
       <button
         onClick={() => setShowCreateModal(true)}
-        className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-xl font-bold text-lg transition-all transform hover:scale-105"
+        className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
       >
         ➕ Create New Auction for {selectedSport.charAt(0).toUpperCase() + selectedSport.slice(1)}
       </button>
@@ -339,17 +339,17 @@ export const AuctionManagement: React.FC = () => {
               <p className="text-slate-400 mt-4">Loading auctions...</p>
             </div>
           ) : auctions.length === 0 ? (
-            <div className="text-center py-16 bg-gradient-to-br from-slate-800/30 to-slate-900/30 border border-slate-700 rounded-2xl">
-              <div className="text-6xl mb-4">📭</div>
-              <p className="text-slate-400 text-lg font-semibold">No auctions yet</p>
-              <p className="text-slate-500 text-sm mt-2">Create your first auction for {selectedSport}</p>
+            <div className="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div className="text-6xl mb-4">💭</div>
+              <p className="text-gray-600 dark:text-gray-400 text-lg font-medium">No auctions yet</p>
+              <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Create your first auction for {selectedSport}</p>
             </div>
           ) : (
             <div className="grid gap-6">
               {auctions.map(auction => (
                 <div
                   key={auction.id}
-                  className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700 rounded-2xl p-6 hover:border-blue-500/50 transition-all"
+                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:border-primary-500 dark:hover:border-primary-400 transition-all shadow-sm hover:shadow-md"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-4">
@@ -455,71 +455,71 @@ export const AuctionManagement: React.FC = () => {
       {/* Create Auction Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-white mb-4">Create New Auction</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Create New Auction</h2>
             
             <form onSubmit={handleCreateAuction} className="space-y-4">
               <div>
-                <label className="block text-slate-400 text-sm mb-1">Auction Name</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Auction Name</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 text-sm mb-1">Description</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Description</label>
                 <textarea
                   value={formData.description}
                   onChange={e => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 text-sm mb-1">Auction Logo URL (optional)</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Auction Logo URL (optional)</label>
                 <input
                   type="url"
                   value={formData.logoUrl}
                   onChange={e => setFormData({...formData, logoUrl: e.target.value})}
                   placeholder="https://example.com/logo.png"
-                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                 />
                 {formData.logoUrl && (
                   <div className="mt-2 flex items-center space-x-2">
                     <img 
                       src={formData.logoUrl} 
                       alt="Auction logo preview" 
-                      className="w-12 h-12 rounded-lg object-cover border border-slate-600"
+                      className="w-12 h-12 rounded-lg object-cover border border-gray-300 dark:border-gray-600"
                       onError={(e) => (e.currentTarget.style.display = 'none')}
                     />
-                    <span className="text-slate-400 text-xs">Preview</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-xs">Preview</span>
                   </div>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-400 text-sm mb-1">Start Date</label>
+                  <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Start Date</label>
                   <input
                     type="datetime-local"
                     value={formData.startDate}
                     onChange={e => setFormData({...formData, startDate: e.target.value})}
-                    className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-400 text-sm mb-1">End Date</label>
+                  <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">End Date</label>
                   <input
                     type="datetime-local"
                     value={formData.endDate}
                     onChange={e => setFormData({...formData, endDate: e.target.value})}
-                    className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                     required
                   />
                 </div>
@@ -527,38 +527,38 @@ export const AuctionManagement: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-slate-400 text-sm mb-1">Min Bid Increment</label>
+                  <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Min Bid Increment</label>
                   <input
                     type="number"
                     value={formData.minBidIncrement}
                     onChange={e => setFormData({...formData, minBidIncrement: parseInt(e.target.value)})}
-                    className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-400 text-sm mb-1">Max Players/Team</label>
+                  <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Max Players/Team</label>
                   <input
                     type="number"
                     value={formData.maxPlayersPerTeam}
                     onChange={e => setFormData({...formData, maxPlayersPerTeam: parseInt(e.target.value)})}
-                    className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-400 text-sm mb-1">Bid Time (sec)</label>
+                  <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Bid Time (sec)</label>
                   <input
                     type="number"
                     value={formData.bidTimeLimit}
                     onChange={e => setFormData({...formData, bidTimeLimit: parseInt(e.target.value)})}
-                    className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Team Selection */}
               <div>
-                <label className="block text-slate-400 text-sm mb-2">Select Teams (minimum 2 teams)</label>
-                <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto border border-slate-600 rounded-lg p-3">
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Select Teams (minimum 2 teams)</label>
+                <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-800">
                   {teams.map(team => (
                     <div key={team.id} className="flex items-center space-x-3">
                       <input
@@ -571,32 +571,32 @@ export const AuctionManagement: React.FC = () => {
                             : formData.selectedTeams.filter(id => id !== team.id);
                           setFormData({...formData, selectedTeams: updatedTeams});
                         }}
-                        className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500"
+                        className="w-4 h-4 text-primary-600 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
                       />
                       <label htmlFor={`team-${team.id}`} className="flex items-center space-x-2 cursor-pointer">
                         {team.logoUrl && (
                           <img src={team.logoUrl} alt={team.name} className="w-8 h-8 rounded" />
                         )}
-                        <span className="text-white">{team.name}</span>
+                        <span className="text-gray-900 dark:text-white">{team.name}</span>
                       </label>
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Selected: {formData.selectedTeams.length} team(s)
                 </p>
               </div>
 
               {/* Verified Players Selection */}
               <div>
-                <label className="block text-slate-400 text-sm mb-2">
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">
                   Select Verified Players for Auction Pool
-                  <span className="text-green-400 ml-2">({verifiedPlayers.length} available)</span>
+                  <span className="text-green-500 dark:text-green-400 ml-2">({verifiedPlayers.length} available)</span>
                 </label>
                 {verifiedPlayers.length === 0 ? (
                   <div className="p-4 bg-yellow-600/10 border border-yellow-600/30 rounded-lg text-center">
-                    <p className="text-yellow-300 text-sm">⚠️ No verified players available for {selectedSport}</p>
-                    <p className="text-slate-500 text-xs mt-1">Verify players first in Player Verification</p>
+                    <p className="text-yellow-600 dark:text-yellow-300 text-sm">⚠️ No verified players available for {selectedSport}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">Verify players first in Player Verification</p>
                   </div>
                 ) : (
                   <>
@@ -604,21 +604,21 @@ export const AuctionManagement: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setFormData({...formData, selectedPlayers: verifiedPlayers.map(p => p.id)})}
-                        className="px-3 py-1 bg-green-600/20 text-green-300 text-xs rounded hover:bg-green-600/30"
+                        className="px-3 py-1 bg-green-600/20 text-green-600 dark:text-green-300 text-xs rounded hover:bg-green-600/30"
                       >
                         Select All
                       </button>
                       <button
                         type="button"
                         onClick={() => setFormData({...formData, selectedPlayers: []})}
-                        className="px-3 py-1 bg-red-600/20 text-red-300 text-xs rounded hover:bg-red-600/30"
+                        className="px-3 py-1 bg-red-600/20 text-red-600 dark:text-red-300 text-xs rounded hover:bg-red-600/30"
                       >
                         Clear All
                       </button>
                     </div>
-                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-slate-600 rounded-lg p-3">
+                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-800">
                       {verifiedPlayers.map(player => (
-                        <div key={player.id} className="flex items-center space-x-3 p-2 bg-slate-700/30 rounded-lg hover:bg-slate-700/50">
+                        <div key={player.id} className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50">
                           <input
                             type="checkbox"
                             id={`player-${player.id}`}
@@ -629,22 +629,22 @@ export const AuctionManagement: React.FC = () => {
                                 : formData.selectedPlayers.filter(id => id !== player.id);
                               setFormData({...formData, selectedPlayers: updatedPlayers});
                             }}
-                            className="w-4 h-4 text-green-600 bg-slate-700 border-slate-600 rounded focus:ring-green-500"
+                            className="w-4 h-4 text-green-600 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-green-500"
                           />
                           <label htmlFor={`player-${player.id}`} className="flex items-center space-x-3 cursor-pointer flex-1">
                             {player.imageUrl && (
                               <img src={player.imageUrl} alt={player.name} className="w-8 h-8 rounded-full object-cover" />
                             )}
                             <div className="flex-1">
-                              <span className="text-white font-medium">{player.name}</span>
-                              <span className="text-slate-400 text-xs ml-2">({player.role})</span>
+                              <span className="text-gray-900 dark:text-white font-medium">{player.name}</span>
+                              <span className="text-gray-600 dark:text-gray-400 text-xs ml-2">({player.role})</span>
                             </div>
-                            <span className="text-green-400 text-sm font-semibold">₹{(player.basePrice / 10000000).toFixed(2)} Cr</span>
+                            <span className="text-green-600 dark:text-green-400 text-sm font-semibold">₹{(player.basePrice / 10000000).toFixed(2)} Cr</span>
                           </label>
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Selected: {formData.selectedPlayers.length} of {verifiedPlayers.length} players
                     </p>
                   </>
@@ -653,11 +653,11 @@ export const AuctionManagement: React.FC = () => {
 
               {/* Auctioneer Assignment */}
               <div>
-                <label className="block text-slate-400 text-sm mb-1">Assign Auctioneer</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Assign Auctioneer</label>
                 <select
                   value={formData.assignedAuctioneerId}
                   onChange={e => setFormData({...formData, assignedAuctioneerId: e.target.value})}
-                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                   required
                 >
                   <option value="">Select an auctioneer...</option>
@@ -673,13 +673,13 @@ export const AuctionManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-3 bg-slate-700 text-white rounded-lg font-semibold hover:bg-slate-600 transition-all"
+                  className="flex-1 py-3 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-500 hover:to-emerald-500 transition-all"
+                  className="flex-1 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg font-semibold hover:from-primary-500 hover:to-primary-600 transition-all"
                 >
                   Create Auction
                 </button>

@@ -108,7 +108,7 @@ const Players: React.FC = () => {
           <h2 className="text-4xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
             {isPlayer ? 'My Profile' : `${sport.charAt(0).toUpperCase() + sport.slice(1)} Players`}
           </h2>
-          <p className="text-slate-400 text-sm">
+          <p className="text-gray-600 dark:text-slate-400 text-sm">
             {isPlayer ? 'Your player profile and details' : 'Manage and bid on professional athletes'}
           </p>
         </div>
@@ -117,12 +117,12 @@ const Players: React.FC = () => {
       {/* Player count and Add button (only for admins/auctioneers) */}
       {canManagePlayers && (
         <div className="flex justify-between items-center">
-          <p className="text-slate-400 font-semibold">{players.length} Athletes Available</p>
+          <p className="text-gray-600 dark:text-slate-400 font-semibold">{players.length} Athletes Available</p>
           <button
             onClick={() => setShowForm(!showForm)}
             className={`px-6 py-3 rounded-xl text-sm font-bold transition-all transform hover:scale-105 ${
               showForm
-                ? 'bg-slate-700 text-slate-300'
+                ? 'bg-gray-500 dark:bg-slate-700 text-white dark:text-slate-300'
                 : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg hover:shadow-emerald-500/50'
             }`}
           >
@@ -133,7 +133,7 @@ const Players: React.FC = () => {
 
       {/* Add Player Form (only for admins/auctioneers) */}
       {canManagePlayers && showForm && (
-        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 backdrop-blur-xl rounded-2xl p-8 animate-in fade-in slide-in-from-top">
+        <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800/50 dark:to-slate-900/50 border border-gray-200 dark:border-slate-700/50 backdrop-blur-xl rounded-2xl p-8 shadow-sm animate-in fade-in slide-in-from-top">
           <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             {editingId ? '✏️ Edit Player' : '⭐ Add New Player'}
           </h3>
@@ -144,7 +144,7 @@ const Players: React.FC = () => {
                 placeholder="Player Name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="px-4 py-3 bg-white dark:bg-slate-700/50 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                 required
               />
               <input
@@ -152,7 +152,7 @@ const Players: React.FC = () => {
                 placeholder="Role (e.g., Forward)"
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="px-4 py-3 bg-white dark:bg-slate-700/50 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                 required
               />
               <input
@@ -160,7 +160,7 @@ const Players: React.FC = () => {
                 placeholder="Base Price"
                 value={formData.basePrice}
                 onChange={(e) => setFormData({ ...formData, basePrice: Number(e.target.value) })}
-                className="px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="px-4 py-3 bg-white dark:bg-slate-700/50 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                 required
               />
             </div>
@@ -180,27 +180,27 @@ const Players: React.FC = () => {
           {players.map((player, idx) => (
             <div
               key={player.id}
-              className="group bg-gradient-to-br from-slate-800/60 to-slate-900/60 hover:from-slate-800 hover:to-slate-800 border border-slate-700 hover:border-blue-500/50 rounded-2xl p-6 transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 backdrop-blur-xl animate-in fade-in slide-in-from-bottom"
+              className="group bg-white dark:bg-gradient-to-br dark:from-slate-800/60 dark:to-slate-900/60 hover:bg-gray-50 dark:hover:from-slate-800 dark:hover:to-slate-800 border border-gray-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500/50 rounded-2xl p-6 transition-all transform hover:scale-105 hover:shadow-xl dark:hover:shadow-2xl hover:shadow-blue-200 dark:hover:shadow-blue-500/20 backdrop-blur-xl animate-in fade-in slide-in-from-bottom shadow-sm"
               style={{ animationDelay: `${idx * 50}ms` }}
             >
               {/* Player Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-2xl font-black text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all mb-1">
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-500 dark:group-hover:from-blue-400 group-hover:to-purple-500 dark:group-hover:to-purple-400 group-hover:bg-clip-text transition-all mb-1">
                     {player.name}
                   </h3>
-                  <p className="text-sm text-slate-400 mb-2">
-                    <span className="px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full text-xs font-semibold">
+                  <p className="text-sm text-gray-600 dark:text-slate-400 mb-2">
+                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-300 rounded-full text-xs font-semibold">
                       {player.role}
                     </span>
                   </p>
                   {user?.role === 'admin' && player.username && (
                     <div className="mt-2 space-y-1">
-                      <p className="text-xs text-slate-500">
-                        <span className="text-amber-400 font-semibold">Username:</span> {player.username}
+                      <p className="text-xs text-gray-500 dark:text-slate-500">
+                        <span className="text-amber-600 dark:text-amber-400 font-semibold">Username:</span> {player.username}
                       </p>
-                      <p className="text-xs text-slate-500">
-                        <span className="text-amber-400 font-semibold">Player ID:</span> {player.id}
+                      <p className="text-xs text-gray-500 dark:text-slate-500">
+                        <span className="text-amber-600 dark:text-amber-400 font-semibold">Player ID:</span> {player.id}
                       </p>
                     </div>
                   )}
@@ -211,38 +211,38 @@ const Players: React.FC = () => {
               </div>
 
               {/* Price Info */}
-              <div className="space-y-2 mb-4 pb-4 border-b border-slate-700">
+              <div className="space-y-2 mb-4 pb-4 border-b border-gray-200 dark:border-slate-700">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400 text-sm">Base Price</span>
-                  <span className="text-2xl font-black text-emerald-400">${(player.basePrice / 1000000).toFixed(1)}M</span>
+                  <span className="text-gray-600 dark:text-slate-400 text-sm">Base Price</span>
+                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">${(player.basePrice / 1000000).toFixed(1)}M</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400 text-sm">Current Bid</span>
-                  <span className="text-lg font-bold text-amber-400">${(player.currentBid / 1000000).toFixed(1)}M</span>
+                  <span className="text-gray-600 dark:text-slate-400 text-sm">Current Bid</span>
+                  <span className="text-lg font-bold text-amber-600 dark:text-amber-400">${(player.currentBid / 1000000).toFixed(1)}M</span>
                 </div>
                 {user?.role === 'admin' && player.auctionPrice && (
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400 text-sm">Final Auction Price</span>
-                    <span className="text-lg font-bold text-green-400">${(player.auctionPrice / 1000000).toFixed(1)}M</span>
+                    <span className="text-gray-600 dark:text-slate-400 text-sm">Final Auction Price</span>
+                    <span className="text-lg font-bold text-green-600 dark:text-green-400">${(player.auctionPrice / 1000000).toFixed(1)}M</span>
                   </div>
                 )}
                 {user?.role === 'admin' && player.soldTo && (
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400 text-sm">Sold To</span>
-                    <span className="text-sm font-semibold text-green-300">{player.soldTo}</span>
+                    <span className="text-gray-600 dark:text-slate-400 text-sm">Sold To</span>
+                    <span className="text-sm font-semibold text-green-600 dark:text-green-300">{player.soldTo}</span>
                   </div>
                 )}
               </div>
 
               {/* Career Records (Admin Only) */}
               {user?.role === 'admin' && player.careerRecords && (
-                <div className="space-y-2 mb-4 pb-4 border-b border-slate-700">
-                  <h4 className="text-sm font-bold text-purple-400 mb-2">📊 Career Statistics</h4>
+                <div className="space-y-2 mb-4 pb-4 border-b border-gray-200 dark:border-slate-700">
+                  <h4 className="text-sm font-bold text-purple-600 dark:text-purple-400 mb-2">📊 Career Statistics</h4>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {Object.entries(player.careerRecords).map(([key, value]) => (
                       <div key={key} className="flex justify-between">
-                        <span className="text-slate-400 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                        <span className="text-white font-semibold">{typeof value === 'number' ? value.toLocaleString() : value}</span>
+                        <span className="text-gray-600 dark:text-slate-400 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">{typeof value === 'number' ? value.toLocaleString() : value}</span>
                       </div>
                     ))}
                   </div>
@@ -297,10 +297,10 @@ const Players: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 bg-gradient-to-br from-slate-800/30 to-slate-900/30 border border-slate-700 rounded-2xl">
+        <div className="text-center py-16 bg-white dark:bg-gradient-to-br dark:from-slate-800/30 dark:to-slate-900/30 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-sm">
           <div className="text-6xl mb-4">🎯</div>
-          <p className="text-slate-400 text-lg font-semibold">No players found</p>
-          <p className="text-slate-500 text-sm mt-2">Add players to start the auction for {sport}</p>
+          <p className="text-gray-600 dark:text-slate-400 text-lg font-semibold">No players found</p>
+          <p className="text-gray-500 dark:text-slate-500 text-sm mt-2">Add players to start the auction for {sport}</p>
         </div>
       )}
 

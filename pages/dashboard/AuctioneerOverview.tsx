@@ -202,14 +202,14 @@ const AuctioneerOverview: React.FC = () => {
       )}
 
       {/* Assigned Auctions List */}
-      <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl">
-        <h2 className="text-xl font-bold text-white mb-6">Your Assigned Auctions</h2>
+      <div className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl shadow-sm">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Your Assigned Auctions</h2>
         
         {assignedAuctions.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-5xl mb-4">📭</div>
-            <p className="text-slate-400 text-lg">No auctions assigned yet</p>
-            <p className="text-slate-500 text-sm mt-2">
+            <p className="text-gray-600 dark:text-slate-400 text-lg">No auctions assigned yet</p>
+            <p className="text-gray-500 dark:text-slate-500 text-sm mt-2">
               Admin will create auctions and assign them to you
             </p>
           </div>
@@ -218,19 +218,19 @@ const AuctioneerOverview: React.FC = () => {
             {assignedAuctions.map(auction => (
               <div
                 key={auction.id}
-                className="bg-slate-800/50 border border-slate-700 rounded-xl p-5 hover:bg-slate-800/70 transition-all"
+                className="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl p-5 hover:bg-gray-50 dark:hover:bg-slate-800/70 transition-all shadow-sm"
               >
                 <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-white">{auction.name}</h3>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">{auction.name}</h3>
                       <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusBadge(auction.status)}`}>
                         {auction.status}
                       </span>
                     </div>
-                    <p className="text-gray-400 capitalize mb-3">{auction.sport}</p>
+                    <p className="text-gray-600 dark:text-gray-400 capitalize mb-3">{auction.sport}</p>
                     
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
                       <span className="flex items-center gap-1">📅 {new Date(auction.startDate).toLocaleDateString()}</span>
                       <span className="flex items-center gap-1">👥 {auction.teamIds?.length || 0} Teams</span>
                       <span className="flex items-center gap-1">🏃 {auction.playerPool?.length || 0} Players</span>
@@ -240,9 +240,9 @@ const AuctioneerOverview: React.FC = () => {
                     {auction.participatingTeams && auction.participatingTeams.length > 0 && (
                       <div className="mt-3 flex flex-wrap gap-2">
                         {auction.participatingTeams.slice(0, 4).map(team => (
-                          <div key={team.id} className="flex items-center gap-2 bg-slate-700/50 px-3 py-1 rounded-full">
+                          <div key={team.id} className="flex items-center gap-2 bg-gray-100 dark:bg-slate-700/50 px-3 py-1 rounded-full">
                             {team.logoUrl && <img src={team.logoUrl} alt={team.name} className="w-5 h-5 rounded-full" />}
-                            <span className="text-white text-sm">{team.name}</span>
+                            <span className="text-gray-900 dark:text-white text-sm">{team.name}</span>
                           </div>
                         ))}
                         {auction.participatingTeams.length > 4 && (

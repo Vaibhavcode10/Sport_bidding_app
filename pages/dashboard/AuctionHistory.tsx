@@ -140,32 +140,32 @@ const AuctionHistory: React.FC<Props> = ({ userRole, userId, sport }) => {
   // Access control check
   if (userRole !== 'admin' && userRole !== 'auctioneer') {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-400 mb-4">Access Denied</h2>
-          <p className="text-gray-300">Only administrators and auctioneers can view auction history.</p>
+          <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Access Denied</h2>
+          <p className="text-gray-700 dark:text-gray-300">Only administrators and auctioneers can view auction history.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-blue-400">Auction History</h1>
-            <p className="text-gray-300 mt-2">View completed auction records and statistics</p>
+            <h1 className="text-3xl font-bold text-primary-600 dark:text-blue-400">Auction History</h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-2">View completed auction records and statistics</p>
           </div>
 
           {/* Sport Filter */}
           <div className="flex items-center space-x-4">
-            <label className="text-sm font-medium text-gray-300">Filter by Sport:</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Sport:</label>
             <select
               value={selectedSport}
               onChange={(e) => setSelectedSport(e.target.value)}
-              className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
             >
               <option value="all">All Sports</option>
               <option value="cricket">Cricket</option>
@@ -186,24 +186,24 @@ const AuctionHistory: React.FC<Props> = ({ userRole, userId, sport }) => {
         {/* Statistics Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h3 className="text-sm font-medium text-gray-300 mb-2">Total Auctions</h3>
-              <p className="text-2xl font-bold text-blue-400">{stats.totalAuctions}</p>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Total Auctions</h3>
+              <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{stats.totalAuctions}</p>
             </div>
             
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h3 className="text-sm font-medium text-gray-300 mb-2">Players Auctioned</h3>
-              <p className="text-2xl font-bold text-green-400">{stats.totalPlayersAuctioned}</p>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Players Auctioned</h3>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.totalPlayersAuctioned}</p>
             </div>
             
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h3 className="text-sm font-medium text-gray-300 mb-2">Total Amount Spent</h3>
-              <p className="text-2xl font-bold text-yellow-400">{formatCurrency(stats.totalAmountSpent)}</p>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Total Amount Spent</h3>
+              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{formatCurrency(stats.totalAmountSpent)}</p>
             </div>
             
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h3 className="text-sm font-medium text-gray-300 mb-2">Success Rate</h3>
-              <p className="text-2xl font-bold text-purple-400">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Success Rate</h3>
+              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 {stats.totalPlayersAuctioned > 0 
                   ? ((stats.totalPlayersSold / stats.totalPlayersAuctioned) * 100).toFixed(1)
                   : 0}%
@@ -213,89 +213,89 @@ const AuctionHistory: React.FC<Props> = ({ userRole, userId, sport }) => {
         )}
 
         {/* Auction History Table */}
-        <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-700">
-            <h2 className="text-xl font-semibold text-white">Auction Records</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Auction Records</h2>
           </div>
 
           {loading ? (
             <div className="p-8 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-              <p className="mt-4 text-gray-300">Loading auction history...</p>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+              <p className="mt-4 text-gray-600 dark:text-gray-300">Loading auction history...</p>
             </div>
           ) : history.length === 0 ? (
             <div className="p-8 text-center">
-              <p className="text-gray-400">No auction history found</p>
+              <p className="text-gray-500 dark:text-gray-400">No auction history found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-700">
+                <thead className="bg-gray-100 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Auction
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Sport
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Duration
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Players
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Amount Spent
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Success Rate
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Completed
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-transparent">
                   {history.map((auction) => (
-                    <tr key={auction.auctionId} className="hover:bg-gray-750">
+                    <tr key={auction.auctionId} className="hover:bg-gray-50 dark:hover:bg-gray-750">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <p className="text-sm font-medium text-white">{auction.auctionName}</p>
-                          <p className="text-xs text-gray-400">by {auction.auctioneerName}</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">{auction.auctionName}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">by {auction.auctioneerName}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 dark:bg-blue-900 text-primary-800 dark:text-blue-200">
                           {auction.sport}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                         {formatDuration(auction.totalDuration)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-300">
-                          <span className="text-green-400">{auction.currentStats.playersSold}</span>
+                        <div className="text-sm text-gray-600 dark:text-gray-300">
+                          <span className="text-green-600 dark:text-green-400">{auction.currentStats.playersSold}</span>
                           /
-                          <span className="text-red-400">{auction.currentStats.playersUnsold}</span>
+                          <span className="text-red-600 dark:text-red-400">{auction.currentStats.playersUnsold}</span>
                           <span className="text-gray-500"> ({auction.currentStats.playersAuctioned})</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-yellow-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-yellow-600 dark:text-yellow-400">
                         {formatCurrency(auction.currentStats.totalSpent)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                         {auction.currentStats.soldPercentage.toFixed(1)}%
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                         {formatDate(auction.completedAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => loadAuctionDetails(auction.auctionId)}
-                          className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                          className="text-primary-600 dark:text-blue-400 hover:text-primary-500 dark:hover:text-blue-300 text-sm font-medium"
                         >
                           View Details
                         </button>
@@ -311,9 +311,9 @@ const AuctionHistory: React.FC<Props> = ({ userRole, userId, sport }) => {
         {/* Auction Details Modal */}
         {selectedAuction && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-gray-800 px-6 py-4 border-b border-gray-700 flex justify-between items-center">
-                <h3 className="text-xl font-bold text-white">{selectedAuction.auctionName} - Details</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700">
+              <div className="sticky top-0 bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{selectedAuction.auctionName} - Details</h3>
                 <button
                   onClick={() => setSelectedAuction(null)}
                   className="text-gray-400 hover:text-white"

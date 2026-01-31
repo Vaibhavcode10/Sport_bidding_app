@@ -1,0 +1,60 @@
+/* Custom styles for the professional sports auction app */
+
+/* Ensure smooth transitions globally */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(243 244 246 / 1); /* gray-100 */
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: rgb(55 65 81 / 1); /* gray-700 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(156 163 175 / 1); /* gray-400 */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(107 114 128 / 1); /* gray-500 */
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgb(75 85 99 / 1); /* gray-600 */
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgb(156 163 175 / 1); /* gray-400 */
+}
+
+/* Professional focus ring styling */
+.focus-ring:focus-visible {
+  outline: 2px solid rgb(59 130 246 / 0.5); /* blue-500 with opacity */
+  outline-offset: 2px;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -138,7 +138,7 @@ const Overview: React.FC = () => {
           <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg text-sm font-bold hover:shadow-lg hover:shadow-blue-500/50 transition-all transform hover:scale-105">
             Initialize Auction
           </button>
-          <button className="px-8 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-sm font-bold transition-all">
+          <button className="px-8 py-3 bg-gray-500 dark:bg-slate-700 hover:bg-gray-400 dark:hover:bg-slate-600 text-white dark:text-slate-300 rounded-lg text-sm font-bold transition-all">
             Pause Session
           </button>
         </div>

@@ -97,8 +97,8 @@ const AuctionRequests: React.FC = () => {
             onClick={() => setFilterStatus(status)}
             className={`px-4 py-2 rounded-lg font-semibold transition-all ${
               filterStatus === status
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-300 dark:hover:bg-slate-600'
             }`}
           >
             {status === 'ALL' ? '📋 All' : status === BiddingRequestStatus.PENDING ? '⏳ Pending' : status === BiddingRequestStatus.APPROVED ? '✓ Approved' : status === BiddingRequestStatus.ADDED_TO_AUCTION ? '🎯 In Auction' : '✗ Rejected'}
@@ -109,14 +109,14 @@ const AuctionRequests: React.FC = () => {
       {/* Requests List */}
       <div className="space-y-4">
         {getFilteredRequests().length === 0 ? (
-          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-12 text-center">
-            <p className="text-slate-400 text-lg">No requests found</p>
+          <div className="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-2xl p-12 text-center shadow-sm">
+            <p className="text-gray-600 dark:text-slate-400 text-lg">No requests found</p>
           </div>
         ) : (
           getFilteredRequests().map((request) => (
             <div
               key={request.id}
-              className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-6 hover:border-blue-600/40 transition-all"
+              className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-6 hover:border-gray-300 dark:hover:border-blue-600/40 transition-all shadow-sm"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -171,17 +171,17 @@ const AuctionRequests: React.FC = () => {
       {/* Request Detail Modal */}
       {selectedRequest && currentRequest && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-blue-600/20 rounded-3xl p-8 max-w-md w-full shadow-2xl">
-            <h2 className="text-2xl font-black text-white mb-6">{currentRequest.playerName}</h2>
+          <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-blue-600/20 rounded-3xl p-8 max-w-md w-full shadow-2xl">
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6">{currentRequest.playerName}</h2>
 
             <div className="space-y-4 mb-6">
               <div>
-                <p className="text-slate-400 text-sm mb-1">Role</p>
-                <p className="text-white font-semibold">{currentRequest.role}</p>
+                <p className="text-gray-600 dark:text-slate-400 text-sm mb-1">Role</p>
+                <p className="text-gray-900 dark:text-white font-semibold">{currentRequest.role}</p>
               </div>
               <div>
-                <p className="text-slate-400 text-sm mb-1">Sport</p>
-                <p className="text-white font-semibold">{currentRequest.sport.toUpperCase()}</p>
+                <p className="text-gray-600 dark:text-slate-400 text-sm mb-1">Sport</p>
+                <p className="text-gray-900 dark:text-white font-semibold">{currentRequest.sport.toUpperCase()}</p>
               </div>
               <div>
                 <p className="text-slate-400 text-sm mb-1">Base Price</p>

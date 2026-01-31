@@ -161,23 +161,23 @@ const PlayerProfilePage: React.FC = () => {
       )}
 
       {/* Profile Header */}
-      <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
+      <div className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl shadow-sm">
         <div className="flex items-start justify-between mb-6">
           <div className="flex gap-6">
             <div className="h-32 w-32 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-6xl font-bold">
               {formData.name && formData.name !== 'Unavailable' ? formData.name.charAt(0).toUpperCase() : '?'}
             </div>
             <div>
-              <h1 className="text-4xl font-black text-white mb-2">
-                {formData.name !== 'Unavailable' ? formData.name : <span className="text-slate-500 italic">Name Unavailable</span>}
+              <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-2">
+                {formData.name !== 'Unavailable' ? formData.name : <span className="text-gray-400 dark:text-slate-500 italic">Name Unavailable</span>}
               </h1>
-              <p className="text-slate-400 text-lg mb-4">
+              <p className="text-gray-600 dark:text-slate-400 text-lg mb-4">
                 {displayValue(formData.role)} • {formData.sport !== 'Unavailable' ? formData.sport.toUpperCase() : 'Sport N/A'}
               </p>
               <div className="space-y-1">
-                <p className="text-sm text-slate-300"><span className="text-slate-500">Age:</span> {formData.age ? `${formData.age} years` : displayValue(null)}</p>
-                <p className="text-sm text-slate-300"><span className="text-slate-500">Height:</span> {displayValue(formData.height)}</p>
-                <p className="text-sm text-slate-300"><span className="text-slate-500">Weight:</span> {displayValue(formData.weight)}</p>
+                <p className="text-sm text-gray-700 dark:text-slate-300"><span className="text-gray-500 dark:text-slate-500">Age:</span> {formData.age ? `${formData.age} years` : displayValue(null)}</p>
+                <p className="text-sm text-gray-700 dark:text-slate-300"><span className="text-gray-500 dark:text-slate-500">Height:</span> {displayValue(formData.height)}</p>
+                <p className="text-sm text-gray-700 dark:text-slate-300"><span className="text-gray-500 dark:text-slate-500">Weight:</span> {displayValue(formData.weight)}</p>
               </div>
             </div>
           </div>
@@ -202,37 +202,37 @@ const PlayerProfilePage: React.FC = () => {
         {/* Main Details */}
         <div className="lg:col-span-2 space-y-6">
           {isEditing ? (
-            <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl space-y-6">
-              <h3 className="text-xl font-bold text-white">Edit Your Profile</h3>
+            <div className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl space-y-6 shadow-sm">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Edit Your Profile</h3>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Full Name *</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Full Name *</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name === 'Unavailable' ? '' : formData.name}
                     onChange={handleInputChange}
                     placeholder="Enter your full name"
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Jersey Number</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Jersey Number</label>
                   <input
                     type="number"
                     name="jersey"
                     value={formData.jersey ?? ''}
                     onChange={handleInputChange}
                     placeholder="Enter jersey number"
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Age</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Age</label>
                   <input
                     type="number"
                     name="age"
@@ -328,23 +328,23 @@ const PlayerProfilePage: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
-                <h3 className="text-xl font-bold text-white mb-6">About</h3>
-                <p className="text-slate-300 leading-relaxed">
-                  {formData.bio && formData.bio !== 'Unavailable' ? formData.bio : <span className="text-slate-500 italic">No bio available. Edit your profile to add a bio.</span>}
+              <div className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl shadow-sm">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">About</h3>
+                <p className="text-gray-700 dark:text-slate-300 leading-relaxed">
+                  {formData.bio && formData.bio !== 'Unavailable' ? formData.bio : <span className="text-gray-400 dark:text-slate-500 italic">No bio available. Edit your profile to add a bio.</span>}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-6">
-                <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl">
-                  <p className="text-slate-400 text-sm mb-2">Jersey Number</p>
-                  <p className="text-3xl font-bold text-blue-400">
+                <div className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl shadow-sm">
+                  <p className="text-gray-500 dark:text-slate-400 text-sm mb-2">Jersey Number</p>
+                  <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                     {formData.jersey !== null ? `#${formData.jersey}` : displayValue(null)}
                   </p>
                 </div>
-                <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 border border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl">
-                  <p className="text-slate-400 text-sm mb-2">Base Price</p>
-                  <p className="text-3xl font-bold text-purple-400">
+                <div className="bg-white dark:bg-gradient-to-r dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl shadow-sm">
+                  <p className="text-gray-500 dark:text-slate-400 text-sm mb-2">Base Price</p>
+                  <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                     {formData.basePrice > 0 ? `₹${formData.basePrice.toLocaleString()}` : displayValue(null)}
                   </p>
                 </div>
