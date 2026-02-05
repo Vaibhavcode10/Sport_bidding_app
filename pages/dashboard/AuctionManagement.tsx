@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 
 interface Auction {
@@ -58,37 +59,14 @@ interface Auctioneer {
 
 export const AuctionManagement: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [auctioneers, setAuctioneers] = useState<Auctioneer[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSport, setSelectedSport] = useState('football');
   const [activeTab, setActiveTab] = useState<'auctions' | 'create'>('auctions');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
-  // Form state for creating/editing auction
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    logoUrl: '',
-    startDate: '',
-    endDate: '',
-    minBidIncrement: 100000,
-    maxPlayersPerTeam: 15,
-    bidTimeLimit: 30,
-    selectedTeams: [] as string[], // Team IDs
-    selectedPlayers: [] as string[], // Player IDs (verified players)
-    assignedAuctioneerId: '' // Auctioneer ID
-  });
-
-  // Verified players for selection
-  const [verifiedPlayers, setVerifiedPlayers] = useState<Array<{
-    id: string;
-    name: string;
-    role: string;
-    basePrice: number;
-    imageUrl?: string;
-  }>>([]);
+  const [viewingAuction, setViewingAuction] = useState<Auction | null>(null);
 
   const sports = ['football', 'cricket', 'basketball', 'baseball', 'volleyball'];
 
@@ -96,7 +74,6 @@ export const AuctionManagement: React.FC = () => {
     fetchAuctions();
     fetchAuctioneers();
     fetchTeams();
-    fetchVerifiedPlayers();
   }, [selectedSport]);
 
   const fetchAuctions = async () => {
@@ -122,19 +99,6 @@ export const AuctionManagement: React.FC = () => {
     }
   };
 
-  const fetchVerifiedPlayers = async () => {
-    try {
-      const response = await api.get(`/players/${selectedSport}?verified=true`);
-      // Filter to only available players (not already sold)
-      const availablePlayers = (response.data || []).filter(
-        (p: any) => p.status === 'AVAILABLE' || !p.status
-      );
-      setVerifiedPlayers(availablePlayers);
-    } catch (error) {
-      console.error('Error fetching verified players:', error);
-    }
-  };
-
   const fetchAuctioneers = async () => {
     try {
       const response = await api.get(`/auctions/auctioneers/all/${selectedSport}`, {
@@ -145,80 +109,6 @@ export const AuctionManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching auctioneers:', error);
-    }
-  };
-
-  const handleCreateAuction = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate team selection (at least 2 teams)
-    if (formData.selectedTeams.length < 2) {
-      alert('Please select at least 2 teams for the auction.');
-      return;
-    }
-    
-    // Validate auctioneer assignment
-    if (!formData.assignedAuctioneerId) {
-      alert('Please assign an auctioneer to the auction.');
-      return;
-    }
-    
-    // Validate player selection (at least 1 player)
-    if (formData.selectedPlayers.length === 0) {
-      alert('Please select at least 1 verified player for the auction.');
-      return;
-    }
-
-    try {
-      const selectedTeamsData = teams.filter(team => formData.selectedTeams.includes(team.id));
-      const assignedAuctioneer = auctioneers.find(a => a.id === formData.assignedAuctioneerId);
-      
-      const response = await api.post(`/auctions/${selectedSport}`, {
-        name: formData.name,
-        description: formData.description,
-        logoUrl: formData.logoUrl,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        participatingTeams: selectedTeamsData.map(team => ({
-          id: team.id,
-          name: team.name,
-          logoUrl: team.logoUrl,
-          purseRemaining: team.purseRemaining,
-          totalPurse: team.totalPurse
-        })),
-        playerPool: formData.selectedPlayers,
-        assignedAuctioneerId: formData.assignedAuctioneerId,
-        assignedAuctioneerName: assignedAuctioneer?.name,
-        settings: {
-          minBidIncrement: formData.minBidIncrement,
-          maxPlayersPerTeam: formData.maxPlayersPerTeam,
-          bidTimeLimit: formData.bidTimeLimit
-        },
-        userRole: user?.role,
-        userId: user?.id
-      });
-
-      if (response.data.success) {
-        alert('Auction created successfully!');
-        setShowCreateModal(false);
-        setFormData({
-          name: '',
-          description: '',
-          logoUrl: '',
-          startDate: '',
-          endDate: '',
-          minBidIncrement: 100000,
-          maxPlayersPerTeam: 15,
-          bidTimeLimit: 30,
-          selectedTeams: [],
-          selectedPlayers: [],
-          assignedAuctioneerId: ''
-        });
-        fetchAuctions();
-      }
-    } catch (error) {
-      console.error('Error creating auction:', error);
-      alert('Failed to create auction');
     }
   };
 
@@ -260,13 +150,13 @@ export const AuctionManagement: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'CREATED': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50';
-      case 'READY': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50';
-      case 'SCHEDULED': return 'bg-blue-500/20 text-blue-300 border-blue-500/50';
-      case 'LIVE': return 'bg-green-500/20 text-green-300 border-green-500/50 animate-pulse';
-      case 'COMPLETED': return 'bg-gray-500/20 text-gray-300 border-gray-500/50';
-      case 'CANCELLED': return 'bg-red-500/20 text-red-300 border-red-500/50';
-      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/50';
+      case 'CREATED': return 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-800 dark:text-yellow-300 border-yellow-400 dark:border-yellow-500/50';
+      case 'READY': return 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border-cyan-400 dark:border-cyan-500/50';
+      case 'SCHEDULED': return 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border-blue-400 dark:border-blue-500/50';
+      case 'LIVE': return 'bg-green-100 dark:bg-green-500/20 text-green-800 dark:text-green-300 border-green-400 dark:border-green-500/50 animate-pulse';
+      case 'COMPLETED': return 'bg-gray-100 dark:bg-gray-500/20 text-gray-800 dark:text-gray-300 border-gray-400 dark:border-gray-500/50';
+      case 'CANCELLED': return 'bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-300 border-red-400 dark:border-red-500/50';
+      default: return 'bg-gray-100 dark:bg-gray-500/20 text-gray-800 dark:text-gray-300 border-gray-400 dark:border-gray-500/50';
     }
   };
 
@@ -324,7 +214,7 @@ export const AuctionManagement: React.FC = () => {
 
       {/* Create Auction Button */}
       <button
-        onClick={() => setShowCreateModal(true)}
+        onClick={() => navigate('/dashboard/auctions/create', { state: { sport: selectedSport } })}
         className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
       >
         ➕ Create New Auction for {selectedSport.charAt(0).toUpperCase() + selectedSport.slice(1)}
@@ -349,7 +239,7 @@ export const AuctionManagement: React.FC = () => {
               {auctions.map(auction => (
                 <div
                   key={auction.id}
-                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:border-primary-500 dark:hover:border-primary-400 transition-all shadow-sm hover:shadow-md"
+                  className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 border-2 border-blue-200 dark:border-blue-900/50 rounded-xl p-6 hover:border-blue-400 dark:hover:border-blue-600 transition-all shadow-lg hover:shadow-xl"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-4">
@@ -361,8 +251,8 @@ export const AuctionManagement: React.FC = () => {
                         />
                       )}
                       <div>
-                        <h3 className="text-2xl font-bold text-white mb-1">{auction.name}</h3>
-                        <p className="text-slate-400 text-sm">{auction.description}</p>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{auction.name}</h3>
+                        <p className="text-gray-700 dark:text-gray-300 text-sm">{auction.description}</p>
                       </div>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(auction.status)}`}>
@@ -374,26 +264,26 @@ export const AuctionManagement: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     {/* Assigned Auctioneer */}
                     {auction.assignedAuctioneer && (
-                      <div className="p-3 bg-blue-600/20 border border-blue-500/30 rounded-lg">
-                        <p className="text-slate-400 text-xs mb-1">Assigned Auctioneer</p>
-                        <p className="text-blue-300 font-semibold">{auction.assignedAuctioneer.name}</p>
-                        <p className="text-slate-500 text-xs">Assigned {formatDate(auction.assignedAuctioneer.assignedAt)}</p>
+                      <div className="p-3 bg-blue-100 dark:bg-blue-600/20 border-2 border-blue-300 dark:border-blue-500/30 rounded-lg">
+                        <p className="text-gray-700 dark:text-blue-200 text-xs mb-1 font-medium">Assigned Auctioneer</p>
+                        <p className="text-blue-700 dark:text-blue-300 font-semibold">{auction.assignedAuctioneer.name}</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs">Assigned {formatDate(auction.assignedAuctioneer.assignedAt)}</p>
                       </div>
                     )}
                     
                     {/* Participating Teams */}
                     {auction.participatingTeams && auction.participatingTeams.length > 0 && (
-                      <div className="p-3 bg-green-600/20 border border-green-500/30 rounded-lg">
-                        <p className="text-slate-400 text-xs mb-2">Participating Teams ({auction.participatingTeams.length})</p>
+                      <div className="p-3 bg-green-100 dark:bg-green-600/20 border-2 border-green-300 dark:border-green-500/30 rounded-lg">
+                        <p className="text-gray-700 dark:text-green-200 text-xs mb-2 font-medium">Participating Teams ({auction.participatingTeams.length})</p>
                         <div className="flex flex-wrap gap-1">
                           {auction.participatingTeams.slice(0, 3).map(team => (
-                            <div key={team.id} className="flex items-center space-x-1 bg-slate-700/50 px-2 py-1 rounded text-xs">
+                            <div key={team.id} className="flex items-center space-x-1 bg-white dark:bg-slate-700/50 px-2 py-1 rounded border border-green-200 dark:border-green-700 text-xs">
                               {team.logoUrl && <img src={team.logoUrl} alt={team.name} className="w-4 h-4 rounded" />}
-                              <span className="text-green-300">{team.name}</span>
+                              <span className="text-green-800 dark:text-green-300">{team.name}</span>
                             </div>
                           ))}
                           {auction.participatingTeams.length > 3 && (
-                            <span className="text-slate-500 text-xs">+{auction.participatingTeams.length - 3} more</span>
+                            <span className="text-gray-700 dark:text-gray-400 text-xs font-medium">+{auction.participatingTeams.length - 3} more</span>
                           )}
                         </div>
                       </div>
@@ -401,31 +291,37 @@ export const AuctionManagement: React.FC = () => {
                     
                     {/* Player Pool */}
                     {auction.playerPool && auction.playerPool.length > 0 && (
-                      <div className="p-3 bg-purple-600/20 border border-purple-500/30 rounded-lg">
-                        <p className="text-slate-400 text-xs mb-1">Player Pool</p>
-                        <p className="text-purple-300 font-semibold text-lg">{auction.playerPool.length} Players</p>
-                        <p className="text-slate-500 text-xs">Verified & ready for auction</p>
+                      <div className="p-3 bg-purple-100 dark:bg-purple-600/20 border-2 border-purple-300 dark:border-purple-500/30 rounded-lg">
+                        <p className="text-gray-700 dark:text-purple-200 text-xs mb-1 font-medium">Player Pool</p>
+                        <p className="text-purple-700 dark:text-purple-300 font-semibold text-lg">{auction.playerPool.length} Players</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs">Verified & ready for auction</p>
                       </div>
                     )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <p className="text-slate-500 text-xs">Start Date</p>
-                      <p className="text-white font-semibold">{formatDate(auction.startDate)}</p>
+                      <p className="text-gray-700 dark:text-gray-300 text-xs font-medium">Start Date</p>
+                      <p className="text-gray-900 dark:text-white font-semibold">{formatDate(auction.startDate)}</p>
                     </div>
                     <div>
-                      <p className="text-slate-500 text-xs">End Date</p>
-                      <p className="text-white font-semibold">{formatDate(auction.endDate)}</p>
+                      <p className="text-gray-700 dark:text-gray-300 text-xs font-medium">End Date</p>
+                      <p className="text-gray-900 dark:text-white font-semibold">{formatDate(auction.endDate)}</p>
                     </div>
                   </div>
 
                   {/* Action Buttons */}
                   <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setViewingAuction(auction)}
+                      className="px-4 py-2 bg-blue-100 dark:bg-blue-600/20 text-blue-800 dark:text-blue-300 rounded-lg text-sm font-semibold hover:bg-blue-200 dark:hover:bg-blue-600/30 transition-all border border-blue-300 dark:border-blue-600"
+                    >
+                      👁️ View Details
+                    </button>
                     {auction.status === 'SCHEDULED' && (
                       <button
                         onClick={() => handleUpdateStatus(auction.id, 'LIVE')}
-                        className="px-4 py-2 bg-green-600/20 text-green-300 rounded-lg text-sm font-semibold hover:bg-green-600/30 transition-all"
+                        className="px-4 py-2 bg-green-100 dark:bg-green-600/20 text-green-800 dark:text-green-300 rounded-lg text-sm font-semibold hover:bg-green-200 dark:hover:bg-green-600/30 transition-all border border-green-300 dark:border-green-600"
                       >
                         🚀 Start Auction
                       </button>
@@ -433,14 +329,14 @@ export const AuctionManagement: React.FC = () => {
                     {auction.status === 'LIVE' && (
                       <button
                         onClick={() => handleUpdateStatus(auction.id, 'COMPLETED')}
-                        className="px-4 py-2 bg-gray-600/20 text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-600/30 transition-all"
+                        className="px-4 py-2 bg-gray-100 dark:bg-gray-600/20 text-gray-800 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-600/30 transition-all border border-gray-300 dark:border-gray-600"
                       >
                         ✅ End Auction
                       </button>
                     )}
                     <button
                       onClick={() => handleDeleteAuction(auction.id)}
-                      className="px-4 py-2 bg-red-600/20 text-red-300 rounded-lg text-sm font-semibold hover:bg-red-600/30 transition-all"
+                      className="px-4 py-2 bg-red-100 dark:bg-red-600/20 text-red-800 dark:text-red-300 rounded-lg text-sm font-semibold hover:bg-red-200 dark:hover:bg-red-600/30 transition-all border border-red-300 dark:border-red-600"
                     >
                       🗑️ Delete
                     </button>
@@ -452,239 +348,136 @@ export const AuctionManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Create Auction Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Create New Auction</h2>
-            
-            <form onSubmit={handleCreateAuction} className="space-y-4">
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Auction Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={e => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Auction Logo URL (optional)</label>
-                <input
-                  type="url"
-                  value={formData.logoUrl}
-                  onChange={e => setFormData({...formData, logoUrl: e.target.value})}
-                  placeholder="https://example.com/logo.png"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
-                />
-                {formData.logoUrl && (
-                  <div className="mt-2 flex items-center space-x-2">
-                    <img 
-                      src={formData.logoUrl} 
-                      alt="Auction logo preview" 
-                      className="w-12 h-12 rounded-lg object-cover border border-gray-300 dark:border-gray-600"
-                      onError={(e) => (e.currentTarget.style.display = 'none')}
-                    />
-                    <span className="text-gray-600 dark:text-gray-400 text-xs">Preview</span>
-                  </div>
+      {/* View Auction Details Modal */}
+      {viewingAuction && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setViewingAuction(null)}>
+          <div 
+            className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto border-2 border-blue-300 dark:border-blue-700 shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-6 pb-6 border-b-2 border-gray-200 dark:border-gray-700">
+              <div className="flex items-center space-x-4">
+                {viewingAuction.logoUrl && (
+                  <img 
+                    src={viewingAuction.logoUrl} 
+                    alt={viewingAuction.name} 
+                    className="w-20 h-20 rounded-xl object-cover border-2 border-blue-300 dark:border-blue-700"
+                  />
                 )}
+                <div>
+                  <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">{viewingAuction.name}</h2>
+                  <p className="text-gray-700 dark:text-gray-300">{viewingAuction.description}</p>
+                  <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(viewingAuction.status)}`}>
+                    {viewingAuction.status}
+                  </span>
+                </div>
               </div>
+              <button
+                onClick={() => setViewingAuction(null)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl font-bold"
+              >
+                ×
+              </button>
+            </div>
 
+            {/* Auction Information */}
+            <div className="space-y-6">
+              {/* Dates */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Start Date</label>
-                  <input
-                    type="datetime-local"
-                    value={formData.startDate}
-                    onChange={e => setFormData({...formData, startDate: e.target.value})}
-                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
-                    required
-                  />
+                <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl">
+                  <p className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">Start Date & Time</p>
+                  <p className="text-gray-900 dark:text-white font-bold text-lg">{formatDate(viewingAuction.startDate)}</p>
                 </div>
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">End Date</label>
-                  <input
-                    type="datetime-local"
-                    value={formData.endDate}
-                    onChange={e => setFormData({...formData, endDate: e.target.value})}
-                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
-                    required
-                  />
+                <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-xl">
+                  <p className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">End Date & Time</p>
+                  <p className="text-gray-900 dark:text-white font-bold text-lg">{formatDate(viewingAuction.endDate)}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Min Bid Increment</label>
-                  <input
-                    type="number"
-                    value={formData.minBidIncrement}
-                    onChange={e => setFormData({...formData, minBidIncrement: parseInt(e.target.value)})}
-                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Max Players/Team</label>
-                  <input
-                    type="number"
-                    value={formData.maxPlayersPerTeam}
-                    onChange={e => setFormData({...formData, maxPlayersPerTeam: parseInt(e.target.value)})}
-                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Bid Time (sec)</label>
-                  <input
-                    type="number"
-                    value={formData.bidTimeLimit}
-                    onChange={e => setFormData({...formData, bidTimeLimit: parseInt(e.target.value)})}
-                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Team Selection */}
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Select Teams (minimum 2 teams)</label>
-                <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-800">
-                  {teams.map(team => (
-                    <div key={team.id} className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        id={`team-${team.id}`}
-                        checked={formData.selectedTeams.includes(team.id)}
-                        onChange={e => {
-                          const updatedTeams = e.target.checked 
-                            ? [...formData.selectedTeams, team.id]
-                            : formData.selectedTeams.filter(id => id !== team.id);
-                          setFormData({...formData, selectedTeams: updatedTeams});
-                        }}
-                        className="w-4 h-4 text-primary-600 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
-                      />
-                      <label htmlFor={`team-${team.id}`} className="flex items-center space-x-2 cursor-pointer">
-                        {team.logoUrl && (
-                          <img src={team.logoUrl} alt={team.name} className="w-8 h-8 rounded" />
-                        )}
-                        <span className="text-gray-900 dark:text-white">{team.name}</span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Selected: {formData.selectedTeams.length} team(s)
-                </p>
-              </div>
-
-              {/* Verified Players Selection */}
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">
-                  Select Verified Players for Auction Pool
-                  <span className="text-green-500 dark:text-green-400 ml-2">({verifiedPlayers.length} available)</span>
-                </label>
-                {verifiedPlayers.length === 0 ? (
-                  <div className="p-4 bg-yellow-600/10 border border-yellow-600/30 rounded-lg text-center">
-                    <p className="text-yellow-600 dark:text-yellow-300 text-sm">⚠️ No verified players available for {selectedSport}</p>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">Verify players first in Player Verification</p>
+              {/* Assigned Auctioneer */}
+              {viewingAuction.assignedAuctioneer && (
+                <div className="p-5 bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-700 rounded-xl">
+                  <h3 className="text-gray-800 dark:text-blue-200 text-lg font-bold mb-3">👤 Assigned Auctioneer</h3>
+                  <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg">
+                    <p className="text-blue-700 dark:text-blue-300 font-bold text-xl">{viewingAuction.assignedAuctioneer.name}</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Assigned on {formatDate(viewingAuction.assignedAuctioneer.assignedAt)}</p>
                   </div>
-                ) : (
-                  <>
-                    <div className="flex gap-2 mb-2">
-                      <button
-                        type="button"
-                        onClick={() => setFormData({...formData, selectedPlayers: verifiedPlayers.map(p => p.id)})}
-                        className="px-3 py-1 bg-green-600/20 text-green-600 dark:text-green-300 text-xs rounded hover:bg-green-600/30"
-                      >
-                        Select All
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData({...formData, selectedPlayers: []})}
-                        className="px-3 py-1 bg-red-600/20 text-red-600 dark:text-red-300 text-xs rounded hover:bg-red-600/30"
-                      >
-                        Clear All
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-800">
-                      {verifiedPlayers.map(player => (
-                        <div key={player.id} className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50">
-                          <input
-                            type="checkbox"
-                            id={`player-${player.id}`}
-                            checked={formData.selectedPlayers.includes(player.id)}
-                            onChange={e => {
-                              const updatedPlayers = e.target.checked 
-                                ? [...formData.selectedPlayers, player.id]
-                                : formData.selectedPlayers.filter(id => id !== player.id);
-                              setFormData({...formData, selectedPlayers: updatedPlayers});
-                            }}
-                            className="w-4 h-4 text-green-600 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-green-500"
-                          />
-                          <label htmlFor={`player-${player.id}`} className="flex items-center space-x-3 cursor-pointer flex-1">
-                            {player.imageUrl && (
-                              <img src={player.imageUrl} alt={player.name} className="w-8 h-8 rounded-full object-cover" />
-                            )}
-                            <div className="flex-1">
-                              <span className="text-gray-900 dark:text-white font-medium">{player.name}</span>
-                              <span className="text-gray-600 dark:text-gray-400 text-xs ml-2">({player.role})</span>
-                            </div>
-                            <span className="text-green-600 dark:text-green-400 text-sm font-semibold">₹{(player.basePrice / 10000000).toFixed(2)} Cr</span>
-                          </label>
+                </div>
+              )}
+              
+              {/* Participating Teams */}
+              {viewingAuction.participatingTeams && viewingAuction.participatingTeams.length > 0 && (
+                <div className="p-5 bg-green-100 dark:bg-green-900/30 border-2 border-green-300 dark:border-green-700 rounded-xl">
+                  <h3 className="text-gray-800 dark:text-green-200 text-lg font-bold mb-3">🏆 Participating Teams ({viewingAuction.participatingTeams.length})</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {viewingAuction.participatingTeams.map(team => (
+                      <div key={team.id} className="bg-white dark:bg-gray-800/50 p-4 rounded-lg flex items-center space-x-3 border border-green-200 dark:border-green-800">
+                        {team.logoUrl && <img src={team.logoUrl} alt={team.name} className="w-12 h-12 rounded-lg object-cover" />}
+                        <div className="flex-1">
+                          <p className="text-green-800 dark:text-green-300 font-bold">{team.name}</p>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">Purse: ₹{(team.purseRemaining / 10000000).toFixed(1)} Cr</p>
                         </div>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Selected: {formData.selectedPlayers.length} of {verifiedPlayers.length} players
-                    </p>
-                  </>
-                )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Player Pool */}
+              {viewingAuction.playerPool && viewingAuction.playerPool.length > 0 && (
+                <div className="p-5 bg-purple-100 dark:bg-purple-900/30 border-2 border-purple-300 dark:border-purple-700 rounded-xl">
+                  <h3 className="text-gray-800 dark:text-purple-200 text-lg font-bold mb-3">⚡ Player Pool ({viewingAuction.playerPool.length} Players)</h3>
+                  <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg">
+                    <p className="text-purple-700 dark:text-purple-300 font-semibold text-xl">{viewingAuction.playerPool.length} Verified Players</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Ready for auction bidding</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Auction Settings */}
+              <div className="p-5 bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-300 dark:border-orange-700 rounded-xl">
+                <h3 className="text-gray-800 dark:text-orange-200 text-lg font-bold mb-3">⚙️ Auction Settings</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg text-center">
+                    <p className="text-gray-600 dark:text-gray-400 text-xs mb-1">Min Bid Increment</p>
+                    <p className="text-orange-700 dark:text-orange-300 font-bold text-lg">₹{(viewingAuction.settings.minBidIncrement / 100000).toFixed(1)}L</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg text-center">
+                    <p className="text-gray-600 dark:text-gray-400 text-xs mb-1">Max Players/Team</p>
+                    <p className="text-orange-700 dark:text-orange-300 font-bold text-lg">{viewingAuction.settings.maxPlayersPerTeam}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg text-center">
+                    <p className="text-gray-600 dark:text-gray-400 text-xs mb-1">Bid Time Limit</p>
+                    <p className="text-orange-700 dark:text-orange-300 font-bold text-lg">{viewingAuction.settings.bidTimeLimit}s</p>
+                  </div>
+                </div>
               </div>
 
-              {/* Auctioneer Assignment */}
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-1">Assign Auctioneer</label>
-                <select
-                  value={formData.assignedAuctioneerId}
-                  onChange={e => setFormData({...formData, assignedAuctioneerId: e.target.value})}
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
-                  required
-                >
-                  <option value="">Select an auctioneer...</option>
-                  {auctioneers.map(auctioneer => (
-                    <option key={auctioneer.id} value={auctioneer.id}>
-                      {auctioneer.name} (@{auctioneer.username})
-                    </option>
-                  ))}
-                </select>
+              {/* Metadata */}
+              <div className="p-4 bg-gray-100 dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700 rounded-xl">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600 dark:text-gray-400">Created By</p>
+                    <p className="text-gray-900 dark:text-white font-semibold">{viewingAuction.createdBy}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 dark:text-gray-400">Created At</p>
+                    <p className="text-gray-900 dark:text-white font-semibold">{formatDate(viewingAuction.createdAt)}</p>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-3 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg font-semibold hover:from-primary-500 hover:to-primary-600 transition-all"
-                >
-                  Create Auction
-                </button>
-              </div>
-            </form>
+            {/* Close Button */}
+            <div className="mt-6 pt-6 border-t-2 border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setViewingAuction(null)}
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

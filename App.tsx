@@ -16,6 +16,7 @@ import PlayerProfilePage from './pages/dashboard/PlayerProfile';
 import BidEvents from './pages/dashboard/BidEvents';
 import { History } from './pages/dashboard/History';
 import AuctionManagement from './pages/dashboard/AuctionManagement';
+import CreateAuction from './pages/dashboard/CreateAuction';
 import AuctioneerOverview from './pages/dashboard/AuctioneerOverview';
 import AuctioneerTeamDetails from './pages/dashboard/AuctioneerTeamDetails';
 import AuctioneerPlayers from './pages/dashboard/AuctioneerPlayers';
@@ -66,6 +67,7 @@ const App: React.FC = () => {
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<TeamsAndPlayers />} />
                 <Route path="auctions" element={<AuctionManagement />} />
+                <Route path="auctions/create" element={<CreateAuction />} />
                 <Route path="history" element={<History />} />
                 <Route 
                   path="auction-history" 

@@ -68,13 +68,13 @@ const BidEvents: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'LIVE':
-        return 'bg-red-600/20 text-red-400 border-red-600/30';
+        return 'bg-red-100 dark:bg-red-600/20 text-red-600 dark:text-red-400 border-red-300 dark:border-red-600/30';
       case 'COMPLETED':
-        return 'bg-green-600/20 text-green-400 border-green-600/30';
+        return 'bg-green-100 dark:bg-green-600/20 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600/30';
       case 'SCHEDULED':
-        return 'bg-blue-600/20 text-blue-400 border-blue-600/30';
+        return 'bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600/30';
       default:
-        return 'bg-slate-600/20 text-slate-400 border-slate-600/30';
+        return 'bg-gray-100 dark:bg-slate-600/20 text-gray-600 dark:text-slate-400 border-gray-300 dark:border-slate-600/30';
     }
   };
 
@@ -96,7 +96,7 @@ const BidEvents: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl">
+      <div className="bg-white dark:bg-gradient-to-r dark:from-blue-600/10 dark:to-purple-600/10 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-8 backdrop-blur-xl shadow-sm dark:shadow-none">
         <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-2">Bid Events</h1>
         <p className="text-gray-600 dark:text-slate-400">Watch live auctions for {user?.sport?.toUpperCase()} and follow the bidding action</p>
       </div>
@@ -153,10 +153,10 @@ const BidEvents: React.FC = () => {
                             <h4 className="text-lg font-bold text-gray-900 dark:text-white">{player.name}</h4>
                             <span className="text-2xl">{getPlayerStatusIcon(player.status)}</span>
                             <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                              player.status === 'LIVE' ? 'bg-red-600/30 text-red-300' :
-                              player.status === 'SOLD' ? 'bg-green-600/30 text-green-300' :
-                              player.status === 'UNSOLD' ? 'bg-gray-600/30 text-gray-300' :
-                              'bg-blue-600/30 text-blue-300'
+                              player.status === 'LIVE' ? 'bg-red-100 dark:bg-red-600/30 text-red-600 dark:text-red-300' :
+                              player.status === 'SOLD' ? 'bg-green-100 dark:bg-green-600/30 text-green-600 dark:text-green-300' :
+                              player.status === 'UNSOLD' ? 'bg-gray-100 dark:bg-gray-600/30 text-gray-600 dark:text-gray-300' :
+                              'bg-blue-100 dark:bg-blue-600/30 text-blue-600 dark:text-blue-300'
                             }`}>
                               {player.status}
                             </span>
@@ -165,26 +165,26 @@ const BidEvents: React.FC = () => {
 
                           <div className="grid grid-cols-3 gap-4">
                             <div>
-                              <p className="text-xs text-slate-500 mb-1">Base Price</p>
-                              <p className="text-white font-bold">₹{player.basePrice.toLocaleString()}</p>
+                              <p className="text-xs text-gray-500 dark:text-slate-500 mb-1">Base Price</p>
+                              <p className="text-gray-800 dark:text-white font-bold">₹{player.basePrice.toLocaleString()}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-slate-500 mb-1">Current Bid</p>
-                              <p className={`text-lg font-bold ${player.currentBid > 0 ? 'text-blue-400' : 'text-slate-500'}`}>
+                              <p className="text-xs text-gray-500 dark:text-slate-500 mb-1">Current Bid</p>
+                              <p className={`text-lg font-bold ${player.currentBid > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-slate-500'}`}>
                                 {player.currentBid > 0 ? `₹${player.currentBid.toLocaleString()}` : 'No bids yet'}
                               </p>
                             </div>
                             <div>
-                              <p className="text-xs text-slate-500 mb-1">Increase</p>
-                              <p className="text-white font-bold">+₹{auction.bidIncrement.toLocaleString()}</p>
+                              <p className="text-xs text-gray-500 dark:text-slate-500 mb-1">Increase</p>
+                              <p className="text-gray-800 dark:text-white font-bold">+₹{auction.bidIncrement.toLocaleString()}</p>
                             </div>
                           </div>
                         </div>
                       </div>
 
                       {/* Spectator Note */}
-                      <div className="mt-4 p-3 bg-blue-600/10 border border-blue-600/20 rounded-lg">
-                        <p className="text-xs text-blue-300">👁️ You are viewing as a spectator. Bidding is restricted.</p>
+                      <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-600/10 border border-blue-300 dark:border-blue-600/20 rounded-lg">
+                        <p className="text-xs text-blue-600 dark:text-blue-300">👁️ You are viewing as a spectator. Bidding is restricted.</p>
                       </div>
                     </div>
                   ))}
@@ -192,7 +192,7 @@ const BidEvents: React.FC = () => {
               ) : (
                 <button
                   onClick={() => setSelectedAuction(auction.id)}
-                  className="w-full bg-blue-600/20 border border-blue-600/40 hover:bg-blue-600/30 text-blue-300 font-semibold py-4 rounded-xl transition-all"
+                  className="w-full bg-blue-100 dark:bg-blue-600/20 border border-blue-300 dark:border-blue-600/40 hover:bg-blue-200 dark:hover:bg-blue-600/30 text-blue-600 dark:text-blue-300 font-semibold py-4 rounded-xl transition-all"
                 >
                   + View {auction.players.length} Players
                 </button>
@@ -203,8 +203,8 @@ const BidEvents: React.FC = () => {
       </div>
 
       {/* Info Box */}
-      <div className="bg-gradient-to-r from-amber-600/10 to-orange-600/10 border border-amber-600/20 rounded-2xl p-6 backdrop-blur-xl">
-        <p className="text-amber-300 text-sm">
+      <div className="bg-amber-50 dark:bg-gradient-to-r dark:from-amber-600/10 dark:to-orange-600/10 border border-amber-300 dark:border-amber-600/20 rounded-2xl p-6 backdrop-blur-xl">
+        <p className="text-amber-700 dark:text-amber-300 text-sm">
           <span className="font-bold">ℹ️ Spectator Mode:</span> You can view all upcoming and live auctions for {user?.sport?.toUpperCase()}.
           Track players in real-time, but bidding is restricted. To participate in bidding, you must register as a team owner.
         </p>

@@ -23,10 +23,10 @@ const PlayerDashboardLayout: React.FC = () => {
   }, [isAuthenticated, user, navigate, isLoading]);
 
   const navItems = [
-    { name: 'My Profile', path: '/player/dashboard', icon: '👤', end: true },
-    { name: 'Auctions', path: '/player/dashboard/auctions', icon: '🏆' },
-    { name: 'Live Auction', path: '/player/dashboard/live', icon: '🔴', isLive: true },
-    { name: 'Bid Events', path: '/player/dashboard/bid-events', icon: '🎯' },
+    { name: 'My Profile', path: '/player/dashboard', icon: '●', end: true },
+    { name: 'Auctions', path: '/player/dashboard/auctions', icon: '■' },
+    { name: 'Live Auction', path: '/player/dashboard/live', icon: '▶', isLive: true },
+    { name: 'Bid Events', path: '/player/dashboard/bid-events', icon: '◆' },
   ];
 
   const handleLogout = () => {
@@ -58,25 +58,37 @@ const PlayerDashboardLayout: React.FC = () => {
       </div>
 
       {/* Sidebar */}
-      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-white dark:bg-gradient-to-b dark:from-slate-950/95 dark:to-slate-900/95 backdrop-blur-xl border-r border-gray-200 dark:border-blue-600/20 flex flex-col fixed left-0 top-0 h-screen z-30 transition-all duration-300 shadow-sm dark:shadow-none`}>
-        <div className="p-6 border-b border-blue-600/20 bg-gradient-to-r from-blue-600/10 to-purple-600/10">
+      <aside className={`${sidebarCollapsed ? 'w-[84px]' : 'w-64'} bg-white dark:bg-gradient-to-b dark:from-slate-950/95 dark:to-slate-900/95 backdrop-blur-xl border-r border-gray-200 dark:border-blue-600/20 flex flex-col fixed left-0 top-0 h-screen z-30 transition-all duration-300 shadow-sm dark:shadow-none`}>
+        <div className={`${sidebarCollapsed ? 'p-3' : 'p-6'} border-b border-blue-600/20 bg-gradient-to-r from-blue-600/10 to-purple-600/10`}>
           <div className="flex items-center justify-between">
-            <div className={`flex items-center gap-3 mb-2 ${sidebarCollapsed ? 'justify-center' : ''}`}>
-              <span className="text-3xl">👤</span>
+            <div className={`flex items-center gap-3 mb-2 ${sidebarCollapsed ? 'justify-center w-full mx-auto' : ''}`}>
+              <span className="text-2xl font-bold">P</span>
               {!sidebarCollapsed && (
-                <span className="text-2xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">PLAYER</span>
+                <span className="text-2xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">LAYER</span>
               )}
             </div>
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-1 hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-colors"
-            >
-              <span className="text-gray-500 dark:text-slate-400 text-sm">
-                {sidebarCollapsed ? '→' : '←'}
-              </span>
-            </button>
+            {!sidebarCollapsed && (
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="p-1 hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-colors"
+              >
+                <span className="text-gray-700 dark:text-slate-300 text-sm">←</span>
+              </button>
+            )}
           </div>
-          {!sidebarCollapsed && <p className="text-xs text-gray-500 dark:text-slate-400">Sports Bidding Platform</p>}
+          {sidebarCollapsed ? (
+            <div className="flex justify-center mt-2">
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="p-1 hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-colors"
+                title="Expand Sidebar"
+              >
+                <span className="text-gray-700 dark:text-slate-300 text-sm">→</span>
+              </button>
+            </div>
+          ) : (
+            <p className="text-xs text-gray-700 dark:text-slate-300 mt-1">Sports Bidding Platform</p>
+          )}
         </div>
         
         <nav className="flex-1 p-4 space-y-3">
@@ -86,16 +98,22 @@ const PlayerDashboardLayout: React.FC = () => {
               to={item.path}
               end={item.end}
               className={({ isActive }) => 
-                `block px-4 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${
-                  isActive 
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50 scale-105' 
-                    : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white'
-                } ${sidebarCollapsed ? 'text-center' : ''}`
+                `block px-4 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${isActive 
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50 scale-105' 
+                  : 'text-gray-800 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white'
+                } ${sidebarCollapsed ? 'text-center justify-center flex items-center' : 'flex items-center'}`
               }
               title={sidebarCollapsed ? item.name : ''}
             >
-              <span className="mr-2">{item.icon}</span>
-              {!sidebarCollapsed && item.name}
+              <span className={`${item.isLive ? 'text-red-500 animate-pulse' : ''} ${sidebarCollapsed ? '' : 'mr-3'}`}>
+                {item.icon}
+              </span>
+              {!sidebarCollapsed && (
+                <span className={item.isLive ? 'relative' : ''}>
+                  {item.name}
+                  {item.isLive && <span className="absolute -top-1 -right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -103,33 +121,34 @@ const PlayerDashboardLayout: React.FC = () => {
         <div className="p-4 border-t border-gray-200 dark:border-blue-600/20 space-y-3">
           {!sidebarCollapsed && (
             <div className="p-3 bg-gray-100 dark:bg-slate-800/30 rounded-lg border border-gray-200 dark:border-slate-700">
-              <p className="text-xs text-gray-500 dark:text-slate-400">Logged in as</p>
+              <p className="text-xs text-gray-700 dark:text-slate-300">Logged in as</p>
               <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{user?.username}</p>
-              <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">Sport: {user?.sport?.toUpperCase()}</p>
+              <p className="text-xs text-gray-700 dark:text-slate-400 mt-1">Sport: {user?.sport?.toUpperCase()}</p>
             </div>
           )}
           <button 
             onClick={handleLogout}
-            className={`w-full px-4 py-2 text-sm text-gray-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors font-semibold ${
-              sidebarCollapsed ? 'text-center' : ''
+            className={`w-full px-4 py-2 text-sm text-gray-700 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors font-semibold ${
+              sidebarCollapsed ? 'text-center flex justify-center items-center' : 'flex items-center'
             }`}
             title={sidebarCollapsed ? 'Logout' : ''}
           >
-            🚪 {!sidebarCollapsed && 'Logout'}
+            <span className={sidebarCollapsed ? '' : 'mr-2'}>→</span>
+            {!sidebarCollapsed && 'Logout'}
           </button>
         </div>
       </aside>
 
       {/* Content Area */}
-      <main className={`flex-1 bg-transparent relative z-10 transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+      <main className={`flex-1 bg-transparent relative z-10 transition-all duration-300 ${sidebarCollapsed ? 'ml-[84px]' : 'ml-64'}`}>
         <header className={`h-20 bg-white/95 dark:bg-gradient-to-r dark:from-slate-900/80 dark:to-blue-900/50 backdrop-blur-xl border-b border-gray-200 dark:border-blue-600/20 flex items-center justify-between px-8 fixed top-0 z-20 shadow-sm dark:shadow-lg transition-all duration-300 ${
-          sidebarCollapsed ? 'left-16 right-0' : 'left-64 right-0'
+          sidebarCollapsed ? 'left-[84px] right-0' : 'left-64 right-0'
         }`}>
           <div>
             <h2 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Player Dashboard
             </h2>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Manage your profile and view auctions</p>
+            <p className="text-xs text-gray-700 dark:text-slate-300 mt-1">Manage your profile and view auctions</p>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
@@ -141,7 +160,7 @@ const PlayerDashboardLayout: React.FC = () => {
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900 dark:text-white">{user?.username}</p>
-              <p className="text-xs text-gray-500 dark:text-slate-400">Player</p>
+              <p className="text-xs text-gray-700 dark:text-slate-300">Player</p>
             </div>
           </div>
         </header>

@@ -142,12 +142,12 @@ const PlayerProfilePage: React.FC = () => {
     <div className="space-y-8">
       {/* New User Banner */}
       {isNewUser && (
-        <div className="bg-yellow-600/20 border border-yellow-600/30 rounded-2xl p-6">
+        <div className="bg-yellow-100 dark:bg-yellow-600/20 border border-yellow-400 dark:border-yellow-600/30 rounded-2xl p-6">
           <div className="flex items-center gap-3">
             <span className="text-3xl">👋</span>
             <div>
-              <h3 className="text-lg font-bold text-yellow-300">Welcome, New Player!</h3>
-              <p className="text-yellow-200/80 text-sm">Please edit your profile to add your details. Click "Edit Profile" to get started.</p>
+              <h3 className="text-lg font-bold text-yellow-700 dark:text-yellow-300">Welcome, New Player!</h3>
+              <p className="text-yellow-600 dark:text-yellow-200/80 text-sm">Please edit your profile to add your details. Click "Edit Profile" to get started.</p>
             </div>
           </div>
         </div>
@@ -155,8 +155,8 @@ const PlayerProfilePage: React.FC = () => {
 
       {/* Save Message */}
       {saveMessage && (
-        <div className={`p-4 rounded-xl ${saveMessage.type === 'success' ? 'bg-green-600/20 border border-green-600/30' : 'bg-red-600/20 border border-red-600/30'}`}>
-          <p className={saveMessage.type === 'success' ? 'text-green-300' : 'text-red-300'}>{saveMessage.text}</p>
+        <div className={`p-4 rounded-xl ${saveMessage.type === 'success' ? 'bg-green-100 dark:bg-green-600/20 border border-green-400 dark:border-green-600/30' : 'bg-red-100 dark:bg-red-600/20 border border-red-400 dark:border-red-600/30'}`}>
+          <p className={saveMessage.type === 'success' ? 'text-green-600 dark:text-green-300' : 'text-red-600 dark:text-red-300'}>{saveMessage.text}</p>
         </div>
       )}
 
@@ -239,16 +239,16 @@ const PlayerProfilePage: React.FC = () => {
                     value={formData.age ?? ''}
                     onChange={handleInputChange}
                     placeholder="Enter your age"
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Playing Role *</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Playing Role *</label>
                   <select
                     name="role"
                     value={formData.role === 'Unavailable' ? '' : formData.role}
                     onChange={handleInputChange}
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select a role</option>
                     {roles.map((role) => (
@@ -262,49 +262,49 @@ const PlayerProfilePage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Height</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Height</label>
                   <input
                     type="text"
                     name="height"
                     value={formData.height === 'Unavailable' ? '' : formData.height}
                     onChange={handleInputChange}
                     placeholder="e.g., 6.0 ft"
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-300 mb-2">Weight</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Weight</label>
                   <input
                     type="text"
                     name="weight"
                     value={formData.weight === 'Unavailable' ? '' : formData.weight}
                     onChange={handleInputChange}
                     placeholder="e.g., 75 kg"
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2">Base Price (₹)</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Base Price (₹)</label>
                 <input
                   type="number"
                   name="basePrice"
                   value={formData.basePrice || ''}
                   onChange={handleInputChange}
                   placeholder="Enter your base price"
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2">Bio</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Bio</label>
                 <textarea
                   name="bio"
                   value={formData.bio === 'Unavailable' ? '' : formData.bio}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Tell us about yourself, your achievements, playing style..."
                 />
               </div>
@@ -320,7 +320,7 @@ const PlayerProfilePage: React.FC = () => {
                 <button
                   onClick={handleCancel}
                   disabled={isSaving}
-                  className="flex-1 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-700/50 text-white font-bold py-3 rounded-lg transition-all"
+                  className="flex-1 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 disabled:bg-gray-200/50 dark:disabled:bg-slate-700/50 text-gray-800 dark:text-white font-bold py-3 rounded-lg transition-all"
                 >
                   Cancel
                 </button>
@@ -359,25 +359,25 @@ const PlayerProfilePage: React.FC = () => {
           {playerRequest && (
             <div className={`rounded-2xl p-6 backdrop-blur-xl border ${
               playerRequest.status === BiddingRequestStatus.PENDING
-                ? 'bg-yellow-600/10 border-yellow-600/20'
+                ? 'bg-yellow-50 dark:bg-yellow-600/10 border-yellow-300 dark:border-yellow-600/20'
                 : playerRequest.status === BiddingRequestStatus.APPROVED
-                ? 'bg-green-600/10 border-green-600/20'
+                ? 'bg-green-50 dark:bg-green-600/10 border-green-300 dark:border-green-600/20'
                 : playerRequest.status === BiddingRequestStatus.ADDED_TO_AUCTION
-                ? 'bg-blue-600/10 border-blue-600/20'
-                : 'bg-red-600/10 border-red-600/20'
+                ? 'bg-blue-50 dark:bg-blue-600/10 border-blue-300 dark:border-blue-600/20'
+                : 'bg-red-50 dark:bg-red-600/10 border-red-300 dark:border-red-600/20'
             }`}>
-              <h3 className="text-lg font-bold text-white mb-4">Bidding Request Status</h3>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Bidding Request Status</h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-slate-400 text-sm mb-1">Status</p>
+                  <p className="text-gray-500 dark:text-slate-400 text-sm mb-1">Status</p>
                   <p className={`font-semibold text-lg ${
                     playerRequest.status === BiddingRequestStatus.PENDING
-                      ? 'text-yellow-400'
+                      ? 'text-yellow-600 dark:text-yellow-400'
                       : playerRequest.status === BiddingRequestStatus.APPROVED
-                      ? 'text-green-400'
+                      ? 'text-green-600 dark:text-green-400'
                       : playerRequest.status === BiddingRequestStatus.ADDED_TO_AUCTION
-                      ? 'text-blue-400'
-                      : 'text-red-400'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-red-600 dark:text-red-400'
                   }`}>
                     {playerRequest.status === BiddingRequestStatus.PENDING && '⏳ Pending Review'}
                     {playerRequest.status === BiddingRequestStatus.APPROVED && '✓ Approved by Admin'}
@@ -387,14 +387,14 @@ const PlayerProfilePage: React.FC = () => {
                 </div>
                 {playerRequest.approvedAt && (
                   <div>
-                    <p className="text-slate-400 text-sm mb-1">Approved on</p>
-                    <p className="text-white font-semibold">{new Date(playerRequest.approvedAt).toLocaleDateString()}</p>
+                    <p className="text-gray-500 dark:text-slate-400 text-sm mb-1">Approved on</p>
+                    <p className="text-gray-800 dark:text-white font-semibold">{new Date(playerRequest.approvedAt).toLocaleDateString()}</p>
                   </div>
                 )}
                 {playerRequest.rejectionReason && (
                   <div>
-                    <p className="text-slate-400 text-sm mb-1">Rejection Reason</p>
-                    <p className="text-red-300 font-semibold">{playerRequest.rejectionReason}</p>
+                    <p className="text-gray-500 dark:text-slate-400 text-sm mb-1">Rejection Reason</p>
+                    <p className="text-red-600 dark:text-red-300 font-semibold">{playerRequest.rejectionReason}</p>
                   </div>
                 )}
               </div>
@@ -411,51 +411,51 @@ const PlayerProfilePage: React.FC = () => {
           )}
 
           {isNewUser && (
-            <div className="bg-orange-600/10 border border-orange-600/20 rounded-2xl p-6 backdrop-blur-xl">
-              <p className="text-orange-300 font-semibold">⚠️ Complete your profile first</p>
-              <p className="text-slate-400 text-sm mt-2">You need to fill in your profile details before requesting to join an auction.</p>
+            <div className="bg-orange-50 dark:bg-orange-600/10 border border-orange-300 dark:border-orange-600/20 rounded-2xl p-6 backdrop-blur-xl">
+              <p className="text-orange-600 dark:text-orange-300 font-semibold">⚠️ Complete your profile first</p>
+              <p className="text-gray-500 dark:text-slate-400 text-sm mt-2">You need to fill in your profile details before requesting to join an auction.</p>
             </div>
           )}
 
           {requestSubmitted && !playerRequest && (
-            <div className="bg-green-600/10 border border-green-600/20 rounded-2xl p-6 backdrop-blur-xl">
-              <p className="text-green-300 font-semibold">✓ Your request has been sent to the admin!</p>
-              <p className="text-slate-400 text-sm mt-2">You'll be notified once the admin reviews your profile.</p>
+            <div className="bg-green-50 dark:bg-green-600/10 border border-green-300 dark:border-green-600/20 rounded-2xl p-6 backdrop-blur-xl">
+              <p className="text-green-600 dark:text-green-300 font-semibold">✓ Your request has been sent to the admin!</p>
+              <p className="text-gray-500 dark:text-slate-400 text-sm mt-2">You'll be notified once the admin reviews your profile.</p>
             </div>
           )}
 
-          <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl">
-            <h3 className="text-lg font-bold text-white mb-4">Profile Stats</h3>
+          <div className="bg-white dark:bg-gradient-to-r dark:from-blue-600/10 dark:to-purple-600/10 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl shadow-sm dark:shadow-none">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Profile Stats</h3>
             <div className="space-y-4">
               <div>
-                <p className="text-slate-400 text-sm mb-1">Sport</p>
-                <p className="text-white font-semibold">{formData.sport !== 'Unavailable' ? formData.sport.toUpperCase() : displayValue(null)}</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-1">Sport</p>
+                <p className="text-gray-800 dark:text-white font-semibold">{formData.sport !== 'Unavailable' ? formData.sport.toUpperCase() : displayValue(null)}</p>
               </div>
               <div>
-                <p className="text-slate-400 text-sm mb-1">Role</p>
-                <p className="text-white font-semibold">{displayValue(formData.role)}</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-1">Role</p>
+                <p className="text-gray-800 dark:text-white font-semibold">{displayValue(formData.role)}</p>
               </div>
               <div>
-                <p className="text-slate-400 text-sm mb-1">Email</p>
-                <p className="text-white font-semibold text-sm break-all">{displayValue(formData.email)}</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-1">Email</p>
+                <p className="text-gray-800 dark:text-white font-semibold text-sm break-all">{displayValue(formData.email)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-green-600/10 to-emerald-600/10 border border-green-600/20 rounded-2xl p-6 backdrop-blur-xl">
-            <h3 className="text-lg font-bold text-white mb-4">Account Info</h3>
+          <div className="bg-white dark:bg-gradient-to-r dark:from-green-600/10 dark:to-emerald-600/10 border border-gray-200 dark:border-green-600/20 rounded-2xl p-6 backdrop-blur-xl shadow-sm dark:shadow-none">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Account Info</h3>
             <div className="space-y-4">
               <div>
-                <p className="text-slate-400 text-sm mb-1">Username</p>
-                <p className="text-white font-semibold">{user?.username || 'N/A'}</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-1">Username</p>
+                <p className="text-gray-800 dark:text-white font-semibold">{user?.username || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-slate-400 text-sm mb-1">Member Since</p>
-                <p className="text-white font-semibold">{user?.createdAt ? new Date(user.createdAt).getFullYear() : 'N/A'}</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-1">Member Since</p>
+                <p className="text-gray-800 dark:text-white font-semibold">{user?.createdAt ? new Date(user.createdAt).getFullYear() : 'N/A'}</p>
               </div>
               <div>
-                <p className="text-slate-400 text-sm mb-1">Status</p>
-                <p className="text-green-400 font-semibold">✓ Active</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-1">Status</p>
+                <p className="text-green-600 dark:text-green-400 font-semibold">✓ Active</p>
               </div>
             </div>
           </div>

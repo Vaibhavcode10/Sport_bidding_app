@@ -92,9 +92,9 @@ export const PlayerAuctions: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'SCHEDULED': return 'bg-blue-500/20 text-blue-300 border-blue-500/50';
-      case 'LIVE': return 'bg-green-500/20 text-green-300 border-green-500/50 animate-pulse';
-      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/50';
+      case 'SCHEDULED': return 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300 border-blue-400 dark:border-blue-500/50';
+      case 'LIVE': return 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-300 border-green-400 dark:border-green-500/50 animate-pulse';
+      default: return 'bg-gray-100 dark:bg-gray-500/20 text-gray-600 dark:text-gray-300 border-gray-400 dark:border-gray-500/50';
     }
   };
 
@@ -106,7 +106,7 @@ export const PlayerAuctions: React.FC = () => {
     return (
       <div className="text-center py-16">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="text-slate-400 mt-4">Loading auctions...</p>
+        <p className="text-gray-500 dark:text-slate-400 mt-4">Loading auctions...</p>
       </div>
     );
   }
@@ -114,32 +114,32 @@ export const PlayerAuctions: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl">
-        <h2 className="text-2xl font-bold text-white mb-1">🏆 Available Auctions</h2>
-        <p className="text-slate-400 text-sm">View and register for upcoming auctions in {user?.sport}</p>
+      <div className="bg-white dark:bg-gradient-to-r dark:from-blue-600/10 dark:to-purple-600/10 border border-gray-200 dark:border-blue-600/20 rounded-2xl p-6 backdrop-blur-xl shadow-sm dark:shadow-none">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-1">🏆 Available Auctions</h2>
+        <p className="text-gray-500 dark:text-slate-400 text-sm">View and register for upcoming auctions in {user?.sport}</p>
       </div>
 
       {auctions.length === 0 ? (
-        <div className="text-center py-16 bg-gradient-to-br from-slate-800/30 to-slate-900/30 border border-slate-700 rounded-2xl">
+        <div className="text-center py-16 bg-gray-50 dark:bg-gradient-to-br dark:from-slate-800/30 dark:to-slate-900/30 border border-gray-200 dark:border-slate-700 rounded-2xl">
           <div className="text-6xl mb-4">📅</div>
-          <p className="text-slate-400 text-lg font-semibold">No upcoming auctions</p>
-          <p className="text-slate-500 text-sm mt-2">Check back later for new auction announcements</p>
+          <p className="text-gray-600 dark:text-slate-400 text-lg font-semibold">No upcoming auctions</p>
+          <p className="text-gray-500 dark:text-slate-500 text-sm mt-2">Check back later for new auction announcements</p>
         </div>
       ) : (
         <div className="grid gap-4">
           {auctions.map(auction => (
             <div
               key={auction.id}
-              className={`bg-gradient-to-br from-slate-800/60 to-slate-900/60 border rounded-xl p-5 transition-all ${
-                isRegistered(auction) ? 'border-green-500/50' : 'border-slate-700 hover:border-blue-500/50'
+              className={`bg-white dark:bg-gradient-to-br dark:from-slate-800/60 dark:to-slate-900/60 border rounded-xl p-5 transition-all shadow-sm dark:shadow-none ${
+                isRegistered(auction) ? 'border-green-400 dark:border-green-500/50' : 'border-gray-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500/50'
               }`}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">{getSportEmoji(auction.sport)}</span>
                   <div>
-                    <h3 className="text-xl font-bold text-white">{auction.name}</h3>
-                    <p className="text-slate-400 text-sm capitalize">{auction.sport}</p>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">{auction.name}</h3>
+                    <p className="text-gray-500 dark:text-slate-400 text-sm capitalize">{auction.sport}</p>
                   </div>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(auction.status)}`}>
@@ -147,30 +147,30 @@ export const PlayerAuctions: React.FC = () => {
                 </span>
               </div>
 
-              <p className="text-slate-400 text-sm mb-4">{auction.description}</p>
+              <p className="text-gray-500 dark:text-slate-400 text-sm mb-4">{auction.description}</p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 text-sm">
-                <div className="bg-slate-700/30 rounded-lg p-2">
-                  <p className="text-slate-500 text-xs">Start</p>
-                  <p className="text-white font-semibold">{formatDate(auction.startDate)}</p>
+                <div className="bg-gray-100 dark:bg-slate-700/30 rounded-lg p-2">
+                  <p className="text-gray-500 dark:text-slate-500 text-xs">Start</p>
+                  <p className="text-gray-800 dark:text-white font-semibold">{formatDate(auction.startDate)}</p>
                 </div>
-                <div className="bg-slate-700/30 rounded-lg p-2">
-                  <p className="text-slate-500 text-xs">End</p>
-                  <p className="text-white font-semibold">{formatDate(auction.endDate)}</p>
+                <div className="bg-gray-100 dark:bg-slate-700/30 rounded-lg p-2">
+                  <p className="text-gray-500 dark:text-slate-500 text-xs">End</p>
+                  <p className="text-gray-800 dark:text-white font-semibold">{formatDate(auction.endDate)}</p>
                 </div>
-                <div className="bg-slate-700/30 rounded-lg p-2">
-                  <p className="text-slate-500 text-xs">Teams Participating</p>
-                  <p className="text-orange-400 font-semibold">{auction.acceptedAuctioneers.length}</p>
+                <div className="bg-gray-100 dark:bg-slate-700/30 rounded-lg p-2">
+                  <p className="text-gray-500 dark:text-slate-500 text-xs">Teams Participating</p>
+                  <p className="text-orange-500 dark:text-orange-400 font-semibold">{auction.acceptedAuctioneers.length}</p>
                 </div>
-                <div className="bg-slate-700/30 rounded-lg p-2">
-                  <p className="text-slate-500 text-xs">Players Registered</p>
-                  <p className="text-blue-400 font-semibold">{auction.registeredPlayers.length}</p>
+                <div className="bg-gray-100 dark:bg-slate-700/30 rounded-lg p-2">
+                  <p className="text-gray-500 dark:text-slate-500 text-xs">Players Registered</p>
+                  <p className="text-blue-500 dark:text-blue-400 font-semibold">{auction.registeredPlayers.length}</p>
                 </div>
               </div>
 
               {isRegistered(auction) ? (
-                <div className="p-3 bg-green-600/10 border border-green-600/30 rounded-lg text-center">
-                  <p className="text-green-300 font-semibold">✅ You're registered for this auction!</p>
+                <div className="p-3 bg-green-100 dark:bg-green-600/10 border border-green-300 dark:border-green-600/30 rounded-lg text-center">
+                  <p className="text-green-600 dark:text-green-300 font-semibold">✅ You're registered for this auction!</p>
                 </div>
               ) : (
                 <button

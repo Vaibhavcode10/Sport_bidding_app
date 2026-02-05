@@ -1,4 +1,4 @@
-[  
+[
   {
     "id": "fb_p1",
     "username": "lionel_messi",
@@ -73,6 +73,27 @@
     "currentBid": 0,
     "status": "AVAILABLE",
     "verified": true,
+    "auctionPrice": null,
+    "soldTo": null
+  },
+  {
+    "id": "fo_p1770267991906",
+    "username": "v1",
+    "email": "v1@gmail.com",
+    "name": "vaibhav hoke",
+    "sport": "football",
+    "role": "Unavailable",
+    "jersey": null,
+    "height": "Unavailable",
+    "weight": "Unavailable",
+    "age": null,
+    "basePrice": 0,
+    "bio": "Unavailable",
+    "imageUrl": "",
+    "verified": false,
+    "createdAt": "2026-02-05",
+    "currentBid": 0,
+    "status": "AVAILABLE",
     "auctionPrice": null,
     "soldTo": null
   }

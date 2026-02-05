@@ -232,38 +232,6 @@ export const AuctioneerLiveDashboard: React.FC = () => {
     };
   }, [isTimerRunning, isPaused, timeRemaining]);
 
-  // Check undo availability - MOVED UP: Must be defined before the useEffect that uses it
-  const checkUndoAvailability = useCallback(async () => {
-    if (!isTimerRunning || !isLive) {
-      setCanUndo(false);
-      return;
-    }
-    
-    try {
-      const response = await api.get('/live-auction/state');
-      if (response.data?.ledger?.lastBidUndoable) {
-        const timeSince = Date.now() - response.data.ledger.lastBidUndoable.timestamp;
-        const remaining = Math.max(0, 15000 - timeSince); // 15 second window
-        
-        if (remaining > 0) {
-          setCanUndo(true);
-          setUndoRemainingTime(remaining);
-          setLastBidTeam(response.data.ledger.bidHistory?.length > 0 
-            ? response.data.ledger.bidHistory[response.data.ledger.bidHistory.length - 1].teamName 
-            : ''
-          );
-        } else {
-          setCanUndo(false);
-        }
-      } else {
-        setCanUndo(false);
-      }
-    } catch (err) {
-      console.error('Check undo error:', err);
-      setCanUndo(false);
-    }
-  }, [isTimerRunning, isLive]);
-
   // Check undo availability periodically
   useEffect(() => {
     let undoCheckInterval: NodeJS.Timeout | null = null;
@@ -553,7 +521,7 @@ export const AuctioneerLiveDashboard: React.FC = () => {
           
           {readyAuctions.length === 0 ? (
             <div className="bg-white dark:bg-[#0d1f35] border border-gray-200 dark:border-cyan-900/50 p-12 text-center rounded-xl">
-              <p className="text-gray-500 uppercase tracking-wider">No auctions available</p>
+              <p className="text-gray-800 dark:text-gray-200 uppercase tracking-wider">No auctions available</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -567,7 +535,7 @@ export const AuctioneerLiveDashboard: React.FC = () => {
                     <div>
                       <h2 className="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wide">{auction.name}</h2>
                       <p className="text-primary-600 dark:text-cyan-600 uppercase text-sm tracking-wider mt-1">{auction.sport}</p>
-                      <div className="flex gap-6 mt-3 text-xs text-gray-500 uppercase tracking-wider">
+                      <div className="flex gap-6 mt-3 text-xs text-gray-800 dark:text-gray-200 uppercase tracking-wider">
                         <span>{auction.participatingTeams?.length || 0} Teams</span>
                         <span>{auction.playerPool?.length || 0} Players</span>
                       </div>
@@ -607,7 +575,7 @@ export const AuctioneerLiveDashboard: React.FC = () => {
             <div className="flex gap-4">
               <button
                 onClick={() => setSelectedAuction(null)}
-                className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 uppercase tracking-wider text-sm hover:border-gray-400 dark:hover:border-gray-500 transition-all rounded-lg"
+                className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 uppercase tracking-wider text-sm hover:border-gray-400 dark:hover:border-gray-500 transition-all rounded-lg"
               >
                 Back
               </button>
@@ -628,7 +596,7 @@ export const AuctioneerLiveDashboard: React.FC = () => {
 
           {/* Teams */}
           <div className="mb-8">
-            <h2 className="text-sm text-gray-600 dark:text-gray-500 uppercase tracking-wider mb-4">Participating Teams</h2>
+            <h2 className="text-sm text-gray-800 dark:text-gray-200 uppercase tracking-wider mb-4">Participating Teams</h2>
             <div className="grid grid-cols-4 gap-4">
               {teams.map(team => (
                 <div key={team.id} className="bg-white dark:bg-[#0d1f35] border border-gray-200 dark:border-cyan-900/30 p-4 rounded-xl shadow-sm">
@@ -652,7 +620,7 @@ export const AuctioneerLiveDashboard: React.FC = () => {
 
           {/* Player Queue */}
           <div>
-            <h2 className="text-sm text-gray-600 dark:text-gray-500 uppercase tracking-wider mb-4">Player Queue</h2>
+            <h2 className="text-sm text-gray-800 dark:text-gray-200 uppercase tracking-wider mb-4">Player Queue</h2>
             <div className="grid grid-cols-6 gap-3">
               {playersInPool.map((player, idx) => (
                 <div key={player.id} className="bg-white dark:bg-[#0d1f35] border border-gray-200 dark:border-cyan-900/30 p-3 relative rounded-xl shadow-sm">
@@ -663,7 +631,7 @@ export const AuctioneerLiveDashboard: React.FC = () => {
                     {player.imageUrl ? (
                       <img src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-gray-400 dark:text-gray-600 text-2xl">👤</span>
+                      <span className="text-gray-600 dark:text-gray-300 text-2xl">👤</span>
                     )}
                   </div>
                   <p className="text-gray-900 dark:text-white text-xs font-semibold uppercase truncate">{player.name}</p>
@@ -717,7 +685,7 @@ export const AuctioneerLiveDashboard: React.FC = () => {
               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               <span className="text-red-500 dark:text-red-400 text-sm uppercase tracking-wider font-semibold">Live</span>
             </div>
-            <span className="text-gray-500 text-sm">
+            <span className="text-gray-800 dark:text-gray-200 text-sm">
               Player {currentPlayerIndex + 1} of {playerQueue.length}
             </span>
           </div>
@@ -751,7 +719,7 @@ export const AuctioneerLiveDashboard: React.FC = () => {
               
               {/* LEFT - BASE PRICE */}
               <div className="text-center">
-                <p className="text-gray-600 dark:text-gray-600 uppercase tracking-wider text-xs mb-2">Base Price</p>
+                <p className="text-gray-800 dark:text-gray-200 uppercase tracking-wider text-xs mb-2">Base Price</p>
                 <p className="text-3xl text-gray-700 dark:text-gray-400">{formatCr(basePrice)}</p>
               </div>
 

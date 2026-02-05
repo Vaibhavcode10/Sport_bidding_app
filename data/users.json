@@ -150,6 +150,28 @@
         "imageUrl": "",
         "createdAt": "2026-01-27",
         "updatedAt": "2026-01-27T06:23:56.067Z"
+      },
+      {
+        "id": "fo_p1770267991906",
+        "username": "v1",
+        "email": "v1@gmail.com",
+        "password": "123456",
+        "name": "vaibhav hoke",
+        "sport": "football",
+        "role": "Unavailable",
+        "jersey": null,
+        "height": "Unavailable",
+        "weight": "Unavailable",
+        "age": null,
+        "basePrice": 0,
+        "bio": "Unavailable",
+        "imageUrl": "",
+        "verified": false,
+        "createdAt": "2026-02-05",
+        "currentBid": 0,
+        "status": "AVAILABLE",
+        "auctionPrice": null,
+        "soldTo": null
       }
     ],
     "basketball": [

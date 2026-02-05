@@ -1,5 +1,16 @@
 [
   {
+    "id": "1770271125751_uz8q3xhqw",
+    "timestamp": "2026-02-05T05:58:45.751Z",
+    "action": "AUCTION_CREATED",
+    "sport": "cricket",
+    "auctionId": "auction_cr_1770271125746",
+    "auctionName": "ipl 2026",
+    "createdBy": "admin_1",
+    "status": "READY",
+    "assignedAuctioneerId": "auc-cricket-001"
+  },
+  {
     "id": "1770183697232_bdzvb0shy",
     "timestamp": "2026-02-04T05:41:37.232Z",
     "action": "AUCTION_CREATED",
