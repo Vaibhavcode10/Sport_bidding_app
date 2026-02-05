@@ -134,16 +134,27 @@ const Login: React.FC = () => {
   const canShowRegister = selectedRole !== 'admin';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 flex items-center justify-center p-6">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-900 transition-all duration-500 flex items-center justify-center p-6">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-blue-400/30 to-purple-600/30 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-cyan-400/30 to-blue-600/30 rounded-full blur-3xl animate-pulse-slow"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
+      </div>
+
       {/* Theme Toggle */}
-      <div className="absolute top-6 right-6">
+      <div className="absolute top-6 right-6 z-20 glass-card p-2">
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-2xl bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 p-10 rounded-lg">
+      <div className="relative z-10 w-full max-w-2xl glass-card p-12 animate-scale-in">
         <div className="flex justify-center mb-8">
-          <div className={`p-4 rounded-lg border ${isRegisterMode ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800'}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" className={`h-10 w-10 ${isRegisterMode ? 'text-green-600 dark:text-green-400' : 'text-primary-600 dark:text-primary-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-300 ${
+            isRegisterMode 
+              ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
+              : 'bg-gradient-to-br from-primary-500 to-purple-600'
+          }`}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {isRegisterMode ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               ) : (
@@ -153,22 +164,29 @@ const Login: React.FC = () => {
           </div>
         </div>
 
-        <h2 className="text-3xl font-bold text-center mb-2 text-gray-900 dark:text-white">
-          {isRegisterMode ? 'Create Account' : 'System Access'}
+        <h2 className="text-4xl font-bold text-center mb-3 text-gray-900 dark:text-white">
+          {isRegisterMode ? 'Join the Platform' : 'System Access'}
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 text-center mb-8 text-sm">
-          {isRegisterMode ? 'Register as a new player or auctioneer' : 'Select your role and authenticate'}
+        <p className="text-gray-600 dark:text-gray-300 text-center mb-10">
+          {isRegisterMode ? 'Create your account and start participating' : 'Select your role and authenticate securely'}
         </p>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-600/20 border border-red-600/30 rounded-lg">
-            <p className="text-red-300 text-sm">{error}</p>
+          <div className="mb-8 glass-card p-4 border border-red-400/50 animate-fade-in">
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <p className="text-red-300 text-sm font-medium">{error}</p>
+            </div>
           </div>
         )}
 
         {/* Role Selection */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {roles.map((role) => {
+        <div className="grid grid-cols-3 gap-4 mb-10">
+          {roles.map((role, index) => {
             // In register mode, disable admin
             const isDisabled = isRegisterMode && !role.canRegister;
             return (
