@@ -9,6 +9,7 @@ import liveAuctionRouter from './routes/liveAuction.js';
 import auctionHistoryRouter from './routes/auctionHistory.js';
 import * as auctioneersRouter from './routes/auctioneers.js';
 import { liveAuctionEngine } from './liveAuctionEngine.js';
+import "./firebase.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -50,3 +51,4 @@ app.put('/api/auctioneers/franchise/update', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Backend server running at http://localhost:${PORT}`);
 });
+ 

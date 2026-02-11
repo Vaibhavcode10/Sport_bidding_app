@@ -12,6 +12,8 @@
  */
 
 import { fileStore } from './fileStore.js';
+import "./firebase.js";
+
 
 // Default bid slabs (prices in crores)
 const DEFAULT_BID_SLABS = [
